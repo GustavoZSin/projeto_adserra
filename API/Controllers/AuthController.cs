@@ -23,6 +23,32 @@ namespace API.Controllers
             _professorService = professorService;
         }
 
+        [HttpPost("registrar-admin")]
+        public async Task<IActionResult> RegistrarAdmin([FromBody] RegistrarAdminDto dto)
+        {
+            var usuarioExistente = await _userManager.FindByEmailAsync(dto.Email);
+
+            if (usuarioExistente != null)
+                return BadRequest("Usuário já existe no sistema");
+
+            var novoUsuario = new User
+            {
+                Email = dto.Email,
+                UserName = dto.NomeCompleto
+            };
+
+            var result = await _userManager.CreateAsync(novoUsuario, dto.Password);
+
+            if (!result.Succeeded)
+                return BadRequest(result.Errors);
+
+            var roleResult = await _userManager.AddToRoleAsync(novoUsuario, "Admin");
+            if (!roleResult.Succeeded)
+                return BadRequest(roleResult.Errors);
+
+            return Ok(new { message = "Usuário admin criado com sucesso" });
+        }
+
         [HttpPost("login-com-matricula")]
         public async Task<IActionResult> LoginComMatricula([FromBody] LoginDto dto)
         {
