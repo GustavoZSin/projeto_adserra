@@ -18,24 +18,38 @@ namespace API.Services
         internal async Task<bool> AprovarSolicitacao(int id)
         {
             var solicitacao = await _context.SolicitacoesIngresso.FindAsync(id);
-            if (solicitacao == null)
+
+            if (solicitacao == null || solicitacao.StatusSolicitacao != EnumeradorDeStatus.Pendente)
                 return false;
 
-            var identityUser = new User
+            var identityUser = _context.Users.FirstOrDefault(u => u.Email == solicitacao.EmailInstitucional && u.UserName == solicitacao.NomeCompleto);
+            if (identityUser == null)
             {
-                UserName = solicitacao.EmailInstitucional,
-                Email = solicitacao.EmailInstitucional,
-            };
-            _context.Users.Add(identityUser);
-            _context.SaveChanges();
+                identityUser = new User
+                {
+                    UserName = solicitacao.EmailInstitucional,
+                    Email = solicitacao.EmailInstitucional,
+                };
 
-            var professorCriado = await _professorService.CriarProfessorAsync(solicitacao.NomeCompleto, solicitacao.Matricula, solicitacao.EmailInstitucional, solicitacao.Departamento, identityUser.Id, identityUser);
+                var result = await _context.Users.AddAsync(identityUser);
 
-            if (!professorCriado)
-                return false;
+                if (result == null) return false;
+            }
+
+            var professorCriado = await _professorService.CriarProfessorAsync(
+                solicitacao.NomeCompleto,
+                solicitacao.Matricula,
+                solicitacao.EmailInstitucional,
+                solicitacao.Departamento,
+                identityUser.Id,
+                identityUser
+            );
+
+            if (!professorCriado) return false;
 
             solicitacao.StatusSolicitacao = EnumeradorDeStatus.Aprovado;
             await _context.SaveChangesAsync();
+
             return true;
         }
 
@@ -47,9 +61,9 @@ namespace API.Services
             return true;
         }
 
-        internal List<SolicitacaoIngresso> ListarSolicitacoesPendentes()
+        internal List<SolicitacaoIngresso> ListarSolicitacoesPorStatus(EnumeradorDeStatus status)
         {
-            return _context.SolicitacoesIngresso.Where(s => s.StatusSolicitacao == EnumeradorDeStatus.Pendente).ToList();
+            return _context.SolicitacoesIngresso.Where(s => s.StatusSolicitacao == status).ToList();
         }
 
         internal async Task<bool> ReprovarSolicitacao(int id)
