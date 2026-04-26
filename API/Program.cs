@@ -1,8 +1,6 @@
 using API.Data;
 using API.Models;
 using API.Services;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -34,7 +32,12 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.LogoutPath = "/auth/logout";
 });
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+                .AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.Converters.Add(
+        new System.Text.Json.Serialization.JsonStringEnumConverter());
+});
 
 builder.Services.AddOpenApi();
 var app = builder.Build();

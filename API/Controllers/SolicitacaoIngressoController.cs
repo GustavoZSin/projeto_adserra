@@ -44,10 +44,10 @@ namespace API.Controllers
                 return BadRequest(new { message = "Falha ao processar a solicitação de ingresso. Tente novamente mais tarde." });
         }
 
-        [HttpGet("listar-solicitacoes-pendentes")]
-        public IActionResult ListarSolicitacoesPendentes()
+        [HttpGet("listar-solicitacoes-por-status")]
+        public IActionResult ListarSolicitacoesPorStatus([FromQuery] EnumeradorDeStatus status)
         {
-            var solicitacoes = _solicitacaoIngressoService.ListarSolicitacoesPendentes();
+            var solicitacoes = _solicitacaoIngressoService.ListarSolicitacoesPorStatus(status);
             return Ok(solicitacoes);
         }
 
