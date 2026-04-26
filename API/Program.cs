@@ -1,6 +1,7 @@
 using API.Data;
 using API.Models;
 using API.Services;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,9 +15,11 @@ builder.Services.AddAuthorization();
 
 builder.Services
     .AddIdentityApiEndpoints<User>()
+    .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>();
 
 //Services
+builder.Services.AddScoped<UsuariosService>();
 builder.Services.AddScoped<ProfessorService>();
 builder.Services.AddScoped<SolicitacaoIngressoService>();
 
@@ -61,4 +64,38 @@ app.MapControllers();
 
 app.MapGroup("/Auth").WithTags("Autenticação").MapIdentityApi<User>();
 
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+
+    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+    var userManager = services.GetRequiredService<UserManager<User>>();
+
+    string[] roles = ["Admin", "User"];
+
+    foreach (var role in roles)
+    {
+        if (!await roleManager.RoleExistsAsync(role))
+            await roleManager.CreateAsync(new IdentityRole(role));
+    }
+
+    var adminEmail = builder.Configuration["Seed:Admin:Email"];
+    var adminPassword = builder.Configuration["Seed:Admin:Password"];
+
+    var adminUser = await userManager.FindByEmailAsync(adminEmail);
+
+    if (adminUser == null)
+    {
+        var user = new User
+        {
+            UserName = adminEmail,
+            Email = adminEmail
+        };
+
+        var result = await userManager.CreateAsync(user, adminPassword);
+
+        if (result.Succeeded)
+            await userManager.AddToRoleAsync(user, "Admin");
+    }
+}
 app.Run();
