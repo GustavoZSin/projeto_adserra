@@ -1,0 +1,202 @@
+/* ════════════════════════════════════════
+   LOGIN PAGE — apenas área do formulário
+   (painel esquerdo gerenciado pelo AuthLayout)
+════════════════════════════════════════ */
+
+.login-form-side {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 32px;
+  position: relative;
+  min-height: 100vh;
+}
+
+/* Glow azul sutil no mobile */
+.login-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse 460px 300px at 50% -10%, rgba(27,112,176,.12) 0%, transparent 70%);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 380px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Logo mobile */
+.login-logo-mobile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 28px;
+}
+
+/* Tipografia */
+.login-title {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--t1);
+  margin-bottom: 6px;
+  letter-spacing: -.4px;
+  transition: color .35s;
+}
+.login-subtitle {
+  font-size: 13px;
+  color: var(--t2);
+  margin-bottom: 28px;
+  transition: color .35s;
+}
+
+/* Labels */
+.inp-lbl {
+  display: block;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--t3);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  transition: color .35s;
+}
+
+/* Input wrapper */
+.inp-wrap { width: 100%; margin-bottom: 14px; }
+
+.inp-f {
+  display: flex;
+  align-items: center;
+  background: var(--inp);
+  border: 1.5px solid var(--bdr);
+  border-radius: 11px;
+  padding: 11px 14px;
+  gap: 10px;
+  transition: border-color .25s, box-shadow .25s, background .35s;
+}
+.inp-f.focused   { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-sub); }
+.inp-f.has-error { border-color: var(--red); }
+
+.inp-native {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--t1);
+  font-size: 13px;
+  font-family: 'Inter', sans-serif;
+  transition: color .35s;
+}
+.inp-native::placeholder { color: var(--t3); }
+
+.inp-ico {
+  color: var(--icon-clr);
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  transition: color .35s;
+}
+.eye-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--icon-clr);
+  display: flex;
+  align-items: center;
+  padding: 0;
+  flex-shrink: 0;
+  transition: color .25s;
+}
+.eye-btn:hover { color: var(--t2); }
+.inp-err { font-size: 10px; color: var(--red); margin-top: 5px; display: block; }
+
+/* Esqueceu senha */
+.forgot-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+  margin-bottom: 20px;
+}
+.forgot-link {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--blue-l);
+  text-decoration: none;
+  transition: opacity .2s;
+}
+.forgot-link:hover { opacity: .75; }
+
+/* Error banner */
+.error-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(239,68,68,0.10);
+  border: 1px solid rgba(239,68,68,0.30);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  font-size: 12px;
+  color: var(--red);
+}
+
+/* Botão primário */
+.btn-primary {
+  width: 100%;
+  background: linear-gradient(135deg, var(--blue-d) 0%, var(--blue-l) 100%);
+  border: none;
+  border-radius: 11px;
+  padding: 13px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  box-shadow: 0 6px 20px var(--blue-glow);
+  letter-spacing: .3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  transition: filter .25s, box-shadow .25s, opacity .2s;
+}
+.btn-primary:hover:not(:disabled) { filter: brightness(1.08); box-shadow: 0 8px 28px var(--blue-glow); }
+.btn-primary:disabled { opacity: .65; cursor: not-allowed; }
+
+/* Botão ghost */
+.btn-ghost {
+  width: 100%;
+  background: transparent;
+  border: 1.5px solid var(--bdr);
+  border-radius: 11px;
+  padding: 12px;
+  color: var(--t2);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: border-color .25s, color .25s, background .25s;
+}
+.btn-ghost:hover { border-color: var(--blue-l); color: var(--blue-l); background: var(--blue-sub); }
+
+/* Divisor */
+.divider { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.div-line { flex: 1; height: 1px; background: var(--bdr); transition: background .35s; }
+.div-txt  { font-size: 11px; color: var(--t3); transition: color .35s; }
+
+/* ── Responsivo ── */
+@media (min-width: 768px) {
+  /* No desktop o painel vem do AuthLayout, logo mobile some */
+  .login-logo-mobile { display: none; }
+  .login-glow        { display: none; }
+  .login-form-side   { padding: 40px 48px; }
+}
+
+@media (max-width: 767px) {
+  .login-form-side { padding: 36px 20px 48px; align-items: flex-start; }
+  .login-title     { font-size: 20px; }
+}
