@@ -1,0 +1,72 @@
+/* ═══════════════════════════════════════
+   DESIGN TOKENS — ADSerra
+═══════════════════════════════════════ */
+:root {
+  --blue:      #1B70B0;
+  --blue-l:    #2484CC;
+  --blue-d:    #145690;
+  --blue-glow: rgba(27,112,176,0.24);
+  --blue-sub:  rgba(27,112,176,0.10);
+  --blue-bdr:  rgba(27,112,176,0.20);
+  --green:     #10B981;
+  --amber:     #F59E0B;
+  --red:       #EF4444;
+}
+
+[data-theme="dark"] {
+  --bg:      #0B0E15;
+  --s1:      #111520;
+  --s2:      #182030;
+  --s3:      #1D2840;
+  --bdr:     #1C2535;
+  --bdr2:    #14202E;
+  --t1:      #EEF2F7;
+  --t2:      #7A8FA8;
+  --t3:      #3D5268;
+  --logo-ad: #8A9BAE;
+  --inp:     #131A26;
+  --nav-bg:  rgba(11,14,21,0.97);
+  --sh:      0 24px 64px rgba(0,0,0,0.6);
+  --icon-clr:#4A6A88;
+}
+
+[data-theme="light"] {
+  --bg:      #EFF3F8;
+  --s1:      #FFFFFF;
+  --s2:      #F4F7FC;
+  --s3:      #E8EEF6;
+  --bdr:     #DDE4EE;
+  --bdr2:    #E5ECF5;
+  --t1:      #0F1D2E;
+  --t2:      #5A7290;
+  --t3:      #9AAFC5;
+  --logo-ad: #6B7280;
+  --inp:     #F8FAFC;
+  --nav-bg:  rgba(239,243,248,0.97);
+  --sh:      0 16px 48px rgba(27,112,176,0.12);
+  --icon-clr:#9AAFC5;
+}
+
+/* ═══════════════════════════════════════
+   RESET & BASE
+═══════════════════════════════════════ */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--t1);
+  min-height: 100vh;
+  transition: background 0.35s, color 0.35s;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
