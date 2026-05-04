@@ -1,27 +1,25 @@
 ﻿using API.DTOs;
+using API.DTOs.Senha;
 using API.Models;
 using API.Services;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Web;
 
 namespace API.Controllers
 {
     [ApiController]
     [Route("[controller]")]
     [Tags("Autenticação")]
-    public class AuthController : ControllerBase
+    public class AuthController(SignInManager<User> signInManager, UserManager<User> userManager, ProfessorService professorService, IConfiguration configuration, IEmailSender emailSender) : ControllerBase
     {
-        private readonly SignInManager<User> _signInManager;
-        private readonly UserManager<User> _userManager;
-        private readonly ProfessorService _professorService;
-
-        public AuthController(SignInManager<User> signInManager, UserManager<User> userManager, ProfessorService professorService)
-        {
-            _signInManager = signInManager;
-            _userManager = userManager;
-            _professorService = professorService;
-        }
+        private readonly SignInManager<User> _signInManager = signInManager;
+        private readonly UserManager<User> _userManager = userManager;
+        private readonly ProfessorService _professorService = professorService;
+        private readonly IConfiguration _configuration = configuration;
+        private readonly IEmailSender _emailSender = emailSender;
 
         [HttpPost("registrar-admin")]
         public async Task<IActionResult> RegistrarAdmin([FromBody] RegistrarAdminDto dto)
@@ -84,6 +82,58 @@ namespace API.Controllers
                 id = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value,
                 matricula = User.Identity.Name
             });
+        }
+
+        [HttpPost("esqueci-minha-senha")]
+        public async Task<IActionResult> EsqueciMinhaSenha([FromBody] EsqueciMinhaSenhaDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.Email))
+                return BadRequest("E-mail é obrigatório.");
+
+            var user = await _userManager.FindByEmailAsync(dto.Email);
+
+            if (user != null)
+            {
+                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+                var encodedToken = HttpUtility.UrlEncode(token);
+                var encodedEmail = HttpUtility.UrlEncode(dto.Email);
+
+                //TODO: ajustar url correta
+                //var baseUrl = _configuration["Frontend:BaseUrl"];
+                var baseUrl = "http://localhost:5173";
+                var resetLink = $"{baseUrl}/resetar-senha?email={encodedEmail}&token={encodedToken}";
+
+                var body = $@"
+                <p>Olá,</p>
+                <p>Você solicitou a redefinição de senha.</p>
+                <p><a href='{resetLink}'>Clique aqui para redefinir sua senha</a></p>
+                <p>Se você não solicitou, ignore este e-mail.</p>";
+
+                await _emailSender.SendEmailAsync(dto.Email, "Recuperação de Senha", body);
+            }
+
+            return Ok(new { mensagem = "Se o e-mail estiver cadastrado, você receberá instruções para redefinir sua senha." });
+        }
+
+        [HttpPost("resetar-senha")]
+        public async Task<IActionResult> ResetarSenha([FromBody] ResetarSenhaDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.Email) || string.IsNullOrWhiteSpace(dto.Token) || string.IsNullOrWhiteSpace(dto.NovaSenha))
+                return BadRequest("Dados inválidos.");
+
+            var user = await _userManager.FindByEmailAsync(dto.Email);
+
+            if (user == null)
+                return BadRequest("Token inválido ou expirado.");
+
+            var decodedToken = HttpUtility.UrlDecode(dto.Token);
+            var result = await _userManager.ResetPasswordAsync(user, decodedToken!, dto.NovaSenha);
+
+            if (!result.Succeeded)
+                return BadRequest(new { erros = result.Errors.Select(e => e.Description) });
+
+            return Ok(new { mensagem = "Senha redefinida com sucesso." });
         }
     }
 }
