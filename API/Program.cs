@@ -6,9 +6,10 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(
-        builder.Configuration.GetConnectionString("projeto_ad_serra_default")));
+var connectionString = builder.Configuration.GetConnectionString("SupabaseConnection")
+    ?? throw new InvalidOperationException("Connection string 'SupabaseConnection' não encontrada.");
+
+builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
 
 builder.Services.AddAuthentication();
 builder.Services.AddAuthorization();
@@ -36,16 +37,15 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 
 builder.Services.AddControllers()
-                .AddJsonOptions(options =>
-{
-    options.JsonSerializerOptions.Converters.Add(
-        new System.Text.Json.Serialization.JsonStringEnumConverter());
-});
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(
+            new System.Text.Json.Serialization.JsonStringEnumConverter());
+    });
 
 builder.Services.AddOpenApi();
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -82,20 +82,24 @@ using (var scope = app.Services.CreateScope())
     var adminEmail = builder.Configuration["Seed:Admin:Email"];
     var adminPassword = builder.Configuration["Seed:Admin:Password"];
 
-    var adminUser = await userManager.FindByEmailAsync(adminEmail);
-
-    if (adminUser == null)
+    if (adminEmail != null && adminPassword != null)
     {
-        var user = new User
+        var adminUser = await userManager.FindByEmailAsync(adminEmail);
+
+        if (adminUser == null)
         {
-            UserName = adminEmail,
-            Email = adminEmail
-        };
+            var user = new User
+            {
+                UserName = adminEmail,
+                Email = adminEmail
+            };
 
-        var result = await userManager.CreateAsync(user, adminPassword);
+            var result = await userManager.CreateAsync(user, adminPassword);
 
-        if (result.Succeeded)
-            await userManager.AddToRoleAsync(user, "Admin");
+            if (result.Succeeded)
+                await userManager.AddToRoleAsync(user, "Admin");
+        }
     }
 }
+
 app.Run();
