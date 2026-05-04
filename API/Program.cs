@@ -1,7 +1,9 @@
 using API.Data;
 using API.Models;
 using API.Services;
+using API.Services.Email;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,6 +25,14 @@ builder.Services
 builder.Services.AddScoped<UsuariosService>();
 builder.Services.AddScoped<ProfessorService>();
 builder.Services.AddScoped<SolicitacaoIngressoService>();
+builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("Smtp"));
+builder.Services.AddTransient<IEmailSender, EmailSender>(); 
+builder.Services.AddScoped<EmailTemplateService>();
+builder.Services.AddScoped<EmailService>();
+builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
+{
+    options.TokenLifespan = TimeSpan.FromHours(2);
+});
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
