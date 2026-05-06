@@ -24,33 +24,21 @@ export function AuthProvider({ children }) {
     checkAuth()
   }, [checkAuth])
 
-  const login = async (matricula, senha) => {
+  const login = async (identifier, senha) => {
     setError(null)
     try {
-      await authService.login(matricula, senha)
+      if (identifier.includes('@')) {
+        await authService.loginComEmail(identifier, senha)
+      } else {
+        await authService.loginComMatricula(identifier, senha)
+      }
       await checkAuth()
       return { success: true }
     } catch (err) {
       const msg =
         err.response?.data?.message ||
         err.response?.data ||
-        'Matrícula ou senha incorretos.'
-      setError(typeof msg === 'string' ? msg : 'Erro ao fazer login.')
-      return { success: false, error: msg }
-    }
-  }
-
-  const loginAdmin = async (email, senha) => {
-    setError(null)
-    try {
-      await authService.loginAdmin(email, senha)
-      await checkAuth()
-      return { success: true }
-    } catch (err) {
-      const msg =
-        err.response?.data?.message ||
-        err.response?.data ||
-        'E-mail ou senha incorretos.'
+        'Credenciais inválidas.'
       setError(typeof msg === 'string' ? msg : 'Erro ao fazer login.')
       return { success: false, error: msg }
     }
@@ -67,7 +55,7 @@ export function AuthProvider({ children }) {
   const clearError = () => setError(null)
 
   return (
-    <AuthContext.Provider value={{ user, loading, error, login, loginAdmin, logout, clearError }}>
+    <AuthContext.Provider value={{ user, loading, error, login, logout, clearError }}>
       {children}
     </AuthContext.Provider>
   )
