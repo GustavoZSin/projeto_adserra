@@ -40,6 +40,22 @@ export function AuthProvider({ children }) {
     }
   }
 
+  const loginAdmin = async (email, senha) => {
+    setError(null)
+    try {
+      await authService.loginAdmin(email, senha)
+      await checkAuth()
+      return { success: true }
+    } catch (err) {
+      const msg =
+        err.response?.data?.message ||
+        err.response?.data ||
+        'E-mail ou senha incorretos.'
+      setError(typeof msg === 'string' ? msg : 'Erro ao fazer login.')
+      return { success: false, error: msg }
+    }
+  }
+
   const logout = async () => {
     try {
       await authService.logout()
@@ -51,7 +67,7 @@ export function AuthProvider({ children }) {
   const clearError = () => setError(null)
 
   return (
-    <AuthContext.Provider value={{ user, loading, error, login, logout, clearError }}>
+    <AuthContext.Provider value={{ user, loading, error, login, loginAdmin, logout, clearError }}>
       {children}
     </AuthContext.Provider>
   )

@@ -28,6 +28,9 @@ export const authService = {
   login: (matricula, senha) =>
     api.post('/login-com-matricula', { matricula, senha }),
 
+  loginAdmin: (email, senha) =>
+    api.post('/login', { email, password: senha }),
+
   /**
    * Logout
    * POST /auth/logout
@@ -42,10 +45,10 @@ export const authService = {
 
   /**
    * Solicitar ingresso
-   * POST /SolicitacaoIngresso
+   * POST /SolicitacaoIngresso/solicitar-ingresso
    */
   solicitarIngresso: (dados) =>
-    axios.post('/SolicitacaoIngresso', dados, { withCredentials: true }),
+    axios.post('/SolicitacaoIngresso/solicitar-ingresso', dados, { withCredentials: true }),
 }
 
 export default api

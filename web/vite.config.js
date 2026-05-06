@@ -7,14 +7,16 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/auth': {
-        target: 'https://localhost:7000',
+        target: 'http://localhost:5079',
         changeOrigin: true,
-        secure: false,
       },
       '/Auth': {
-        target: 'https://localhost:7000',
+        target: 'http://localhost:5079',
         changeOrigin: true,
-        secure: false,
+      },
+      '/SolicitacaoIngresso': {
+        target: 'http://localhost:5079',
+        changeOrigin: true,
       },
     },
   },
