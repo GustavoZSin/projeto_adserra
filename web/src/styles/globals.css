@@ -26,6 +26,7 @@
   --logo-ad: #8A9BAE;
   --inp:     #131A26;
   --nav-bg:  rgba(11,14,21,0.97);
+  --sb-bg:   #0E1320;
   --sh:      0 24px 64px rgba(0,0,0,0.6);
   --icon-clr:#4A6A88;
 }
@@ -43,6 +44,7 @@
   --logo-ad: #6B7280;
   --inp:     #F8FAFC;
   --nav-bg:  rgba(239,243,248,0.97);
+  --sb-bg:   #F8FAFC;
   --sh:      0 16px 48px rgba(27,112,176,0.12);
   --icon-clr:#9AAFC5;
 }

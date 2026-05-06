@@ -3,38 +3,19 @@ import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import './LoginPage.css'
 
-/* ══════════════════════════════════════════════════
-   LOGIN PAGE — apenas área do formulário
-   O painel esquerdo vem do AuthLayout
-══════════════════════════════════════════════════ */
 export default function LoginPage() {
-  const { login, loginAdmin, error, clearError } = useAuth()
+  const { login, error, clearError } = useAuth()
   const navigate = useNavigate()
 
-  const [isAdmin, setIsAdmin]         = useState(false)
-  const [matricula, setMatricula]     = useState('')
-  const [email, setEmail]             = useState('')
-  const [senha, setSenha]             = useState('')
-  const [loading, setLoading]         = useState(false)
+  const [identifier, setIdentifier] = useState('')
+  const [senha, setSenha]           = useState('')
+  const [loading, setLoading]       = useState(false)
   const [fieldErrors, setFieldErrors] = useState({})
-
-  const handleToggleAdmin = () => {
-    setIsAdmin(v => !v)
-    setMatricula('')
-    setEmail('')
-    setSenha('')
-    setFieldErrors({})
-    clearError()
-  }
 
   const validate = () => {
     const errs = {}
-    if (isAdmin) {
-      if (!email.trim())    errs.email = 'Informe seu e-mail'
-    } else {
-      if (!matricula.trim()) errs.matricula = 'Informe sua matrícula'
-    }
-    if (!senha.trim()) errs.senha = 'Informe sua senha'
+    if (!identifier.trim()) errs.identifier = 'Informe sua matrícula ou e-mail'
+    if (!senha.trim())       errs.senha = 'Informe sua senha'
     setFieldErrors(errs)
     return Object.keys(errs).length === 0
   }
@@ -44,9 +25,7 @@ export default function LoginPage() {
     clearError()
     if (!validate()) return
     setLoading(true)
-    const result = isAdmin
-      ? await loginAdmin(email.trim(), senha)
-      : await login(matricula.trim(), senha)
+    const result = await login(identifier.trim(), senha)
     setLoading(false)
     if (result.success) navigate('/dashboard', { replace: true })
   }
@@ -57,7 +36,6 @@ export default function LoginPage() {
 
       <div className="login-card">
 
-        {/* Logo — visível só no mobile (desktop tem o painel) */}
         <div className="login-logo-mobile">
           <LogoSVG />
           <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: '2.5px', textTransform: 'uppercase', color: 'var(--t3)', marginTop: 3 }}>
@@ -66,38 +44,20 @@ export default function LoginPage() {
         </div>
 
         <h1 className="login-title">Bem-vindo de volta</h1>
-        <p className="login-subtitle">
-          {isAdmin ? 'Acesso exclusivo para administradores' : 'Acesse o portal com suas credenciais'}
-        </p>
+        <p className="login-subtitle">Acesse o portal com sua matrícula ou e-mail</p>
 
         <form onSubmit={handleSubmit} noValidate>
 
           <div className="inp-wrap">
-            {isAdmin ? (
-              <>
-                <span className="inp-lbl">E-mail</span>
-                <InputField
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="seu@email.com"
-                  autoComplete="email"
-                  icon={<EmailIcon />}
-                  error={fieldErrors.email}
-                />
-              </>
-            ) : (
-              <>
-                <span className="inp-lbl">Matrícula</span>
-                <InputField
-                  value={matricula}
-                  onChange={(e) => setMatricula(e.target.value)}
-                  placeholder="Ex: 123456789"
-                  autoComplete="username"
-                  icon={<UserIcon />}
-                  error={fieldErrors.matricula}
-                />
-              </>
-            )}
+            <span className="inp-lbl">Matrícula ou e-mail</span>
+            <InputField
+              value={identifier}
+              onChange={(e) => setIdentifier(e.target.value)}
+              placeholder="Ex: 123456 ou nome@fsg.edu.br"
+              autoComplete="username"
+              icon={<UserIcon />}
+              error={fieldErrors.identifier}
+            />
           </div>
 
           <div className="inp-wrap" style={{ marginBottom: 2 }}>
@@ -109,10 +69,7 @@ export default function LoginPage() {
             />
           </div>
 
-          <div className="forgot-row">
-            <button type="button" className="forgot-link admin-toggle" onClick={handleToggleAdmin}>
-              {isAdmin ? 'Entrar com matrícula' : 'Sou administrador'}
-            </button>
+          <div className="forgot-row" style={{ justifyContent: 'flex-end' }}>
             <Link to="/esqueci-senha" className="forgot-link">
               Esqueceu a senha?
             </Link>
@@ -152,8 +109,15 @@ function InputField({ value, onChange, placeholder, autoComplete, icon, error })
   return (
     <>
       <div className={`inp-f ${focused ? 'focused' : ''} ${error ? 'has-error' : ''}`}>
-        <input className="inp-native" value={value} onChange={onChange} placeholder={placeholder}
-          autoComplete={autoComplete} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)} />
+        <input
+          className="inp-native"
+          value={value}
+          onChange={onChange}
+          placeholder={placeholder}
+          autoComplete={autoComplete}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+        />
         <span className="inp-ico">{icon}</span>
       </div>
       {error && <span className="inp-err">{error}</span>}
@@ -167,9 +131,16 @@ function PasswordField({ value, onChange, error }) {
   return (
     <>
       <div className={`inp-f ${focused ? 'focused' : ''} ${error ? 'has-error' : ''}`}>
-        <input className="inp-native" type={show ? 'text' : 'password'} value={value} onChange={onChange}
-          placeholder="••••••••" autoComplete="current-password"
-          onFocus={() => setFocused(true)} onBlur={() => setFocused(false)} />
+        <input
+          className="inp-native"
+          type={show ? 'text' : 'password'}
+          value={value}
+          onChange={onChange}
+          placeholder="••••••••"
+          autoComplete="current-password"
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+        />
         <button type="button" className="eye-btn" onClick={() => setShow(v => !v)} tabIndex={-1}>
           {show ? <EyeOffIcon /> : <EyeIcon />}
         </button>
@@ -179,7 +150,7 @@ function PasswordField({ value, onChange, error }) {
   )
 }
 
-/* ── Logos ── */
+/* ── Logo ── */
 function LogoSVG() {
   return (
     <svg width="148" height="42" viewBox="0 0 296 80" xmlns="http://www.w3.org/2000/svg">
@@ -199,9 +170,6 @@ function LogoSVG() {
 /* ── Ícones ── */
 function UserIcon() {
   return <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-}
-function EmailIcon() {
-  return <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
 }
 function EyeIcon() {
   return <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
