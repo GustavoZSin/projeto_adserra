@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\bueen\\\\projeto_adserra\" -Recurse -Directory -ErrorAction SilentlyContinue)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(dotnet user-secrets *)",
+      "Bash(dotnet build *)",
+      "Bash(dotnet run *)",
+      "PowerShell(Get-NetTCPConnection *)",
+      "Bash(npm run *)"
+    ]
+  }
+}
