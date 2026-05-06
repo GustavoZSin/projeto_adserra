@@ -8,18 +8,33 @@ import './LoginPage.css'
    O painel esquerdo vem do AuthLayout
 ══════════════════════════════════════════════════ */
 export default function LoginPage() {
-  const { login, error, clearError } = useAuth()
+  const { login, loginAdmin, error, clearError } = useAuth()
   const navigate = useNavigate()
 
-  const [matricula, setMatricula] = useState('')
-  const [senha, setSenha]         = useState('')
-  const [loading, setLoading]     = useState(false)
+  const [isAdmin, setIsAdmin]         = useState(false)
+  const [matricula, setMatricula]     = useState('')
+  const [email, setEmail]             = useState('')
+  const [senha, setSenha]             = useState('')
+  const [loading, setLoading]         = useState(false)
   const [fieldErrors, setFieldErrors] = useState({})
+
+  const handleToggleAdmin = () => {
+    setIsAdmin(v => !v)
+    setMatricula('')
+    setEmail('')
+    setSenha('')
+    setFieldErrors({})
+    clearError()
+  }
 
   const validate = () => {
     const errs = {}
-    if (!matricula.trim()) errs.matricula = 'Informe sua matrícula'
-    if (!senha.trim())     errs.senha     = 'Informe sua senha'
+    if (isAdmin) {
+      if (!email.trim())    errs.email = 'Informe seu e-mail'
+    } else {
+      if (!matricula.trim()) errs.matricula = 'Informe sua matrícula'
+    }
+    if (!senha.trim()) errs.senha = 'Informe sua senha'
     setFieldErrors(errs)
     return Object.keys(errs).length === 0
   }
@@ -29,7 +44,9 @@ export default function LoginPage() {
     clearError()
     if (!validate()) return
     setLoading(true)
-    const result = await login(matricula.trim(), senha)
+    const result = isAdmin
+      ? await loginAdmin(email.trim(), senha)
+      : await login(matricula.trim(), senha)
     setLoading(false)
     if (result.success) navigate('/dashboard', { replace: true })
   }
@@ -49,20 +66,38 @@ export default function LoginPage() {
         </div>
 
         <h1 className="login-title">Bem-vindo de volta</h1>
-        <p className="login-subtitle">Acesse o portal com suas credenciais</p>
+        <p className="login-subtitle">
+          {isAdmin ? 'Acesso exclusivo para administradores' : 'Acesse o portal com suas credenciais'}
+        </p>
 
         <form onSubmit={handleSubmit} noValidate>
 
           <div className="inp-wrap">
-            <span className="inp-lbl">Matrícula</span>
-            <InputField
-              value={matricula}
-              onChange={(e) => setMatricula(e.target.value)}
-              placeholder="Ex: 123456789"
-              autoComplete="username"
-              icon={<UserIcon />}
-              error={fieldErrors.matricula}
-            />
+            {isAdmin ? (
+              <>
+                <span className="inp-lbl">E-mail</span>
+                <InputField
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="seu@email.com"
+                  autoComplete="email"
+                  icon={<EmailIcon />}
+                  error={fieldErrors.email}
+                />
+              </>
+            ) : (
+              <>
+                <span className="inp-lbl">Matrícula</span>
+                <InputField
+                  value={matricula}
+                  onChange={(e) => setMatricula(e.target.value)}
+                  placeholder="Ex: 123456789"
+                  autoComplete="username"
+                  icon={<UserIcon />}
+                  error={fieldErrors.matricula}
+                />
+              </>
+            )}
           </div>
 
           <div className="inp-wrap" style={{ marginBottom: 2 }}>
@@ -75,6 +110,9 @@ export default function LoginPage() {
           </div>
 
           <div className="forgot-row">
+            <button type="button" className="forgot-link admin-toggle" onClick={handleToggleAdmin}>
+              {isAdmin ? 'Entrar com matrícula' : 'Sou administrador'}
+            </button>
             <Link to="/esqueci-senha" className="forgot-link">
               Esqueceu a senha?
             </Link>
@@ -161,6 +199,9 @@ function LogoSVG() {
 /* ── Ícones ── */
 function UserIcon() {
   return <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+}
+function EmailIcon() {
+  return <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
 }
 function EyeIcon() {
   return <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>

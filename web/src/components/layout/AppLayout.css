@@ -1,0 +1,69 @@
+/* ═══════════════════════════════════════
+   APP LAYOUT — shell para telas internas
+═══════════════════════════════════════ */
+.app-root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--bg);
+}
+
+.app-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  /* espaço para a bottom nav fixa */
+  padding-bottom: 60px;
+}
+
+/* ── Bottom Navigation ── */
+.app-bnav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: var(--nav-bg);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-top: 1px solid var(--bdr);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 4px 6px;
+  z-index: 50;
+  transition: background 0.35s, border-color 0.35s;
+}
+
+.app-ni {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 5px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  color: var(--t3);
+  background: none;
+  border: none;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.25s;
+  min-width: 48px;
+}
+
+.app-ni:hover {
+  color: var(--t2);
+}
+
+.app-ni--active {
+  background: var(--blue-sub);
+  color: var(--blue-l);
+}
+
+.app-ni-l {
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1;
+  transition: color 0.35s;
+}
