@@ -13,20 +13,31 @@ var connectionString = builder.Configuration.GetConnectionString("SupabaseConnec
 
 builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
 
-builder.Services.AddAuthentication();
 builder.Services.AddAuthorization();
 
 builder.Services
-    .AddIdentityApiEndpoints<User>()
-    .AddRoles<IdentityRole>()
-    .AddEntityFrameworkStores<AppDbContext>();
+    .AddIdentity<User, IdentityRole>()
+    .AddEntityFrameworkStores<AppDbContext>()
+    .AddDefaultTokenProviders();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("Frontend", policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:5173")
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
+});
 
 //Services
 builder.Services.AddScoped<UsuariosService>();
 builder.Services.AddScoped<ProfessorService>();
 builder.Services.AddScoped<SolicitacaoIngressoService>();
 builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("Smtp"));
-builder.Services.AddTransient<IEmailSender, EmailSender>(); 
+builder.Services.AddTransient<IEmailSender, EmailSender>();
 builder.Services.AddScoped<EmailTemplateService>();
 builder.Services.AddScoped<EmailService>();
 builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
@@ -37,7 +48,10 @@ builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.Cookie.Name = "AuthCookie";
-    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    options.Cookie.SameSite = SameSiteMode.None;
 
     options.SlidingExpiration = true;
     options.ExpireTimeSpan = TimeSpan.FromHours(8);
@@ -65,15 +79,14 @@ if (app.Environment.IsDevelopment())
         options.RoutePrefix = "swagger";
     });
 }
-if (!app.Environment.IsDevelopment())
-    app.UseHttpsRedirection();
 
+app.UseHttpsRedirection();
+
+app.UseCors("Frontend");
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
-app.MapGroup("/Auth").WithTags("Autenticação").MapIdentityApi<User>();
 
 using (var scope = app.Services.CreateScope())
 {

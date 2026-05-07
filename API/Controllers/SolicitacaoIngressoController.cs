@@ -22,17 +22,17 @@ namespace API.Controllers
         [HttpPost("solicitar-ingresso")]
         public IActionResult SolicitarIngresso([FromBody] SolicitacaoIngressoDto dto)
         {
-            if (!dto.AceitaTermos)
-                return BadRequest("É necessário aceitar os termos");
+            if (!dto.AutorizaDesconto)
+                return BadRequest("É necessário autorizar o desconto");
 
             var solicitacao = new SolicitacaoIngresso
             {
                 NomeCompleto = dto.NomeCompleto,
                 Matricula = dto.Matricula,
-                EmailInstitucional = dto.EmailInstitucional,
+                EmailInstitucional = dto.Email,
                 Departamento = dto.Departamento,
                 Mensagem = dto.Mensagem,
-                AceitaTermos = dto.AceitaTermos,
+                AceitaTermos = dto.AutorizaDesconto,
                 StatusSolicitacao = EnumeradorDeStatus.Pendente,
             };
 
