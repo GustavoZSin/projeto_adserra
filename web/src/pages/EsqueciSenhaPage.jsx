@@ -32,7 +32,7 @@ export default function EsqueciSenhaPage() {
     setLoading(true)
     try {
       // Endpoint gerado automaticamente pelo MapIdentityApi<User>()
-      await axios.post('/Auth/forgotPassword', { email }, { withCredentials: true })
+      await axios.post('/Auth/esqueci-minha-senha', { email }, { withCredentials: true })
       setSuccess(true)
     } catch (err) {
       // Identity retorna 200 mesmo sem encontrar o e-mail (por segurança),
