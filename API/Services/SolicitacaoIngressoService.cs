@@ -8,12 +8,13 @@ using System.Text;
 
 namespace API.Services
 {
-    public class SolicitacaoIngressoService(AppDbContext context, EmailService emailService, ProfessorService professorService, UserManager<User> userManager)
+    public class SolicitacaoIngressoService(AppDbContext context, EmailService emailService, ProfessorService professorService, UserManager<User> userManager, IConfiguration configuration)
     {
         private readonly UserManager<User> _userManager = userManager;
         private readonly EmailService _emailService = emailService;
         private readonly AppDbContext _context = context;
         private readonly ProfessorService _professorService = professorService;
+        private readonly IConfiguration _configuration = configuration;
 
         internal async Task<bool> AprovarSolicitacao(int id)
         {
@@ -49,16 +50,19 @@ namespace API.Services
 
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(identityUser);
             var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+            var encodedEmail = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(identityUser.Email!));
 
-            var link = $"https://localhost:7192/Auth/confirmEmail?userId={identityUser.Id}&code={encodedToken}";
-            await _emailService.EnviarConfirmacao(identityUser.Email, link);
+            var frontendUrl = _configuration["Frontend:BaseUrl"] ?? "http://localhost:5173"; 
+            var link = $"{frontendUrl}/confirmar-email?userId={identityUser.Id}&token={encodedToken}&email={encodedEmail}";
+            await _emailService.EnviarConfirmacao(identityUser.Email!, link);
 
             solicitacao.StatusSolicitacao = EnumeradorDeStatus.Aprovado;
             await _context.SaveChangesAsync();
 
             return true;
         }
-        private string GerarSenhaProvisoria() => "Temp@123";
+        private string GerarSenhaProvisoria() => $"Temp@{Guid.NewGuid():N}A1!";
+
         internal async Task<bool> CriarSolicitacao(SolicitacaoIngresso solicitacao)
         {
             _context.SolicitacoesIngresso.Add(solicitacao);
