@@ -3,6 +3,7 @@ using API.DTOs.Senha;
 using API.Models;
 using API.Services;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -47,9 +48,27 @@ namespace API.Controllers
             return Ok(new { message = "Usuário admin criado com sucesso" });
         }
 
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginRequest request, [FromQuery] bool? useCookies, [FromQuery] bool? useSessionCookies)
+        {
+            var user = await _userManager.FindByEmailAsync(request.Email);
+
+            if (user == null) return Unauthorized();
+
+            var isPersistent = useCookies == true && useSessionCookies != true;
+            var result = await _signInManager.PasswordSignInAsync(user.UserName!, request.Password, isPersistent, lockoutOnFailure: true);
+
+            if (result.RequiresTwoFactor) return Problem(detail: "Requires two-factor authentication.", statusCode: StatusCodes.Status401Unauthorized);
+            if (result.IsLockedOut) return Problem(detail: "User account locked out.", statusCode: StatusCodes.Status401Unauthorized);
+            if (!result.Succeeded) return Unauthorized();
+
+            return Ok();
+        }
+
         [HttpPost("login-com-matricula")]
         public async Task<IActionResult> LoginComMatricula([FromBody] LoginDto dto)
         {
+            //TODO: Ajustar retorno para casos de erro
             var professor = await _professorService.ObterPorMatricula(dto.Matricula);
             var user = await _userManager.Users.FirstOrDefaultAsync(u => u.Id == professor.IdUsuario);
 
