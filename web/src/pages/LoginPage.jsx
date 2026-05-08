@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { Input } from '../components/ui/Input'
 import './LoginPage.css'
 
 export default function LoginPage() {
@@ -48,26 +49,24 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit} noValidate>
 
-          <div className="inp-wrap">
-            <span className="inp-lbl">Matrícula ou e-mail</span>
-            <InputField
-              value={identifier}
-              onChange={(e) => setIdentifier(e.target.value)}
-              placeholder="Ex: 123456 ou nome@fsg.edu.br"
-              autoComplete="username"
-              icon={<UserIcon />}
-              error={fieldErrors.identifier}
-            />
-          </div>
+          <Input
+            label="Matrícula ou e-mail"
+            value={identifier}
+            onChange={(e) => setIdentifier(e.target.value)}
+            placeholder="Ex: 123456 ou nome@fsg.edu.br"
+            autoComplete="username"
+            icon={<UserIcon />}
+            error={fieldErrors.identifier}
+          />
 
-          <div className="inp-wrap" style={{ marginBottom: 2 }}>
-            <span className="inp-lbl">Senha</span>
-            <PasswordField
-              value={senha}
-              onChange={(e) => setSenha(e.target.value)}
-              error={fieldErrors.senha}
-            />
-          </div>
+          <Input
+            label="Senha"
+            type="password"
+            value={senha}
+            onChange={(e) => setSenha(e.target.value)}
+            placeholder="••••••••"
+            error={fieldErrors.senha}
+          />
 
           <div className="forgot-row" style={{ justifyContent: 'flex-end' }}>
             <Link to="/esqueci-senha" className="forgot-link">
@@ -103,53 +102,6 @@ export default function LoginPage() {
   )
 }
 
-/* ── Campos ── */
-function InputField({ value, onChange, placeholder, autoComplete, icon, error }) {
-  const [focused, setFocused] = useState(false)
-  return (
-    <>
-      <div className={`inp-f ${focused ? 'focused' : ''} ${error ? 'has-error' : ''}`}>
-        <input
-          className="inp-native"
-          value={value}
-          onChange={onChange}
-          placeholder={placeholder}
-          autoComplete={autoComplete}
-          onFocus={() => setFocused(true)}
-          onBlur={() => setFocused(false)}
-        />
-        <span className="inp-ico">{icon}</span>
-      </div>
-      {error && <span className="inp-err">{error}</span>}
-    </>
-  )
-}
-
-function PasswordField({ value, onChange, error }) {
-  const [focused, setFocused] = useState(false)
-  const [show, setShow]       = useState(false)
-  return (
-    <>
-      <div className={`inp-f ${focused ? 'focused' : ''} ${error ? 'has-error' : ''}`}>
-        <input
-          className="inp-native"
-          type={show ? 'text' : 'password'}
-          value={value}
-          onChange={onChange}
-          placeholder="••••••••"
-          autoComplete="current-password"
-          onFocus={() => setFocused(true)}
-          onBlur={() => setFocused(false)}
-        />
-        <button type="button" className="eye-btn" onClick={() => setShow(v => !v)} tabIndex={-1}>
-          {show ? <EyeOffIcon /> : <EyeIcon />}
-        </button>
-      </div>
-      {error && <span className="inp-err">{error}</span>}
-    </>
-  )
-}
-
 /* ── Logo ── */
 function LogoSVG() {
   return (
@@ -170,12 +122,6 @@ function LogoSVG() {
 /* ── Ícones ── */
 function UserIcon() {
   return <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-}
-function EyeIcon() {
-  return <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-}
-function EyeOffIcon() {
-  return <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
 }
 function AlertIcon() {
   return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>

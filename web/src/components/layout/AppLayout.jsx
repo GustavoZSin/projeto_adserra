@@ -18,6 +18,7 @@ export default function AppLayout() {
   const isActive    = (path) => pathname === path
   const initials    = getInitials(user)
   const displayName = user?.matricula || user?.id || 'Usuário'
+  const { isAdmin } = useAuth()
 
   return (
     <div className="app-root">
@@ -33,7 +34,7 @@ export default function AppLayout() {
           <SbItem icon={<HomeIcon />}     label="Início"   active={isActive('/dashboard')} onClick={() => navigate('/dashboard')} />
           <SbItem icon={<CalendarIcon />} label="Eventos"  active={isActive('/eventos')}   badge="3"           onClick={() => navigate('/eventos')} />
           <SbItem icon={<ImageIcon />}    label="Galeria"  active={isActive('/galeria')}   onClick={() => navigate('/galeria')} />
-          <SbItem icon={<SendIcon />}     label="Publicar" active={isActive('/publicar')}  onClick={() => navigate('/publicar')} />
+          {isAdmin && <SbItem icon={<SendIcon />} label="Publicar" active={isActive('/publicar')} onClick={() => navigate('/publicar')} />}
         </div>
 
         <div className="sb-sec">
@@ -62,7 +63,7 @@ export default function AppLayout() {
         <NavItem icon={<HomeIcon lg />}     label="Início"   active={isActive('/dashboard')} onClick={() => navigate('/dashboard')} />
         <NavItem icon={<CalendarIcon lg />} label="Eventos"  active={isActive('/eventos')}   onClick={() => navigate('/eventos')} />
         <NavItem icon={<ImageIcon lg />}    label="Galeria"  active={isActive('/galeria')}   onClick={() => navigate('/galeria')} />
-        <NavItem icon={<SendIcon lg />}     label="Publicar" active={isActive('/publicar')}  onClick={() => navigate('/publicar')} />
+        {isAdmin && <NavItem icon={<SendIcon lg />} label="Publicar" active={isActive('/publicar')} onClick={() => navigate('/publicar')} />}
         <NavItem icon={<UserIcon lg />}     label="Perfil"   active={isActive('/perfil')}    onClick={() => navigate('/perfil')} />
       </nav>
 

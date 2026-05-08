@@ -7,7 +7,28 @@
       "Bash(dotnet build *)",
       "Bash(dotnet run *)",
       "PowerShell(Get-NetTCPConnection *)",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\bueen\\\\projeto_adserra\\\\web\\\\src\" -Recurse -Directory)",
+      "Bash(Select-Object FullName)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\bueen\\\\projeto_adserra\\\\web\\\\src\" -Recurse | Where-Object {$_.PSIsContainer} | Select-Object -ExpandProperty FullName | Sort-Object)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\bueen\\\\projeto_adserra\\\\API\\\\Controllers\" -Filter \"*.cs\")",
+      "Bash(Select-Object Name)",
+      "Skill(update-config)",
+      "PowerShell(npm *)",
+      "Bash(npm list *)",
+      "Bash(npm root *)",
+      "PowerShell(& \"C:\\\\Program Files\\\\nodejs\\\\node.exe\" -e \"const p=require\\('path'\\); const { execSync } = require\\('child_process'\\); try { const r=execSync\\('npm list -g vercel-react-best-practices --json', {encoding:'utf8'}\\); console.log\\(r\\); } catch\\(e\\) { console.log\\(e.stdout||e.message\\); }\")",
+      "PowerShell(& \"C:\\\\Program Files\\\\nodejs\\\\node.exe\" -e \"const { execSync } = require\\('child_process'\\); console.log\\(execSync\\('npm root -g', {encoding:'utf8'}\\)\\);\")",
+      "PowerShell(& \"C:\\\\Program Files\\\\nodejs\\\\node.exe\" -e \"const { execSync } = require\\('child_process'\\); console.log\\(execSync\\('npm list -g --depth=0 --json', {encoding:'utf8'}\\)\\);\")",
+      "PowerShell(& \"C:\\\\Program Files\\\\nodejs\\\\node.exe\" -e \"const { execSync } = require\\('child_process'\\); try { console.log\\(execSync\\('npm prefix -g', {encoding:'utf8'}\\)\\); } catch\\(e\\) { console.log\\(e.message\\); }\")",
+      "PowerShell(Get-ChildItem *)",
+      "PowerShell(Test-Path *)",
+      "PowerShell(& \"C:\\\\Program Files\\\\nodejs\\\\node.exe\" -e \"try { require.resolve\\('vercel-react-best-practices'\\); console.log\\('found'\\); } catch\\(e\\) { console.log\\('not found:', e.message\\); }\")",
+      "PowerShell(New-Item *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\bueen\\\\projeto_adserra\\\\web\" -Recurse -Force)",
+      "Bash(ConvertTo-Csv -NoTypeInformation)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
     ]
   }
 }
