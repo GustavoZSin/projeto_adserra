@@ -1,5 +1,6 @@
 import { useAuth } from '../contexts/AuthContext'
 import { getIniciais } from '../utils/usuario'
+import logoImg from '../assets/adserra-logo.png'
 import './HomePage.css'
 
 function getGreeting() {
@@ -217,17 +218,13 @@ function WebActivityItem({ av, avColor, text, time }) {
 /* ── Logo topbar mobile ── */
 function LogoSmall() {
   return (
-    <svg width="80" height="22" viewBox="0 0 160 40" xmlns="http://www.w3.org/2000/svg" aria-label="ADSerra">
-      <text x="0" y="32" fontFamily="Georgia,serif" fontSize="35" fontWeight="700" fill="var(--logo-ad)" style={{ transition: 'fill .35s' }}>AD</text>
-      <text x="55" y="32" fontFamily="Georgia,serif" fontSize="35" fontWeight="700" fill="#1B70B0">Serra</text>
-      <g transform="translate(138,0) scale(0.22)">
-        <path d="M28,4 L58,2 L82,10 L98,20 L106,36 L112,52 L108,70 L96,84 L78,96 L58,104 L36,102 L18,92 L6,76 L2,56 L4,36 L12,18 Z" fill="#1B70B0" opacity=".9"/>
-        <line x1="28" y1="4"  x2="108" y2="70" stroke="white" strokeWidth="7" opacity=".7"/>
-        <line x1="2"  y1="56" x2="112" y2="52" stroke="white" strokeWidth="7" opacity=".7"/>
-        <line x1="58" y1="2"  x2="58"  y2="104" stroke="white" strokeWidth="7" opacity=".7"/>
-        <circle cx="57" cy="52" r="9" fill="white" opacity=".9"/>
-      </g>
-    </svg>
+    <img
+      src={logoImg}
+      alt="ADSerra"
+      height={40}
+      style={{ width: 'auto', display: 'block', userSelect: 'none' }}
+      draggable={false}
+    />
   )
 }
 
