@@ -22,7 +22,8 @@ export default function App() {
             <Route path="/login"           element={<LoginPage />} />
             <Route path="/interesse"       element={<InteressePage />} />
             <Route path="/esqueci-senha"   element={<EsqueciSenhaPage />} />
-            <Route path="/redefinir-senha" element={<RedefinirSenhaPage />} />
+            <Route path="/redefinir-senha"    element={<RedefinirSenhaPage />} />
+            <Route path="/confirmar-cadastro" element={<ConfirmarCadastroPage />} />
           </Route>
 
           {/* ── Protegidas — compartilham AppLayout com bottom nav ── */}
