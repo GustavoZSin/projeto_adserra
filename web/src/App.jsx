@@ -6,8 +6,9 @@ import AppLayout  from './components/layout/AppLayout'
 import LoginPage          from './pages/LoginPage'
 import InteressePage      from './pages/InteressePage'
 import EsqueciSenhaPage   from './pages/EsqueciSenhaPage'
-import RedefinirSenhaPage from './pages/RedefinirSenhaPage'
-import HomePage           from './pages/HomePage'
+import RedefinirSenhaPage    from './pages/RedefinirSenhaPage'
+import ConfirmarCadastroPage from './pages/ConfirmarCadastroPage'
+import HomePage              from './pages/HomePage'
 
 export default function App() {
   return (
@@ -19,7 +20,8 @@ export default function App() {
             <Route path="/login"           element={<LoginPage />} />
             <Route path="/interesse"       element={<InteressePage />} />
             <Route path="/esqueci-senha"   element={<EsqueciSenhaPage />} />
-            <Route path="/redefinir-senha" element={<RedefinirSenhaPage />} />
+            <Route path="/redefinir-senha"    element={<RedefinirSenhaPage />} />
+            <Route path="/confirmar-cadastro" element={<ConfirmarCadastroPage />} />
           </Route>
 
           {/* ── Protegidas — compartilham AppLayout com bottom nav ── */}
