@@ -1,5 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* ═══════════════════════════════════════
    DESIGN TOKENS — ADSerra
+   Usados pelo tailwind.config.js via var()
+   e diretamente em classes Tailwind arbitrárias
 ═══════════════════════════════════════ */
 :root {
   --blue:      #1B70B0;
@@ -23,7 +29,6 @@
   --t1:      #EEF2F7;
   --t2:      #7A8FA8;
   --t3:      #3D5268;
-  --logo-ad: #8A9BAE;
   --inp:     #131A26;
   --nav-bg:  rgba(11,14,21,0.97);
   --sb-bg:   #0E1320;
@@ -41,7 +46,6 @@
   --t1:      #0F1D2E;
   --t2:      #5A7290;
   --t3:      #9AAFC5;
-  --logo-ad: #6B7280;
   --inp:     #F8FAFC;
   --nav-bg:  rgba(239,243,248,0.97);
   --sb-bg:   #F8FAFC;
@@ -53,9 +57,9 @@
    RESET & BASE
 ═══════════════════════════════════════ */
 *, *::before, *::after {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
 }
 
 body {
@@ -63,7 +67,6 @@ body {
   background: var(--bg);
   color: var(--t1);
   min-height: 100vh;
-  transition: background 0.35s, color 0.35s;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -72,3 +75,28 @@ body {
   display: flex;
   flex-direction: column;
 }
+
+/* ═══════════════════════════════════════
+   UTILITIES CUSTOMIZADAS
+   Padrões repetidos que não têm equivalente
+   direto em Tailwind
+═══════════════════════════════════════ */
+@layer utilities {
+  .scrollbar-hide {
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: var(--bdr) transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar { width: 4px; }
+  .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+  .scrollbar-thin::-webkit-scrollbar-thumb { background: var(--bdr); border-radius: 4px; }
+}
+
+[data-theme="dark"]  input[type="date"] { color-scheme: dark; }
+[data-theme="light"] input[type="date"] { color-scheme: light; }

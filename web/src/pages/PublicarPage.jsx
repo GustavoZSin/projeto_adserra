@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { useSearchParams } from 'react-router-dom'
-import './PublicarPage.css'
+import clsx from 'clsx'
 
 function getInitials(user) {
   if (user?.name)
@@ -16,6 +16,11 @@ const TIPOS = [
   { key: 'noticia', label: 'Notícia', Icon: NewspaperIcon },
   { key: 'aviso',   label: 'Aviso',   Icon: MegaphoneIcon },
 ]
+
+const lbl     = 'block text-[9px] font-bold text-t3 tracking-[1px] uppercase mb-1'
+const inpBase = 'w-full bg-inp border-[1.5px] rounded-[11px] px-3 py-[10px] text-t1 text-[11px] font-sans outline-none block placeholder:text-t3 transition-all duration-[350ms] focus:border-blue focus:shadow-[0_0_0_3px_var(--blue-sub)]'
+const btnP    = 'w-full bg-blue-grad border-none rounded-[11px] py-3 text-white text-[12px] font-bold font-sans cursor-pointer shadow-[0_6px_18px_var(--blue-glow)] tracking-[0.3px] transition-opacity duration-200 flex items-center justify-center gap-[6px] hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed'
+const btnG    = 'w-full bg-transparent border-[1.5px] border-bdr rounded-[11px] py-[11px] text-t2 text-[12px] font-semibold font-sans cursor-pointer transition-all duration-[350ms] disabled:opacity-60 disabled:cursor-not-allowed'
 
 export default function PublicarPage() {
   const { user }                    = useAuth()
@@ -42,7 +47,6 @@ export default function PublicarPage() {
     if (!isEditing) return
     setLoading(true)
     const timer = setTimeout(() => {
-      // Placeholder: pré-preenche com dados fictícios até o backend estar disponível
       setTitulo('Evento 2 FSG')
       setData('2025-04-26')
       setLocal('Campus Sede FSG')
@@ -97,12 +101,14 @@ export default function PublicarPage() {
 
   if (success) {
     return (
-      <div className="pub-success-wrap">
-        <div className="pub-success-card">
-          <div className="pub-success-ico"><CheckCircleIcon /></div>
-          <h1 className="pub-success-title">Publicado com sucesso!</h1>
-          <p className="pub-success-sub">Sua publicação já está visível para os docentes.</p>
-          <button className="pub-btn-p" onClick={() => { setSuccess(false); resetForm() }}>
+      <div className="flex-1 flex items-center justify-center min-h-[calc(100vh-60px)] md:min-h-screen p-5">
+        <div className="bg-s1 border border-bdr rounded-[20px] px-7 py-9 flex flex-col items-center text-center max-w-[340px] w-full shadow-sh">
+          <div className="w-16 h-16 bg-green/[0.12] rounded-2xl flex items-center justify-center text-green mb-[18px]">
+            <CheckCircleIcon />
+          </div>
+          <h1 className="text-[18px] font-extrabold text-t1 mb-2">Publicado com sucesso!</h1>
+          <p className="text-[12px] text-t3 leading-[1.6] mb-6">Sua publicação já está visível para os docentes.</p>
+          <button className={btnP} onClick={() => { setSuccess(false); resetForm() }}>
             Nova publicação
           </button>
         </div>
@@ -115,91 +121,69 @@ export default function PublicarPage() {
       <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFile} />
 
       {/* ── Mobile ── */}
-      <div className="pub-mobile">
-        <div className="pub-topbar">
-          <span className="pub-topbar-title">{isEditing ? 'Editar publicação' : 'Nova publicação'}</span>
-          <div className="pub-avatar">{initials}</div>
+      <div className="flex flex-col md:hidden h-[calc(100vh-60px)] overflow-hidden">
+        <div className="px-[15px] py-[11px] flex items-center justify-between flex-shrink-0 border-b border-bdr2 bg-bg">
+          <span className="text-[15px] font-extrabold text-t1">{isEditing ? 'Editar publicação' : 'Nova publicação'}</span>
+          <div className="w-[30px] h-[30px] bg-blue-grad rounded-[9px] flex items-center justify-center text-[11px] font-bold text-white tracking-[0.5px] flex-shrink-0 font-sans select-none">
+            {initials}
+          </div>
         </div>
 
-        <div className="pub-scroll">
-          <p className="pub-sub">Compartilhe um evento, ação ou notícia com os docentes.</p>
+        <div className="flex-1 overflow-y-auto min-h-0 px-[14px] py-3 pb-5 scrollbar-hide">
+          <p className="text-[11px] text-t3 mb-[14px] leading-[1.5]">Compartilhe um evento, ação ou notícia com os docentes.</p>
 
-          <div className="pub-inp-grp">
-            <span className="pub-inp-lbl">Tipo de publicação</span>
-            <div className="pub-cat-row">
-              {TIPOS.map(({ key, label, Icon }) => (
-                <button key={key} type="button"
-                  className={`pub-cat-pill${tipo === key ? ' pub-cat-pill--on' : ''}`}
-                  onClick={() => setTipo(key)}>
-                  <Icon /> {label}
-                </button>
-              ))}
-            </div>
+          <div className="w-full mb-[10px]">
+            <span className={lbl}>Tipo de publicação</span>
+            <TipoRow tipo={tipo} setTipo={setTipo} />
           </div>
 
-          <div className="pub-inp-grp">
-            <span className="pub-inp-lbl">Título</span>
+          <div className="w-full mb-[10px]">
+            <span className={lbl}>Título</span>
             <input
-              className={`pub-inp-f${errors.titulo ? ' pub-inp-f--error' : ''}`}
+              className={clsx(inpBase, errors.titulo ? 'border-red' : 'border-bdr')}
               type="text"
               placeholder="Ex: Evento 3 FSG — Maio 2025"
               value={titulo}
               onChange={e => { setTitulo(e.target.value); setErrors(p => ({ ...p, titulo: undefined })) }}
             />
-            {errors.titulo && <span className="pub-inp-err">{errors.titulo}</span>}
+            {errors.titulo && <span className="block text-[9px] text-red mt-[3px]">{errors.titulo}</span>}
           </div>
 
-          <div className="pub-inp-grp">
-            <span className="pub-inp-lbl">Descrição</span>
+          <div className="w-full mb-[10px]">
+            <span className={lbl}>Descrição</span>
             <textarea
-              className="pub-textarea"
+              className={clsx(inpBase, 'border-bdr h-[62px] resize-none')}
               placeholder="Descreva o conteúdo..."
               value={descricao}
               onChange={e => setDescricao(e.target.value)}
             />
           </div>
 
-          <div className="pub-inp-grp">
-            <span className="pub-inp-lbl">Imagem de capa</span>
-            <div className="pub-upload" onClick={() => fileRef.current?.click()}>
-              {preview
-                ? <img src={preview} alt="capa" className="pub-upload-preview" />
-                : <><UploadCloudIcon /><span className="pub-upload-txt">Toque para adicionar imagem</span></>
-              }
+          <div className="w-full mb-[10px]">
+            <span className={lbl}>Imagem de capa</span>
+            <UploadArea preview={preview} onClickUpload={() => fileRef.current?.click()} hint="Toque para adicionar imagem" />
+          </div>
+
+          <div className="w-full mb-[10px]">
+            <span className={lbl}>Data</span>
+            <input className={clsx(inpBase, 'border-bdr')} type="date" value={data} onChange={e => setData(e.target.value)} />
+          </div>
+
+          <div className="w-full mb-4">
+            <span className={lbl}>Local</span>
+            <div className="relative">
+              <input className={clsx(inpBase, 'border-bdr pr-9')} type="text" placeholder="Campus Sede FSG" value={local} onChange={e => setLocal(e.target.value)} />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-icon pointer-events-none flex items-center"><MapPinIcon /></span>
             </div>
           </div>
 
-          <div className="pub-inp-grp">
-            <span className="pub-inp-lbl">Data</span>
-            <input
-              className="pub-inp-f"
-              type="date"
-              value={data}
-              onChange={e => setData(e.target.value)}
-            />
-          </div>
+          {apiError && <div className="bg-red/[0.1] border border-red/25 rounded-[9px] px-3 py-[9px] text-[11px] text-red mb-2">{apiError}</div>}
 
-          <div className="pub-inp-grp" style={{ marginBottom: 16 }}>
-            <span className="pub-inp-lbl">Local</span>
-            <div className="pub-inp-f-wrap">
-              <input
-                className="pub-inp-f pub-inp-f--icon"
-                type="text"
-                placeholder="Campus Sede FSG"
-                value={local}
-                onChange={e => setLocal(e.target.value)}
-              />
-              <span className="pub-inp-ico"><MapPinIcon /></span>
-            </div>
-          </div>
-
-          {apiError && <div className="pub-api-error">{apiError}</div>}
-
-          <button className="pub-btn-p" onClick={handlePublicar} disabled={loading} style={{ marginBottom: 8 }}>
+          <button className={clsx(btnP, 'mb-2')} onClick={handlePublicar} disabled={loading}>
             {loading ? <Spinner /> : isEditing ? 'Salvar alterações' : 'Publicar'}
           </button>
           {!isEditing && (
-            <button className="pub-btn-g" onClick={handleRascunho} disabled={loading}>
+            <button className={btnG} onClick={handleRascunho} disabled={loading}>
               Salvar rascunho
             </button>
           )}
@@ -207,103 +191,71 @@ export default function PublicarPage() {
       </div>
 
       {/* ── Desktop ── */}
-      <div className="pub-desktop">
-        <div className="pub-web-tb">
-          <p className="pub-web-title">{isEditing ? 'Editar publicação' : 'Nova publicação'}</p>
-        </div>
+      <div className="hidden md:block py-5 px-[22px]">
+        <p className="text-[19px] font-black text-t1 mb-[18px]">{isEditing ? 'Editar publicação' : 'Nova publicação'}</p>
 
-        <div className="pub-web-grid">
+        <div className="grid gap-[14px] items-start" style={{ gridTemplateColumns: '1.4fr 1fr' }}>
           {/* Coluna esquerda — Conteúdo */}
-          <div className="pub-panel">
-            <div className="pub-panel-hd" style={{ marginBottom: 14 }}>
-              <span className="pub-panel-t">Conteúdo</span>
+          <div className="bg-s1 border border-bdr rounded-[13px] p-[15px]">
+            <p className="text-[12px] font-bold text-t1 mb-[14px]">Conteúdo</p>
+
+            <div className="w-full mb-[14px]">
+              <span className={lbl}>Tipo de publicação</span>
+              <TipoRow tipo={tipo} setTipo={setTipo} />
             </div>
 
-            <div className="pub-inp-grp">
-              <span className="pub-inp-lbl">Tipo de publicação</span>
-              <div className="pub-cat-row" style={{ marginBottom: 14 }}>
-                {TIPOS.map(({ key, label, Icon }) => (
-                  <button key={key} type="button"
-                    className={`pub-cat-pill${tipo === key ? ' pub-cat-pill--on' : ''}`}
-                    onClick={() => setTipo(key)}>
-                    <Icon /> {label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="pub-inp-grp">
-              <span className="pub-inp-lbl">Título</span>
+            <div className="w-full mb-[10px]">
+              <span className={lbl}>Título</span>
               <input
-                className={`pub-inp-f${errors.titulo ? ' pub-inp-f--error' : ''}`}
+                className={clsx(inpBase, errors.titulo ? 'border-red' : 'border-bdr')}
                 type="text"
                 placeholder="Ex: Evento 3 FSG — Maio 2025"
                 value={titulo}
                 onChange={e => { setTitulo(e.target.value); setErrors(p => ({ ...p, titulo: undefined })) }}
               />
-              {errors.titulo && <span className="pub-inp-err">{errors.titulo}</span>}
+              {errors.titulo && <span className="block text-[9px] text-red mt-[3px]">{errors.titulo}</span>}
             </div>
 
-            <div className="pub-inp-grp">
-              <span className="pub-inp-lbl">Descrição</span>
+            <div className="w-full mb-[10px]">
+              <span className={lbl}>Descrição</span>
               <textarea
-                className="pub-textarea pub-textarea--lg"
+                className={clsx(inpBase, 'border-bdr h-20 resize-none')}
                 placeholder="Descreva..."
                 value={descricao}
                 onChange={e => setDescricao(e.target.value)}
               />
             </div>
 
-            <div className="pub-date-local-row">
-              <div className="pub-inp-grp">
-                <span className="pub-inp-lbl">Data</span>
-                <input
-                  className="pub-inp-f"
-                  type="date"
-                  value={data}
-                  onChange={e => setData(e.target.value)}
-                />
+            <div className="grid grid-cols-2 gap-[10px]">
+              <div>
+                <span className={lbl}>Data</span>
+                <input className={clsx(inpBase, 'border-bdr')} type="date" value={data} onChange={e => setData(e.target.value)} />
               </div>
-              <div className="pub-inp-grp">
-                <span className="pub-inp-lbl">Local</span>
-                <div className="pub-inp-f-wrap">
-                  <input
-                    className="pub-inp-f pub-inp-f--icon"
-                    type="text"
-                    placeholder="Campus FSG"
-                    value={local}
-                    onChange={e => setLocal(e.target.value)}
-                  />
-                  <span className="pub-inp-ico"><MapPinIcon /></span>
+              <div>
+                <span className={lbl}>Local</span>
+                <div className="relative">
+                  <input className={clsx(inpBase, 'border-bdr pr-9')} type="text" placeholder="Campus FSG" value={local} onChange={e => setLocal(e.target.value)} />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-icon pointer-events-none flex items-center"><MapPinIcon /></span>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Coluna direita */}
-          <div className="pub-right-col">
-            <div className="pub-panel">
-              <div className="pub-panel-hd" style={{ marginBottom: 10 }}>
-                <span className="pub-panel-t">Imagem de capa</span>
-              </div>
-              <div className="pub-upload pub-upload--web" onClick={() => fileRef.current?.click()}>
-                {preview
-                  ? <img src={preview} alt="capa" className="pub-upload-preview" />
-                  : <><UploadCloudIcon s={22} /><span className="pub-upload-txt">Clique ou arraste uma imagem</span></>
-                }
-              </div>
+          <div className="flex flex-col gap-3">
+            <div className="bg-s1 border border-bdr rounded-[13px] p-[15px]">
+              <p className="text-[12px] font-bold text-t1 mb-[10px]">Imagem de capa</p>
+              <UploadArea preview={preview} onClickUpload={() => fileRef.current?.click()} hint="Clique ou arraste uma imagem" tall />
             </div>
 
-            <div className="pub-panel">
-              <div className="pub-panel-hd" style={{ marginBottom: 12 }}>
-                <span className="pub-panel-t">Publicação</span>
-              </div>
-              {apiError && <div className="pub-api-error" style={{ marginBottom: 8 }}>{apiError}</div>}
-              <button className="pub-btn-p" onClick={handlePublicar} disabled={loading} style={{ marginBottom: 8 }}>
+            <div className="bg-s1 border border-bdr rounded-[13px] p-[15px]">
+              <p className="text-[12px] font-bold text-t1 mb-3">Publicação</p>
+              {apiError && <div className="bg-red/[0.1] border border-red/25 rounded-[9px] px-3 py-[9px] text-[11px] text-red mb-2">{apiError}</div>}
+              <button className={clsx(btnP, 'mb-2')} onClick={handlePublicar} disabled={loading}>
                 {loading ? <Spinner /> : isEditing ? 'Salvar alterações' : 'Publicar agora'}
               </button>
               {!isEditing && (
-                <button className="pub-btn-g" onClick={handleRascunho} disabled={loading}>
+                <button className={btnG} onClick={handleRascunho} disabled={loading}>
                   Salvar rascunho
                 </button>
               )}
@@ -312,6 +264,44 @@ export default function PublicarPage() {
         </div>
       </div>
     </>
+  )
+}
+
+/* ── Sub-components ── */
+
+function TipoRow({ tipo, setTipo }) {
+  return (
+    <div className="flex gap-[6px] flex-wrap">
+      {TIPOS.map(({ key, label, Icon }) => (
+        <button key={key} type="button"
+          className={clsx(
+            'px-[10px] py-1 rounded-[20px] text-[10px] font-semibold cursor-pointer border flex items-center gap-[5px] font-sans transition-all duration-[250ms]',
+            tipo === key
+              ? 'bg-[var(--blue-sub)] border-[var(--blue-bdr)] text-blue-l'
+              : 'border-bdr bg-s2 text-t3'
+          )}
+          onClick={() => setTipo(key)}>
+          <Icon /> {label}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+function UploadArea({ preview, onClickUpload, hint, tall }) {
+  return (
+    <div
+      className={clsx(
+        'w-full bg-s2 border-[1.5px] border-dashed border-bdr rounded-[11px] flex flex-col items-center justify-center gap-1 cursor-pointer text-t3 relative overflow-hidden hover:border-blue-l hover:text-blue-l transition-all duration-[350ms]',
+        tall ? 'h-[100px]' : 'h-[66px]'
+      )}
+      onClick={onClickUpload}
+    >
+      {preview
+        ? <img src={preview} alt="capa" className="absolute inset-0 w-full h-full object-cover" />
+        : <><UploadCloudIcon /><span className="text-[10px] font-semibold">{hint}</span></>
+      }
+    </div>
   )
 }
 
@@ -340,11 +330,5 @@ function CheckCircleIcon() {
   return <svg width="32" height="32" viewBox="0 0 24 24" {...SV}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
 }
 function Spinner() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
-      style={{ animation: 'pub-spin .8s linear infinite', flexShrink: 0 }}>
-      <style>{`@keyframes pub-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>
-      <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
-    </svg>
-  )
+  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="animate-spin-fast flex-shrink-0"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
 }
