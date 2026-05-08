@@ -1,4 +1,5 @@
 import { useAuth } from '../contexts/AuthContext'
+import { getIniciais } from '../utils/usuario'
 import './HomePage.css'
 
 function getGreeting() {
@@ -15,19 +16,12 @@ function getHeroDate() {
   return raw.charAt(0).toUpperCase() + raw.slice(1)
 }
 
-function getInitials(user) {
-  if (user?.name) {
-    return user.name.split(' ').filter(Boolean).slice(0, 2).map(n => n[0].toUpperCase()).join('')
-  }
-  return 'P'
-}
-
 /* ═══════════════════════════════════════
    HOME PAGE
 ═══════════════════════════════════════ */
 export default function HomePage() {
   const { user } = useAuth()
-  const initials  = getInitials(user)
+  const initials  = getIniciais(user)
   const firstName = user?.name ? user.name.split(' ')[0] : 'Professor'
 
   return (
