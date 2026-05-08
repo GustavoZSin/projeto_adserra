@@ -6,13 +6,14 @@ import { AdminRoute }   from './components/layout/AdminRoute'
 import AuthLayout from './components/layout/AuthLayout'
 import AppLayout  from './components/layout/AppLayout'
 
-const LoginPage          = lazy(() => import('./pages/LoginPage'))
-const InteressePage      = lazy(() => import('./pages/InteressePage'))
-const EsqueciSenhaPage   = lazy(() => import('./pages/EsqueciSenhaPage'))
-const RedefinirSenhaPage = lazy(() => import('./pages/RedefinirSenhaPage'))
-const HomePage           = lazy(() => import('./pages/HomePage'))
-const EventosPage        = lazy(() => import('./pages/EventosPage'))
-const PublicarPage       = lazy(() => import('./pages/PublicarPage'))
+const LoginPage              = lazy(() => import('./pages/LoginPage'))
+const InteressePage          = lazy(() => import('./pages/InteressePage'))
+const EsqueciSenhaPage       = lazy(() => import('./pages/EsqueciSenhaPage'))
+const RedefinirSenhaPage     = lazy(() => import('./pages/RedefinirSenhaPage'))
+const ConfirmarCadastroPage  = lazy(() => import('./pages/ConfirmarCadastroPage'))
+const HomePage               = lazy(() => import('./pages/HomePage'))
+const EventosPage            = lazy(() => import('./pages/EventosPage'))
+const PublicarPage           = lazy(() => import('./pages/PublicarPage'))
 
 export default function App() {
   return (
