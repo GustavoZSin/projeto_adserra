@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
+import { AprovacoesPendentesProvider } from './contexts/AprovacoesPendentesContext'
 import { PrivateRoute } from './components/layout/PrivateRoute'
 import { AdminRoute }   from './components/layout/AdminRoute'
 import AuthLayout from './components/layout/AuthLayout'
@@ -14,11 +15,13 @@ const ConfirmarCadastroPage  = lazy(() => import('./pages/ConfirmarCadastroPage'
 const HomePage               = lazy(() => import('./pages/HomePage'))
 const EventosPage            = lazy(() => import('./pages/EventosPage'))
 const PublicarPage           = lazy(() => import('./pages/PublicarPage'))
+const AprovarCadastrosPage   = lazy(() => import('./pages/AprovarCadastrosPage'))
 
 export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <AprovacoesPendentesProvider>
         <Suspense fallback={null}>
         <Routes>
           {/* ── Públicas — painel azul no desktop ── */}
@@ -34,7 +37,8 @@ export default function App() {
           <Route element={<PrivateRoute><AppLayout /></PrivateRoute>}>
             <Route path="/dashboard" element={<HomePage />} />
             <Route path="/eventos"   element={<EventosPage />} />
-            <Route path="/publicar"  element={<AdminRoute><PublicarPage /></AdminRoute>} />
+            <Route path="/publicar"          element={<AdminRoute><PublicarPage /></AdminRoute>} />
+            <Route path="/aprovar-cadastros" element={<AdminRoute><AprovarCadastrosPage /></AdminRoute>} />
           </Route>
 
           {/* ── Raiz → login ── */}
@@ -42,6 +46,7 @@ export default function App() {
           <Route path="*"  element={<Navigate to="/login" replace />} />
         </Routes>
         </Suspense>
+        </AprovacoesPendentesProvider>
       </AuthProvider>
     </BrowserRouter>
   )
