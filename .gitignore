@@ -281,6 +281,9 @@ FakesAssemblies/
 # GhostDoc plugin setting file
 *.GhostDoc.xml
 
+# Claude Code
+.claude/settings.local.json
+
 # Node.js Tools for Visual Studio
 .ntvs_analysis.dat
 node_modules/
