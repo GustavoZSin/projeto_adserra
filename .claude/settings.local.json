@@ -7,7 +7,21 @@
       "Bash(dotnet build *)",
       "Bash(dotnet run *)",
       "PowerShell(Get-NetTCPConnection *)",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(git checkout *)",
+      "Bash(git pull *)",
+      "Bash(git stash *)",
+      "Bash(git restore *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(npm install *)",
+      "PowerShell(cmd /c \"dir /s /b C:\\\\Users\\\\bueen\\\\projeto_adserra\\\\web\\\\src\\\\components\")",
+      "Bash(Remove-Item \"C:\\\\Users\\\\bueen\\\\projeto_adserra\\\\web\\\\src\\\\components\\\\layout\\\\AuthLayout.css\" -ErrorAction SilentlyContinue)",
+      "Bash(Remove-Item \"C:\\\\Users\\\\bueen\\\\projeto_adserra\\\\web\\\\src\\\\components\\\\layout\\\\AppLayout.css\" -ErrorAction SilentlyContinue)",
+      "Bash(Remove-Item \"C:\\\\Users\\\\bueen\\\\projeto_adserra\\\\web\\\\src\\\\pages\\\\HomePage.css\" -ErrorAction SilentlyContinue)",
+      "Bash(Remove-Item \"C:\\\\Users\\\\bueen\\\\projeto_adserra\\\\web\\\\src\\\\pages\\\\EventosPage.css\" -ErrorAction SilentlyContinue)",
+      "Bash(Remove-Item \"C:\\\\Users\\\\bueen\\\\projeto_adserra\\\\web\\\\src\\\\pages\\\\PublicarPage.css\" -ErrorAction SilentlyContinue)"
     ]
   }
 }

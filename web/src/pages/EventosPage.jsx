@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { getIniciais } from '../utils/usuario'
-import './EventosPage.css'
+import clsx from 'clsx'
 
 // TODO: substituir por chamada à API — eventosService.listar()
 const MOCK_EVENTOS = [
@@ -33,6 +33,9 @@ function formatarDataCurta(dateStr) {
   if (!dateStr) return ''
   return new Date(dateStr + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
 }
+
+const filterPill = 'flex-shrink-0 px-3 py-[5px] rounded-[20px] text-[10px] font-semibold cursor-pointer font-sans border transition-all duration-[250ms]'
+const btnBase    = 'flex items-center gap-[5px] rounded-[8px] px-[11px] py-[6px] text-[11px] font-bold font-sans cursor-pointer border-none transition-all duration-200 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed'
 
 export default function EventosPage() {
   const navigate              = useNavigate()
@@ -75,48 +78,47 @@ export default function EventosPage() {
       )}
 
       {/* ── Mobile ── */}
-      <div className="ev-mobile">
-        <div className="ev-topbar">
-          <span className="ev-topbar-title">Eventos</span>
-          <div className="ev-tb-r">
-            <button className="ev-tb-btn" aria-label="Buscar"><SearchIcon /></button>
-            <div className="ev-avatar">{initials}</div>
+      <div className="flex flex-col md:hidden h-[calc(100vh-60px)] overflow-hidden relative">
+        <div className="px-[15px] py-[11px] flex items-center justify-between flex-shrink-0 border-b border-bdr2 bg-bg">
+          <span className="text-[15px] font-extrabold text-t1">Eventos</span>
+          <div className="flex items-center gap-2">
+            <button className="w-[30px] h-[30px] bg-s2 rounded-[9px] flex items-center justify-center text-t2 border-none cursor-pointer hover:bg-s3" aria-label="Buscar">
+              <SearchIcon />
+            </button>
+            <div className="w-[30px] h-[30px] bg-blue-grad rounded-[9px] flex items-center justify-center text-[11px] font-bold text-white tracking-[0.5px] font-sans select-none flex-shrink-0">
+              {initials}
+            </div>
           </div>
         </div>
 
-        <div className="ev-scroll">
-          <div className="ev-filters">
-            {FILTROS.map(f => (
-              <button key={f} className={`ev-filter-pill${filtro === f ? ' ev-filter-pill--on' : ''}`}
-                onClick={() => setFiltro(f)}>{f}</button>
-            ))}
-          </div>
+        <div className="flex-1 overflow-y-auto min-h-0 px-[13px] py-[11px] pb-5 scrollbar-hide">
+          <Filters filtro={filtro} setFiltro={setFiltro} className="mb-3" />
 
-          {visiveis.length === 0 && <p className="ev-empty">Nenhum evento encontrado.</p>}
+          {visiveis.length === 0 && <p className="text-[11px] text-t3 text-center py-8">Nenhum evento encontrado.</p>}
 
           {visiveis.map(ev => (
-            <div key={ev.id} className="ev-card">
-              <div className="ev-card-img">
+            <div key={ev.id} className="bg-s1 border border-bdr rounded-[13px] overflow-hidden mb-[9px]">
+              <div className="w-full h-20 flex items-center justify-center text-icon relative"
+                   style={{ background: 'linear-gradient(135deg, var(--s2), var(--s3))' }}>
                 <EventIcon tipo={ev.tipo} />
-                {ev.badge && <span className={`ev-badge ev-badge--${ev.badgeColor}`}>{ev.badge}</span>}
+                {ev.badge && <EventBadge label={ev.badge} color={ev.badgeColor} />}
               </div>
-              <div className="ev-card-body">
-                <div className="ev-card-top">
-                  <p className="ev-card-title">{ev.titulo}</p>
-                  <span className={`ev-tag ev-tag--${ev.tagColor}`}>{ev.tag}</span>
+              <div className="px-3 py-[10px] pb-3">
+                <div className="flex justify-between items-start mb-[5px] gap-[6px]">
+                  <p className="text-[12px] font-bold text-t1">{ev.titulo}</p>
+                  <EventTag tag={ev.tag} color={ev.tagColor} />
                 </div>
-                <p className="ev-card-meta"><CalendarIcon s={12} />{formatarDataLonga(ev.data)}</p>
-                <p className="ev-card-meta"><MapPinIcon s={12} />{ev.local}</p>
-                <div className="ev-card-actions">
-                  <button className="ev-btn-sm ev-btn-sm--p"><EyeIcon s={12} />Detalhes</button>
-                  <button className="ev-btn-sm ev-btn-sm--g"><ImageIcon s={12} />Galeria</button>
+                <p className="text-[9px] text-t3 flex items-center gap-1 mb-0.5"><CalendarIcon s={12} />{formatarDataLonga(ev.data)}</p>
+                <p className="text-[9px] text-t3 flex items-center gap-1 mb-0.5"><MapPinIcon s={12} />{ev.local}</p>
+                <div className="flex flex-wrap gap-[6px] mt-[9px]">
+                  <button className={clsx(btnBase, 'bg-blue-grad text-white shadow-[0_3px_10px_var(--blue-glow)] hover:opacity-90')}><EyeIcon s={12} />Detalhes</button>
+                  <button className={clsx(btnBase, 'bg-s2 border border-bdr text-t2 hover:bg-s3')}><ImageIcon s={12} />Galeria</button>
                   {isAdmin && <>
-                    <button className="ev-btn-sm ev-btn-sm--g" onClick={() => handleEditar(ev.id)}>
+                    <button className={clsx(btnBase, 'bg-s2 border border-bdr text-t2 hover:bg-s3')} onClick={() => handleEditar(ev.id)}>
                       <EditIcon s={12} />Editar
                     </button>
-                    <button className="ev-btn-sm ev-btn-sm--danger"
-                      onClick={() => setConfirmId(ev.id)}
-                      disabled={deletando === ev.id}>
+                    <button className={clsx(btnBase, 'bg-red/[0.1] border border-red/25 text-red hover:bg-red/[0.18]')}
+                      onClick={() => setConfirmId(ev.id)} disabled={deletando === ev.id}>
                       <TrashIcon s={12} />Excluir
                     </button>
                   </>}
@@ -127,59 +129,57 @@ export default function EventosPage() {
         </div>
 
         {isAdmin && (
-          <button className="ev-fab" onClick={() => navigate('/publicar')} aria-label="Novo evento">
+          <button className="absolute bottom-3 right-[14px] w-[42px] h-[42px] bg-blue-grad rounded-[12px] flex items-center justify-center text-white border-none shadow-[0_5px_16px_var(--blue-glow)] cursor-pointer z-[6] hover:opacity-90"
+                  onClick={() => navigate('/publicar')} aria-label="Novo evento">
             <PlusIcon s={18} />
           </button>
         )}
       </div>
 
       {/* ── Desktop ── */}
-      <div className="ev-desktop">
-        <div className="ev-web-tb">
-          <p className="ev-web-title">Eventos</p>
-          <div className="ev-web-tb-r">
-            <div className="ev-web-search"><SearchIcon s={13} /><span>Buscar eventos...</span></div>
+      <div className="hidden md:block py-5 px-[22px]">
+        <div className="flex items-center justify-between mb-[18px]">
+          <p className="text-[19px] font-black text-t1">Eventos</p>
+          <div className="flex items-center gap-[9px]">
+            <div className="flex items-center gap-[7px] bg-s1 border-[1.5px] border-bdr rounded-[9px] px-3 py-[7px] text-[11px] text-t3 cursor-text hover:border-blue-l transition-colors">
+              <SearchIcon s={13} /><span>Buscar eventos...</span>
+            </div>
             {isAdmin && (
-              <button className="ev-btn-sm ev-btn-sm--p" onClick={() => navigate('/publicar')}>
+              <button className={clsx(btnBase, 'bg-blue-grad text-white shadow-[0_3px_10px_var(--blue-glow)] hover:opacity-90')} onClick={() => navigate('/publicar')}>
                 <PlusIcon s={13} />Novo evento
               </button>
             )}
           </div>
         </div>
 
-        <div className="ev-filters" style={{ marginBottom: 16 }}>
-          {FILTROS.map(f => (
-            <button key={f} className={`ev-filter-pill${filtro === f ? ' ev-filter-pill--on' : ''}`}
-              onClick={() => setFiltro(f)}>{f}</button>
-          ))}
-        </div>
+        <Filters filtro={filtro} setFiltro={setFiltro} className="mb-4" />
 
-        {visiveis.length === 0 && <p className="ev-empty">Nenhum evento encontrado.</p>}
+        {visiveis.length === 0 && <p className="text-[11px] text-t3 text-center py-8">Nenhum evento encontrado.</p>}
 
-        <div className="ev-web-grid">
+        <div className="grid grid-cols-3 gap-3">
           {visiveis.map(ev => (
-            <div key={ev.id} className="ev-web-card">
-              <div className="ev-web-card-img">
+            <div key={ev.id} className="bg-s1 border border-bdr rounded-[13px] overflow-hidden">
+              <div className="w-full h-[100px] flex items-center justify-center text-icon relative"
+                   style={{ background: 'linear-gradient(135deg, var(--s2), var(--s3))' }}>
                 <EventIcon tipo={ev.tipo} s={24} />
-                {ev.badge && <span className={`ev-badge ev-badge--${ev.badgeColor}`}>{ev.badge}</span>}
+                {ev.badge && <EventBadge label={ev.badge} color={ev.badgeColor} />}
               </div>
-              <div className="ev-web-card-body">
-                <p className="ev-web-card-title">{ev.titulo}</p>
-                <p className="ev-web-card-meta">
+              <div className="p-3">
+                <p className="text-[12px] font-bold text-t1 mb-1">{ev.titulo}</p>
+                <p className="text-[10px] text-t3 flex items-center gap-1 mb-[9px] flex-wrap">
                   <CalendarIcon s={12} />{formatarDataCurta(ev.data)}
-                  <span className="ev-web-card-dot">·</span>
+                  <span className="mx-0.5">·</span>
                   <MapPinIcon s={12} />{ev.local}
                 </p>
-                <div className="ev-web-card-acts">
-                  <button className="ev-btn-sm ev-btn-sm--p"><EyeIcon s={12} />Ver mais</button>
-                  <button className="ev-btn-sm ev-btn-sm--g"><ImageIcon s={12} />Galeria</button>
+                <div className="flex gap-[6px] flex-wrap">
+                  <button className={clsx(btnBase, 'bg-blue-grad text-white shadow-[0_3px_10px_var(--blue-glow)] hover:opacity-90')}><EyeIcon s={12} />Ver mais</button>
+                  <button className={clsx(btnBase, 'bg-s2 border border-bdr text-t2 hover:bg-s3')}><ImageIcon s={12} />Galeria</button>
                   {isAdmin && <>
-                    <button className="ev-btn-sm ev-btn-sm--g" onClick={() => handleEditar(ev.id)}>
+                    <button className={clsx(btnBase, 'bg-s2 border border-bdr text-t2 hover:bg-s3')} onClick={() => handleEditar(ev.id)}>
                       <EditIcon s={12} />Editar
                     </button>
-                    <button className="ev-btn-sm ev-btn-sm--danger"
-                      onClick={() => setConfirmId(ev.id)}
-                      disabled={deletando === ev.id}>
+                    <button className={clsx(btnBase, 'bg-red/[0.1] border border-red/25 text-red hover:bg-red/[0.18]')}
+                      onClick={() => setConfirmId(ev.id)} disabled={deletando === ev.id}>
                       <TrashIcon s={12} />Excluir
                     </button>
                   </>}
@@ -193,19 +193,63 @@ export default function EventosPage() {
   )
 }
 
+/* ── Shared sub-components ── */
+
+function Filters({ filtro, setFiltro, className }) {
+  return (
+    <div className={clsx('flex gap-[6px] overflow-x-auto scrollbar-hide pb-0.5', className)}>
+      {FILTROS.map(f => (
+        <button key={f}
+          className={clsx(filterPill, filtro === f
+            ? 'bg-blue-grad text-white border-transparent shadow-[0_3px_9px_var(--blue-glow)]'
+            : 'border-bdr bg-s2 text-t3'
+          )}
+          onClick={() => setFiltro(f)}>{f}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+function EventBadge({ label, color }) {
+  return (
+    <span className={clsx(
+      'absolute top-[7px] right-[7px] rounded-[5px] px-[7px] py-0.5 text-[8px] font-bold text-white tracking-[0.3px]',
+      color === 'blue'  && 'bg-blue',
+      color === 'green' && 'bg-green',
+      color === 'amber' && 'bg-amber',
+    )}>{label}</span>
+  )
+}
+
+function EventTag({ tag, color }) {
+  return (
+    <span className={clsx(
+      'inline-flex items-center px-2 py-0.5 rounded-[20px] text-[8px] font-bold tracking-[0.3px] uppercase whitespace-nowrap flex-shrink-0',
+      color === 'blue'  && 'bg-[var(--blue-sub)] text-blue-l border border-[var(--blue-bdr)]',
+      color === 'green' && 'bg-green/[0.1] text-green',
+      color === 'amber' && 'bg-amber/[0.1] text-amber',
+    )}>{tag}</span>
+  )
+}
+
 /* ── Modal de confirmação ── */
 function ConfirmModal({ titulo, onCancel, onConfirm }) {
   return (
-    <div className="ev-modal-overlay" onClick={onCancel}>
-      <div className="ev-modal" onClick={e => e.stopPropagation()}>
-        <div className="ev-modal-ico"><TrashIcon s={28} /></div>
-        <h2 className="ev-modal-title">Excluir evento?</h2>
-        <p className="ev-modal-sub">
+    <div className="fixed inset-0 bg-black/55 backdrop-blur z-[200] flex items-center justify-center p-5" onClick={onCancel}>
+      <div className="bg-s1 border border-bdr rounded-[18px] px-6 py-7 max-w-[320px] w-full flex flex-col items-center text-center shadow-sh" onClick={e => e.stopPropagation()}>
+        <div className="w-14 h-14 bg-red/[0.12] rounded-[14px] flex items-center justify-center text-red mb-4">
+          <TrashIcon s={28} />
+        </div>
+        <h2 className="text-[16px] font-extrabold text-t1 mb-2">Excluir evento?</h2>
+        <p className="text-[11px] text-t3 leading-[1.6] mb-[22px] [&_strong]:text-t2 [&_strong]:font-semibold">
           <strong>"{titulo}"</strong> será removido permanentemente. Esta ação não pode ser desfeita.
         </p>
-        <div className="ev-modal-actions">
-          <button className="ev-modal-btn-cancel" onClick={onCancel}>Cancelar</button>
-          <button className="ev-modal-btn-confirm" onClick={onConfirm}>Excluir</button>
+        <div className="flex gap-2 w-full">
+          <button className="flex-1 bg-transparent border-[1.5px] border-bdr rounded-[10px] py-[10px] text-t2 text-[12px] font-semibold font-sans cursor-pointer hover:bg-s2 transition-colors"
+                  onClick={onCancel}>Cancelar</button>
+          <button className="flex-1 bg-red-grad border-none rounded-[10px] py-[10px] text-white text-[12px] font-bold font-sans cursor-pointer shadow-[0_4px_14px_rgba(239,68,68,0.35)] hover:opacity-90 transition-opacity"
+                  onClick={onConfirm}>Excluir</button>
         </div>
       </div>
     </div>

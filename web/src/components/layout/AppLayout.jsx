@@ -2,7 +2,7 @@ import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { useAprovacoesPendentes } from '../../contexts/AprovacoesPendentesContext'
 import logoImg from '../../assets/adserra-logo.png'
-import './AppLayout.css'
+import clsx from 'clsx'
 
 function getInitials(user) {
   if (user?.name) {
@@ -23,16 +23,16 @@ export default function AppLayout() {
   const displayName = user?.matricula || user?.id || 'Usuário'
 
   return (
-    <div className="app-root">
+    <div className="flex min-h-screen bg-bg">
 
       {/* ── Sidebar — desktop apenas ── */}
-      <aside className="app-sidebar">
-        <div className="sb-logo">
+      <aside className="hidden md:flex md:flex-col md:w-48 md:flex-shrink-0 md:bg-sb-bg md:border-r md:border-bdr md:h-screen md:sticky md:top-0 md:px-[10px] md:py-[18px] md:overflow-y-auto md:scrollbar-hide">
+        <div className="mb-[22px] px-[6px] flex-shrink-0">
           <LogoSidebar />
         </div>
 
-        <div className="sb-sec">
-          <div className="sb-sec-lbl">Menu principal</div>
+        <div className="mb-[18px]">
+          <span className="block text-[8px] font-bold tracking-[2px] uppercase text-t3 mb-[7px] px-2">Menu principal</span>
           <SbItem icon={<HomeIcon />}     label="Início"   active={isActive('/dashboard')} onClick={() => navigate('/dashboard')} />
           <SbItem icon={<CalendarIcon />} label="Eventos"  active={isActive('/eventos')}   badge="3"           onClick={() => navigate('/eventos')} />
           <SbItem icon={<ImageIcon />}    label="Galeria"  active={isActive('/galeria')}   onClick={() => navigate('/galeria')} />
@@ -42,29 +42,32 @@ export default function AppLayout() {
           )}
         </div>
 
-        <div className="sb-sec">
-          <div className="sb-sec-lbl">Conta</div>
+        <div className="mb-[18px]">
+          <span className="block text-[8px] font-bold tracking-[2px] uppercase text-t3 mb-[7px] px-2">Conta</span>
           <SbItem icon={<UserIcon />}     label="Meu Perfil"    active={isActive('/perfil')}        onClick={() => navigate('/perfil')} />
           <SbItem icon={<BellIcon />}     label="Notificações"  active={isActive('/notificacoes')}  badgeRed="2" onClick={() => navigate('/notificacoes')} />
           <SbItem icon={<SettingsIcon />} label="Configurações" active={isActive('/configuracoes')} onClick={() => navigate('/configuracoes')} />
         </div>
 
-        <div className="sb-user">
-          <div className="sb-av">{initials}</div>
+        <div className="mt-auto px-[10px] py-[10px] bg-s2 rounded-[11px] border border-bdr flex items-center gap-[9px] flex-shrink-0">
+          <div className="w-8 h-8 rounded-[9px] bg-blue-grad flex items-center justify-center text-[11px] font-bold text-white flex-shrink-0 font-sans">
+            {initials}
+          </div>
           <div style={{ minWidth: 0 }}>
-            <p className="sb-name">{displayName}</p>
-            <p className="sb-role">Docente</p>
+            <p className="text-[11px] font-bold text-t1 whitespace-nowrap overflow-hidden text-ellipsis">{displayName}</p>
+            <p className="text-[9px] text-t3">Docente</p>
           </div>
         </div>
       </aside>
 
       {/* ── Conteúdo principal ── */}
-      <main className="app-main">
+      <main className="flex-1 flex flex-col min-w-0 pb-[60px] md:h-screen md:overflow-y-auto md:pb-0 md:scrollbar-thin">
         <Outlet />
       </main>
 
       {/* ── Bottom nav — mobile apenas ── */}
-      <nav className="app-bnav" aria-label="Navegação principal">
+      <nav className="fixed bottom-0 left-0 right-0 h-[60px] bg-nav-bg backdrop-blur-[14px] border-t border-bdr flex items-center justify-around px-1 pb-[6px] z-50 md:hidden"
+           aria-label="Navegação principal">
         <NavItem icon={<HomeIcon lg />}     label="Início"   active={isActive('/dashboard')} onClick={() => navigate('/dashboard')} />
         <NavItem icon={<CalendarIcon lg />} label="Eventos"  active={isActive('/eventos')}   onClick={() => navigate('/eventos')} />
         <NavItem icon={<ImageIcon lg />}    label="Galeria"  active={isActive('/galeria')}   onClick={() => navigate('/galeria')} />
@@ -84,14 +87,17 @@ export default function AppLayout() {
 function SbItem({ icon, label, active, badge, badgeRed, onClick }) {
   return (
     <button
-      className={`sb-item${active ? ' sb-item--active' : ''}`}
+      className={clsx(
+        'flex items-center gap-[9px] w-full px-[10px] py-2 rounded-[10px] cursor-pointer text-[11px] font-semibold mb-px border-none font-sans text-left transition-all duration-[250ms]',
+        active ? 'bg-[var(--blue-sub)] text-blue-l' : 'bg-transparent text-t2 hover:bg-s2 hover:text-t1'
+      )}
       onClick={onClick}
       aria-current={active ? 'page' : undefined}
     >
       {icon}
-      <span className="sb-item-label">{label}</span>
-      {badge    && <span className="sb-badge">{badge}</span>}
-      {badgeRed && <span className="sb-badge sb-badge--red">{badgeRed}</span>}
+      <span className="flex-1">{label}</span>
+      {badge    && <span className="ml-auto bg-blue text-white rounded-[10px] px-[7px] py-px text-[9px] font-bold leading-[1.4]">{badge}</span>}
+      {badgeRed && <span className="ml-auto bg-red text-white rounded-[10px] px-[7px] py-px text-[9px] font-bold leading-[1.4]">{badgeRed}</span>}
     </button>
   )
 }
@@ -99,16 +105,23 @@ function SbItem({ icon, label, active, badge, badgeRed, onClick }) {
 function NavItem({ icon, label, active, badge, onClick }) {
   return (
     <button
-      className={`app-ni${active ? ' app-ni--active' : ''}`}
+      className={clsx(
+        'flex flex-col items-center gap-[3px] px-[14px] py-[5px] rounded-[10px] cursor-pointer border-none font-sans transition-all duration-[250ms] min-w-[48px]',
+        active ? 'bg-[var(--blue-sub)] text-blue-l' : 'bg-transparent text-t3 hover:text-t2'
+      )}
       onClick={onClick}
       aria-label={label}
       aria-current={active ? 'page' : undefined}
     >
-      <span className="app-ni-ico">
+      <span className="relative flex items-center justify-center">
         {icon}
-        {badge && <span className="app-ni-dot">{badge}</span>}
+        {badge && (
+          <span className="absolute -top-[5px] -right-[7px] bg-amber text-white rounded-[10px] min-w-[14px] h-[14px] text-[8px] font-bold flex items-center justify-center px-[3px] font-sans leading-none">
+            {badge}
+          </span>
+        )}
       </span>
-      <span className="app-ni-l">{label}</span>
+      <span className="text-[9px] font-bold leading-none">{label}</span>
     </button>
   )
 }

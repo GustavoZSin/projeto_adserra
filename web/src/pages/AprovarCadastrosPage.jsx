@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { useAprovacoesPendentes } from '../contexts/AprovacoesPendentesContext'
 import { getIniciais } from '../utils/usuario'
-import './AprovarCadastrosPage.css'
+import clsx from 'clsx'
 
 // TODO: substituir por chamada à API — solicitacaoIngressoService.listar()
 const MOCK_SOLICITACOES = [
@@ -49,6 +49,9 @@ function getInicaisSolicitacao(nome) {
   return nome.split(' ').filter(Boolean).slice(0, 2).map(n => n[0].toUpperCase()).join('')
 }
 
+const filterPill = 'flex-shrink-0 px-3 py-[5px] rounded-[20px] text-[10px] font-semibold cursor-pointer font-sans border transition-all duration-[250ms]'
+const btnBase    = 'inline-flex items-center gap-[5px] px-[13px] py-[7px] rounded-[9px] text-[11px] font-bold font-sans cursor-pointer transition-all duration-200 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed'
+
 export default function AprovarCadastrosPage() {
   const { user }   = useAuth()
   const { setPendentes } = useAprovacoesPendentes()
@@ -56,7 +59,7 @@ export default function AprovarCadastrosPage() {
   const [filtro, setFiltro]               = useState('Todos')
   const [solicitacoes, setSolicitacoes]   = useState(MOCK_SOLICITACOES)
   const [processando, setProcessando]     = useState(null)
-  const [confirmando, setConfirmando]     = useState(null) // { id, acao }
+  const [confirmando, setConfirmando]     = useState(null)
 
   const contagem = useMemo(() => ({
     pendentes: solicitacoes.filter(s => s.status === 'pendente').length,
@@ -105,37 +108,32 @@ export default function AprovarCadastrosPage() {
       )}
 
       {/* ══════════ MOBILE ══════════ */}
-      <div className="ac-mobile">
-        <div className="ac-topbar">
-          <div>
-            <span className="ac-topbar-title">Aprovação de Cadastros</span>
+      <div className="flex flex-col md:hidden h-[calc(100vh-60px)] overflow-hidden">
+        <div className="px-[15px] py-[11px] flex items-center justify-between flex-shrink-0 border-b border-bdr2 bg-bg">
+          <div className="flex items-center gap-2">
+            <span className="text-[15px] font-extrabold text-t1">Aprovação de Cadastros</span>
             {contagem.pendentes > 0 && (
-              <span className="ac-topbar-badge">{contagem.pendentes}</span>
+              <span className="bg-amber text-white rounded-[10px] px-[7px] py-px text-[9px] font-bold leading-[1.4]">{contagem.pendentes}</span>
             )}
           </div>
-          <div className="ac-avatar">{initials}</div>
+          <div className="w-[30px] h-[30px] bg-blue-grad rounded-[9px] flex items-center justify-center text-[11px] font-bold text-white tracking-[0.5px] font-sans select-none flex-shrink-0">
+            {initials}
+          </div>
         </div>
 
-        <div className="ac-scroll">
+        <div className="flex-1 overflow-y-auto min-h-0 px-[13px] py-[11px] pb-5 scrollbar-hide">
           {/* Stats */}
-          <div className="ac-stats-row">
-            <StatCard cor="amber" icon={<ClockIcon />} n={contagem.pendentes} label="Pendentes" />
+          <div className="grid grid-cols-3 gap-[7px] mb-3">
+            <StatCard cor="amber" icon={<ClockIcon />}       n={contagem.pendentes} label="Pendentes" />
             <StatCard cor="green" icon={<CheckCircleIcon />} n={contagem.aprovados} label="Aprovados" />
             <StatCard cor="red"   icon={<XCircleIcon />}     n={contagem.recusados} label="Recusados" />
           </div>
 
           {/* Filtros */}
-          <div className="ac-filters">
-            {FILTROS.map(f => (
-              <button key={f}
-                className={`ac-filter-pill${filtro === f ? ' ac-filter-pill--on' : ''}`}
-                onClick={() => setFiltro(f)}>{f}
-              </button>
-            ))}
-          </div>
+          <Filters filtro={filtro} setFiltro={setFiltro} className="mb-3" />
 
           {/* Cards */}
-          {visiveis.length === 0 && <p className="ac-empty">Nenhuma solicitação encontrada.</p>}
+          {visiveis.length === 0 && <p className="text-[11px] text-t3 text-center py-8">Nenhuma solicitação encontrada.</p>}
           {visiveis.map(s => (
             <CardSolicitacao
               key={s.id}
@@ -149,39 +147,34 @@ export default function AprovarCadastrosPage() {
       </div>
 
       {/* ══════════ DESKTOP ══════════ */}
-      <div className="ac-desktop">
-        <div className="ac-web-tb">
+      <div className="hidden md:block py-5 px-[22px]">
+        <div className="flex items-start justify-between mb-[18px]">
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <p className="ac-web-title">Aprovação de Cadastros</p>
+            <div className="flex items-center gap-[10px]">
+              <p className="text-[19px] font-black text-t1">Aprovação de Cadastros</p>
               {contagem.pendentes > 0 && (
-                <span className="ac-web-badge">{contagem.pendentes} pendentes</span>
+                <span className="inline-flex items-center px-[10px] py-[3px] rounded-[20px] text-[9px] font-bold bg-amber/[0.12] text-amber border border-amber/25">
+                  {contagem.pendentes} pendentes
+                </span>
               )}
             </div>
-            <p className="ac-web-sub">Solicitações de ingresso pendentes de análise</p>
+            <p className="text-[11px] text-t3 mt-[3px]">Solicitações de ingresso pendentes de análise</p>
           </div>
         </div>
 
         {/* Stats */}
-        <div className="ac-web-stats">
-          <WebStatCard cor="amber" icon={<ClockIcon />}       n={contagem.pendentes} label="Pendentes" />
-          <WebStatCard cor="green" icon={<CheckCircleIcon />} n={contagem.aprovados} label="Aprovados" />
-          <WebStatCard cor="red"   icon={<XCircleIcon />}     n={contagem.recusados} label="Recusados" />
+        <div className="grid grid-cols-3 gap-[10px] mb-[18px]">
+          <WebStatCard cor="amber" icon={<ClockIcon size={16} />}       n={contagem.pendentes} label="Pendentes" />
+          <WebStatCard cor="green" icon={<CheckCircleIcon size={16} />} n={contagem.aprovados} label="Aprovados" />
+          <WebStatCard cor="red"   icon={<XCircleIcon size={16} />}     n={contagem.recusados} label="Recusados" />
         </div>
 
         {/* Filtros */}
-        <div className="ac-filters" style={{ marginBottom: 14 }}>
-          {FILTROS.map(f => (
-            <button key={f}
-              className={`ac-filter-pill${filtro === f ? ' ac-filter-pill--on' : ''}`}
-              onClick={() => setFiltro(f)}>{f}
-            </button>
-          ))}
-        </div>
+        <Filters filtro={filtro} setFiltro={setFiltro} className="mb-[14px]" />
 
         {/* Lista */}
-        <div className="ac-list">
-          {visiveis.length === 0 && <p className="ac-empty">Nenhuma solicitação encontrada.</p>}
+        <div className="flex flex-col gap-2">
+          {visiveis.length === 0 && <p className="text-[11px] text-t3 text-center py-8">Nenhuma solicitação encontrada.</p>}
           {visiveis.map(s => (
             <CardSolicitacao
               key={s.id}
@@ -197,58 +190,79 @@ export default function AprovarCadastrosPage() {
   )
 }
 
+/* ── Shared ── */
+
+function Filters({ filtro, setFiltro, className }) {
+  return (
+    <div className={clsx('flex gap-[6px] overflow-x-auto scrollbar-hide pb-0.5', className)}>
+      {FILTROS.map(f => (
+        <button key={f}
+          className={clsx(filterPill, filtro === f
+            ? 'bg-blue-grad text-white border-transparent shadow-[0_3px_9px_var(--blue-glow)]'
+            : 'border-bdr bg-s2 text-t3'
+          )}
+          onClick={() => setFiltro(f)}>{f}
+        </button>
+      ))}
+    </div>
+  )
+}
+
 /* ── Card de solicitação ── */
 function CardSolicitacao({ s, processando, onAprovar, onRecusar }) {
-  const borderColor  = s.status === 'pendente' ? 'var(--amber)' : s.status === 'aprovado' ? 'var(--green)' : 'var(--red)'
-  const opacity      = s.status === 'pendente' ? 1 : 0.75
-  const iniciais     = getInicaisSolicitacao(s.nome)
-  const dataLabel    = s.status === 'aprovado' ? 'Aprovado em' : s.status === 'recusado' ? 'Recusado em' : 'Solicitado em'
-  const dataColor    = s.status === 'aprovado' ? 'var(--green)' : s.status === 'recusado' ? 'var(--red)' : 'var(--t1)'
+  const borderColor = s.status === 'pendente' ? 'var(--amber)' : s.status === 'aprovado' ? 'var(--green)' : 'var(--red)'
+  const iniciais    = getInicaisSolicitacao(s.nome)
+  const dataLabel   = s.status === 'aprovado' ? 'Aprovado em' : s.status === 'recusado' ? 'Recusado em' : 'Solicitado em'
+  const dataColor   = s.status === 'aprovado' ? 'var(--green)' : s.status === 'recusado' ? 'var(--red)' : undefined
 
   return (
-    <div className="ac-card" style={{ opacity }}>
-      <div className="ac-card-border" style={{ background: borderColor }} />
-      <div className="ac-card-body">
+    <div className="bg-s1 border border-bdr rounded-[13px] overflow-hidden mb-[9px] flex"
+         style={{ opacity: s.status === 'pendente' ? 1 : 0.75 }}>
+      <div className="w-1 flex-shrink-0" style={{ background: borderColor }} />
+      <div className="flex-1 px-3 py-3 pl-[10px] min-w-0">
 
         {/* Cabeçalho */}
-        <div className="ac-card-head">
-          <div className="ac-card-id">
-            <div className="ac-avatar-sm" style={{ background: s.avatarGrad }}>
+        <div className="flex items-start justify-between gap-2 mb-[10px]">
+          <div className="flex items-center gap-[9px] min-w-0">
+            <div className="w-9 h-9 rounded-[10px] flex items-center justify-center text-[12px] font-bold text-white flex-shrink-0 font-sans"
+                 style={{ background: s.avatarGrad }}>
               {iniciais}
             </div>
-            <div>
-              <p className="ac-card-name">{s.nome}</p>
-              <p className="ac-card-email">{s.email}</p>
+            <div style={{ minWidth: 0 }}>
+              <p className="text-[12px] font-bold text-t1">{s.nome}</p>
+              <p className="text-[9px] text-t3 whitespace-nowrap overflow-hidden text-ellipsis">{s.email}</p>
             </div>
           </div>
           <StatusBadge status={s.status} />
         </div>
 
         {/* Info grid */}
-        <div className="ac-card-grid">
-          <InfoCell label="Matrícula"   value={s.matricula}     />
+        <div className="grid grid-cols-3 gap-2 mb-[10px]">
+          <InfoCell label="Matrícula"    value={s.matricula} />
           <InfoCell label="Departamento" value={s.departamento} />
-          <InfoCell label={dataLabel}   value={s.data}  valueColor={dataColor} />
+          <InfoCell label={dataLabel}    value={s.data} valueColor={dataColor} />
         </div>
 
         {/* Mensagem */}
         {s.status === 'pendente' && (
-          <div className="ac-card-msg">
-            <p className="ac-msg-label">Mensagem do professor</p>
-            <p className="ac-msg-text">{s.mensagem || '—'}</p>
+          <div className="bg-s2 border border-bdr rounded-[8px] px-[10px] py-2 mb-[10px]">
+            <p className="text-[8px] font-bold uppercase tracking-[0.5px] text-t3 mb-[3px]">Mensagem do professor</p>
+            <p className="text-[10px] text-t2 leading-[1.5]">{s.mensagem || '—'}</p>
           </div>
         )}
 
         {/* Ações */}
         {s.status === 'pendente' && (
-          <div className="ac-card-actions">
-            <button className="ac-btn ac-btn--green" onClick={onAprovar} disabled={processando}>
+          <div className="flex flex-wrap gap-[6px]">
+            <button className={clsx(btnBase, 'bg-green-grad text-white shadow-green-btn border-none hover:opacity-90')}
+                    onClick={onAprovar} disabled={processando}>
               {processando ? <SpinnerIcon /> : <CheckCircleIcon />} Aprovar
             </button>
-            <button className="ac-btn ac-btn--red-outline" onClick={onRecusar} disabled={processando}>
+            <button className={clsx(btnBase, 'bg-red/[0.08] border border-red/30 text-red hover:bg-red/[0.14]')}
+                    onClick={onRecusar} disabled={processando}>
               <XCircleIcon /> Recusar
             </button>
-            <button className="ac-btn ac-btn--ghost">
+            <button className={clsx(btnBase, 'bg-s2 border border-bdr text-t2 hover:bg-s3')}>
               <MailIcon /> Contatar
             </button>
           </div>
@@ -259,13 +273,19 @@ function CardSolicitacao({ s, processando, onAprovar, onRecusar }) {
 }
 
 /* ── Sub-componentes ── */
+
 function StatCard({ cor, icon, n, label }) {
   return (
-    <div className="ac-stat">
-      <div className={`ac-stat-ico ac-stat-ico--${cor}`}>{icon}</div>
+    <div className="bg-s1 border border-bdr rounded-[11px] p-[10px] flex items-center gap-2">
+      <div className={clsx(
+        'w-[34px] h-[34px] rounded-[9px] flex items-center justify-center flex-shrink-0',
+        cor === 'amber' && 'bg-amber/[0.12] text-amber',
+        cor === 'green' && 'bg-green/[0.12] text-green',
+        cor === 'red'   && 'bg-red/[0.10] text-red',
+      )}>{icon}</div>
       <div>
-        <p className="ac-stat-n">{n}</p>
-        <p className="ac-stat-l">{label}</p>
+        <p className="text-[17px] font-extrabold text-t1 leading-[1.1]">{n}</p>
+        <p className="text-[9px] text-t3 font-medium">{label}</p>
       </div>
     </div>
   )
@@ -273,11 +293,16 @@ function StatCard({ cor, icon, n, label }) {
 
 function WebStatCard({ cor, icon, n, label }) {
   return (
-    <div className="ac-web-stat">
-      <div className={`ac-stat-ico ac-stat-ico--${cor}`}>{icon}</div>
+    <div className="bg-s1 border border-bdr rounded-[13px] px-4 py-[14px] flex items-center gap-3">
+      <div className={clsx(
+        'w-10 h-10 rounded-[11px] flex items-center justify-center flex-shrink-0',
+        cor === 'amber' && 'bg-amber/[0.12] text-amber',
+        cor === 'green' && 'bg-green/[0.12] text-green',
+        cor === 'red'   && 'bg-red/[0.10] text-red',
+      )}>{icon}</div>
       <div>
-        <p className="ac-stat-n">{n}</p>
-        <p className="ac-stat-l">{label}</p>
+        <p className="text-[22px] font-extrabold text-t1 leading-[1.1]">{n}</p>
+        <p className="text-[10px] text-t3 font-medium">{label}</p>
       </div>
     </div>
   )
@@ -285,42 +310,51 @@ function WebStatCard({ cor, icon, n, label }) {
 
 function InfoCell({ label, value, valueColor }) {
   return (
-    <div className="ac-info-cell">
-      <p className="ac-info-label">{label}</p>
-      <p className="ac-info-value" style={valueColor ? { color: valueColor } : {}}>{value}</p>
+    <div className="flex flex-col gap-0.5">
+      <p className="text-[8px] font-semibold uppercase tracking-[0.5px] text-t3">{label}</p>
+      <p className="text-[11px] font-semibold text-t1" style={valueColor ? { color: valueColor } : {}}>{value}</p>
     </div>
   )
 }
 
 function StatusBadge({ status }) {
-  const map = {
-    pendente: { cls: 'ac-badge--amber', text: 'PENDENTE' },
-    aprovado: { cls: 'ac-badge--green', text: 'APROVADO' },
-    recusado: { cls: 'ac-badge--red',   text: 'RECUSADO' },
-  }
-  const { cls, text } = map[status] || map.pendente
-  return <span className={`ac-badge ${cls}`}>{text}</span>
+  return (
+    <span className={clsx(
+      'inline-flex items-center px-[9px] py-[3px] rounded-[20px] text-[8px] font-bold tracking-[0.5px] whitespace-nowrap flex-shrink-0 border',
+      status === 'pendente' && 'bg-amber/[0.12] text-amber border-amber/25',
+      status === 'aprovado' && 'bg-green/[0.12] text-green border-green/25',
+      status === 'recusado' && 'bg-red/[0.10] text-red border-red/20',
+    )}>
+      {status === 'pendente' ? 'PENDENTE' : status === 'aprovado' ? 'APROVADO' : 'RECUSADO'}
+    </span>
+  )
 }
 
 function ConfirmModal({ nome, acao, onCancel, onConfirm }) {
   const aprovando = acao === 'aprovar'
   return (
-    <div className="ac-modal-overlay" onClick={onCancel}>
-      <div className="ac-modal" onClick={e => e.stopPropagation()}>
-        <div className={`ac-modal-ico ac-modal-ico--${aprovando ? 'green' : 'red'}`}>
+    <div className="fixed inset-0 bg-black/55 backdrop-blur z-[200] flex items-center justify-center p-5" onClick={onCancel}>
+      <div className="bg-s1 border border-bdr rounded-[18px] px-6 py-7 max-w-[340px] w-full flex flex-col items-center text-center shadow-sh" onClick={e => e.stopPropagation()}>
+        <div className={clsx(
+          'w-14 h-14 rounded-[14px] flex items-center justify-center mb-4',
+          aprovando ? 'bg-green/[0.12] text-green' : 'bg-red/[0.10] text-red'
+        )}>
           {aprovando ? <CheckCircleIcon size={26} /> : <XCircleIcon size={26} />}
         </div>
-        <p className="ac-modal-title">{aprovando ? 'Aprovar solicitação?' : 'Recusar solicitação?'}</p>
-        <p className="ac-modal-sub">
+        <p className="text-[16px] font-extrabold text-t1 mb-2">{aprovando ? 'Aprovar solicitação?' : 'Recusar solicitação?'}</p>
+        <p className="text-[11px] text-t3 leading-[1.6] mb-[22px]">
           {aprovando
             ? `O docente ${nome} receberá acesso ao portal e um e-mail de confirmação.`
             : `A solicitação de ${nome} será recusada e o docente será notificado.`}
         </p>
-        <div className="ac-modal-btns">
-          <button className="ac-btn ac-btn--ghost ac-btn--full" onClick={onCancel}>Cancelar</button>
-          <button
-            className={`ac-btn ac-btn--full ${aprovando ? 'ac-btn--green' : 'ac-btn--red'}`}
-            onClick={onConfirm}>
+        <div className="flex gap-2 w-full">
+          <button className="flex-1 bg-s2 border border-bdr rounded-[9px] py-[9px] text-t2 text-[11px] font-bold font-sans cursor-pointer hover:bg-s3 transition-colors"
+                  onClick={onCancel}>Cancelar</button>
+          <button className={clsx(
+            'flex-1 border-none rounded-[9px] py-[9px] text-white text-[11px] font-bold font-sans cursor-pointer hover:opacity-90 transition-opacity',
+            aprovando ? 'bg-green-grad shadow-green-btn' : 'bg-red-grad shadow-red-btn'
+          )}
+                  onClick={onConfirm}>
             {aprovando ? 'Sim, aprovar' : 'Sim, recusar'}
           </button>
         </div>
@@ -335,4 +369,4 @@ function CheckCircleIcon({ size = 13 }) { return <svg width={size} height={size}
 function XCircleIcon({ size = 13 })     { return <svg width={size} height={size} viewBox="0 0 24 24" {...IC} strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> }
 function ClockIcon({ size = 16 })       { return <svg width={size} height={size} viewBox="0 0 24 24" {...IC} strokeWidth="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> }
 function MailIcon({ size = 13 })        { return <svg width={size} height={size} viewBox="0 0 24 24" {...IC} strokeWidth="1.8"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg> }
-function SpinnerIcon()                  { return <svg width="13" height="13" viewBox="0 0 24 24" {...IC} strokeWidth="2" style={{ animation: 'ac-spin .7s linear infinite' }}><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> }
+function SpinnerIcon()                  { return <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" className="animate-spin-fast"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> }
