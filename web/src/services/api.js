@@ -8,11 +8,14 @@ const api = axios.create({
   },
 })
 
+const PUBLIC_PATHS = ['/login', '/interesse', '/esqueci-senha', '/redefinir-senha', '/confirmar-cadastro']
+
 // Interceptor para tratar erros globalmente
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401 && window.location.pathname !== '/login') {
+    const isPublic = PUBLIC_PATHS.some(p => window.location.pathname.startsWith(p))
+    if (error.response?.status === 401 && !isPublic) {
       window.location.href = '/login'
     }
     return Promise.reject(error)
