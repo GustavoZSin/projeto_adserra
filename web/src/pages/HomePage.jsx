@@ -1,7 +1,7 @@
+import clsx from 'clsx'
 import { useAuth } from '../contexts/AuthContext'
 import { getIniciais } from '../utils/usuario'
 import logoImg from '../assets/adserra-logo.png'
-import './HomePage.css'
 
 function getGreeting() {
   const h = new Date().getHours()
@@ -17,9 +17,6 @@ function getHeroDate() {
   return raw.charAt(0).toUpperCase() + raw.slice(1)
 }
 
-/* ═══════════════════════════════════════
-   HOME PAGE
-═══════════════════════════════════════ */
 export default function HomePage() {
   const { user } = useAuth()
   const initials  = getIniciais(user)
@@ -28,106 +25,111 @@ export default function HomePage() {
   return (
     <>
       {/* ══════════ MOBILE ══════════ */}
-      <div className="home-mobile">
-        <header className="home-topbar">
+      <div className="flex flex-col md:hidden h-[calc(100vh-60px)] overflow-hidden">
+        <header className="px-[15px] py-[11px] flex items-center justify-between flex-shrink-0 border-b border-bdr2 bg-bg">
           <LogoSmall />
-          <div className="home-tb-r">
-            <button className="home-tb-btn" aria-label="Notificações">
+          <div className="flex items-center gap-2">
+            <button className="w-[30px] h-[30px] bg-s2 rounded-[9px] flex items-center justify-center text-t2 relative cursor-pointer border-none hover:bg-s3" aria-label="Notificações">
               <BellIcon size={16} />
-              <span className="home-ndot" aria-hidden="true" />
+              <span className="w-[6px] h-[6px] bg-red rounded-full absolute top-[5px] right-[5px] border-[1.5px] border-bg" aria-hidden="true" />
             </button>
-            <div className="home-avatar">{initials}</div>
+            <div className="w-[30px] h-[30px] bg-blue-grad rounded-[9px] flex items-center justify-center text-[11px] font-bold text-white tracking-[0.5px] flex-shrink-0 font-sans select-none">
+              {initials}
+            </div>
           </div>
         </header>
 
-        <div className="home-scroll">
+        <div className="flex-1 overflow-y-auto min-h-0 px-[13px] py-[11px] pb-4 scrollbar-hide">
           {/* Hero */}
-          <div className="home-hero">
-            <div className="home-hero-inner">
+          <div className="rounded-[14px] px-[15px] py-[13px] mb-3 relative overflow-hidden"
+               style={{ background: 'linear-gradient(135deg, var(--blue-d) 0%, var(--blue) 55%, var(--blue-l) 100%)' }}>
+            <div className="absolute -top-[22px] -right-[22px] w-20 h-20 rounded-full bg-white/[0.07] pointer-events-none" />
+            <div className="absolute -bottom-[36px] right-2 w-[100px] h-[100px] rounded-full bg-white/[0.04] pointer-events-none" />
+            <div className="flex justify-between items-start relative z-10">
               <div>
-                <p className="home-hero-date">{getHeroDate()}</p>
-                <p className="home-hero-name">{getGreeting()}, Prof. {firstName}</p>
+                <p className="text-[9px] text-white/55 mb-0.5 capitalize">{getHeroDate()}</p>
+                <p className="text-[14px] font-bold text-white">{getGreeting()}, Prof. {firstName}</p>
               </div>
-              <span className="home-hero-badge">Docente</span>
+              <span className="bg-white/[0.15] rounded-[7px] px-2 py-[3px] text-[8px] font-bold text-white whitespace-nowrap">Docente</span>
             </div>
           </div>
 
           {/* Stats (3) */}
-          <div className="home-stats-row">
-            <StatCard icon={<CalendarIcon size={13} />} cls="home-ico-b" n="2"  label="Eventos" />
-            <StatCard icon={<ZapIcon />}                cls="home-ico-g" n="12" label="Ações" />
-            <StatCard icon={<NewspaperIcon />}          cls="home-ico-a" n="5"  label="Notícias" />
+          <div className="flex gap-[6px] mb-[13px]">
+            <StatCard icon={<CalendarIcon size={13} />} iconCls="bg-[var(--blue-sub)] text-blue-l" n="2"  label="Eventos" />
+            <StatCard icon={<ZapIcon />}                iconCls="bg-green/[0.12] text-green"        n="12" label="Ações" />
+            <StatCard icon={<NewspaperIcon />}          iconCls="bg-amber/[0.12] text-amber"        n="5"  label="Notícias" />
           </div>
 
           {/* Próximos Eventos */}
-          <div className="home-sec">
-            <span className="home-sec-t">Próximos Eventos</span>
-            <button className="home-sec-l">Ver todos</button>
+          <div className="flex justify-between items-center mb-[9px]">
+            <span className="text-[12px] font-bold text-t1">Próximos Eventos</span>
+            <button className="text-[10px] font-semibold text-blue-l cursor-pointer bg-transparent border-none p-0 font-sans">Ver todos</button>
           </div>
-          <div className="home-events-row">
-            <MobileEventCard icon={<LandmarkIcon size={22} />} badge={{ label: 'Em breve', cls: 'home-badge-blue' }} title="Evento 2 FSG"      date="26.04.2025" />
-            <MobileEventCard icon={<GradCapIcon size={22} />}  badge={{ label: 'Novo',     cls: 'home-badge-green' }} title="Semana Acadêmica" date="30.04.2025" />
-            <MobileEventCard icon={<MicIcon size={22} />}                                                             title="Palestra STEM"    date="05.05.2025" />
+          <div className="flex gap-2 overflow-x-auto scrollbar-hide mb-[14px] pb-0.5">
+            <MobileEventCard icon={<LandmarkIcon size={22} />} badge={{ label: 'Em breve', color: 'blue' }}  title="Evento 2 FSG"      date="26.04.2025" />
+            <MobileEventCard icon={<GradCapIcon size={22} />}  badge={{ label: 'Novo',     color: 'green' }} title="Semana Acadêmica" date="30.04.2025" />
+            <MobileEventCard icon={<MicIcon size={22} />}                                                    title="Palestra STEM"    date="05.05.2025" />
           </div>
 
           {/* Últimas Notícias */}
-          <div className="home-sec">
-            <span className="home-sec-t">Últimas Notícias</span>
-            <button className="home-sec-l">Ver todas</button>
+          <div className="flex justify-between items-center mb-[9px]">
+            <span className="text-[12px] font-bold text-t1">Últimas Notícias</span>
+            <button className="text-[10px] font-semibold text-blue-l cursor-pointer bg-transparent border-none p-0 font-sans">Ver todas</button>
           </div>
-          <MobileNewsCard icon={<MegaphoneIcon />} tag="Institucional" tagCls="home-ncard-tag--blue"  title="Novidades no calendário acadêmico 2025"  time="Hoje · 09:30" />
-          <MobileNewsCard icon={<AwardIcon />}     tag="Destaque"      tagCls="home-ncard-tag--green" title="FSG conquista prêmio regional de ensino"  time="Ontem · 14:15" />
-          <MobileNewsCard icon={<BookOpenIcon />}  tag="Pesquisa"      tagCls="home-ncard-tag--amber" title="Inscrições para iniciação científica"      time="22/04 · 10:00" />
+          <MobileNewsCard icon={<MegaphoneIcon />} tagColor="blue"  tag="Institucional" title="Novidades no calendário acadêmico 2025"  time="Hoje · 09:30" />
+          <MobileNewsCard icon={<AwardIcon />}     tagColor="green" tag="Destaque"      title="FSG conquista prêmio regional de ensino"  time="Ontem · 14:15" />
+          <MobileNewsCard icon={<BookOpenIcon />}  tagColor="amber" tag="Pesquisa"      title="Inscrições para iniciação científica"      time="22/04 · 10:00" />
         </div>
       </div>
 
       {/* ══════════ DESKTOP ══════════ */}
-      <div className="home-desktop">
+      <div className="hidden md:block py-5 px-[22px]">
         {/* Topbar web */}
-        <div className="home-web-tb">
-          <p className="home-web-title">Início</p>
-          <div className="home-web-tb-r">
-            <div className="home-web-search">
+        <div className="flex items-center justify-between mb-[18px]">
+          <p className="text-[19px] font-black text-t1">Início</p>
+          <div className="flex items-center gap-[9px]">
+            <div className="flex items-center gap-[7px] bg-s1 border-[1.5px] border-bdr rounded-[9px] px-3 py-[7px] text-[11px] text-t3 cursor-pointer hover:border-blue-l transition-colors">
               <SearchIcon /> <span>Buscar...</span>
             </div>
-            <button className="home-web-notif" aria-label="Notificações">
+            <button className="w-[33px] h-[33px] bg-s1 border-[1.5px] border-bdr rounded-[9px] flex items-center justify-center text-t2 cursor-pointer relative flex-shrink-0" aria-label="Notificações">
               <BellIcon size={16} />
-              <span className="home-ndot" aria-hidden="true" />
+              <span className="w-[6px] h-[6px] bg-red rounded-full absolute top-[5px] right-[5px] border-[1.5px] border-bg" aria-hidden="true" />
             </button>
           </div>
         </div>
 
         {/* Stats (4) */}
-        <div className="home-web-stats">
-          <WebStatCard icon={<CalendarIcon size={16} />} cls="ico-b" n="2"  label="Eventos próximos"   trend="2 novos" />
-          <WebStatCard icon={<ZapIcon size={16} />}      cls="ico-g" n="12" label="Ações registradas"  trend="5 novas" />
-          <WebStatCard icon={<NewspaperIcon size={16} />} cls="ico-a" n="5"  label="Notícias publicadas" trend="3 novas" />
-          <WebStatCard icon={<UsersIcon size={16} />}    cls="ico-b" n="48" label="Docentes ativos"    trend="+1 novo" />
+        <div className="flex gap-[10px] mb-[18px]">
+          <WebStatCard icon={<CalendarIcon size={16} />} iconCls="bg-[var(--blue-sub)] text-blue-l" n="2"  label="Eventos próximos"    trend="2 novos" />
+          <WebStatCard icon={<ZapIcon size={16} />}      iconCls="bg-green/[0.12] text-green"       n="12" label="Ações registradas"   trend="5 novas" />
+          <WebStatCard icon={<NewspaperIcon size={16} />} iconCls="bg-amber/[0.12] text-amber"      n="5"  label="Notícias publicadas" trend="3 novas" />
+          <WebStatCard icon={<UsersIcon size={16} />}    iconCls="bg-[var(--blue-sub)] text-blue-l" n="48" label="Docentes ativos"     trend="+1 novo" />
         </div>
 
         {/* Grid 2 colunas */}
-        <div className="home-web-grid">
+        <div className="grid grid-cols-2 gap-3">
           {/* Próximos Eventos */}
-          <div className="home-web-panel">
-            <div className="home-wp-hd">
-              <span className="home-wp-t">Próximos Eventos</span>
-              <button className="home-wp-l">Ver todos</button>
+          <div className="bg-s1 border border-bdr rounded-[13px] p-[15px]">
+            <div className="flex justify-between items-center mb-[13px]">
+              <span className="text-[12px] font-bold text-t1">Próximos Eventos</span>
+              <button className="text-[11px] font-semibold text-blue-l cursor-pointer bg-transparent border-none p-0 font-sans">Ver todos</button>
             </div>
-            <WebEventItem icon={<LandmarkIcon size={16} />} name="Evento 2 FSG"      meta="26 de Abril · Campus Sede" tag="Evento"    tagCls="tag-blue" />
-            <WebEventItem icon={<GradCapIcon size={16} />}  name="Semana Acadêmica"  meta="30 de Abril · Auditório"  tag="Acadêmico" tagCls="tag-green" />
-            <WebEventItem icon={<MicIcon size={16} />}      name="Palestra STEM"     meta="05 de Maio · Sala 201"    tag="Palestra"  tagCls="tag-amber" />
+            <WebEventItem icon={<LandmarkIcon size={16} />} name="Evento 2 FSG"      meta="26 de Abril · Campus Sede" tagColor="blue"  tag="Evento" />
+            <WebEventItem icon={<GradCapIcon size={16} />}  name="Semana Acadêmica"  meta="30 de Abril · Auditório"  tagColor="green" tag="Acadêmico" />
+            <WebEventItem icon={<MicIcon size={16} />}      name="Palestra STEM"     meta="05 de Maio · Sala 201"    tagColor="amber" tag="Palestra" />
           </div>
 
           {/* Atividade recente */}
-          <div className="home-web-panel">
-            <div className="home-wp-hd">
-              <span className="home-wp-t">Atividade recente</span>
-              <button className="home-wp-l">Ver tudo</button>
+          <div className="bg-s1 border border-bdr rounded-[13px] p-[15px]">
+            <div className="flex justify-between items-center mb-[13px]">
+              <span className="text-[12px] font-bold text-t1">Atividade recente</span>
+              <button className="text-[11px] font-semibold text-blue-l cursor-pointer bg-transparent border-none p-0 font-sans">Ver tudo</button>
             </div>
-            <WebActivityItem av="DC" avColor="linear-gradient(135deg,var(--blue-d),var(--blue-l))" text={<><b>Davi Chidem</b> publicou um novo evento</>}           time="Há 2 horas" />
-            <WebActivityItem av="MA" avColor="linear-gradient(135deg,#10B981,#059669)"              text={<><b>Maria A.</b> adicionou fotos à galeria</>}            time="Há 4 horas" />
-            <WebActivityItem av="JB" avColor="linear-gradient(135deg,#F59E0B,#D97706)"              text={<><b>João B.</b> publicou uma notícia</>}                  time="Ontem · 14:30" />
-            <WebActivityItem av="ADM" avColor="linear-gradient(135deg,#EF4444,#DC2626)"             text={<><b>Administrador</b> aprovou solicitação de ingresso</>} time="Ontem · 10:00" />
+            <WebActivityItem av="DC"  avColor="linear-gradient(135deg,var(--blue-d),var(--blue-l))" text={<><b>Davi Chidem</b> publicou um novo evento</>}           time="Há 2 horas" />
+            <WebActivityItem av="MA"  avColor="linear-gradient(135deg,#10B981,#059669)"              text={<><b>Maria A.</b> adicionou fotos à galeria</>}            time="Há 4 horas" />
+            <WebActivityItem av="JB"  avColor="linear-gradient(135deg,#F59E0B,#D97706)"              text={<><b>João B.</b> publicou uma notícia</>}                  time="Ontem · 14:30" />
+            <WebActivityItem av="ADM" avColor="linear-gradient(135deg,#EF4444,#DC2626)"              text={<><b>Administrador</b> aprovou solicitação de ingresso</>} time="Ontem · 10:00" />
           </div>
         </div>
       </div>
@@ -137,39 +139,55 @@ export default function HomePage() {
 
 /* ── Sub-componentes mobile ── */
 
-function StatCard({ icon, cls, n, label }) {
+function StatCard({ icon, iconCls, n, label }) {
   return (
-    <div className="home-stat">
-      <div className={`home-stat-ico ${cls}`}>{icon}</div>
-      <span className="home-stat-n">{n}</span>
-      <span className="home-stat-l">{label}</span>
+    <div className="flex-1 bg-s1 border border-bdr rounded-[12px] p-[10px] px-[9px] flex flex-col gap-[3px]">
+      <div className={clsx('w-6 h-6 rounded-[7px] flex items-center justify-center mb-0.5 flex-shrink-0', iconCls)}>{icon}</div>
+      <span className="text-[18px] font-extrabold text-t1 leading-[1.1]">{n}</span>
+      <span className="text-[8px] font-semibold text-t3">{label}</span>
     </div>
   )
 }
 
 function MobileEventCard({ icon, badge, title, date }) {
   return (
-    <div className="home-ecard">
-      <div className="home-ecard-img">
+    <div className="flex-shrink-0 w-[120px] bg-s1 border border-bdr rounded-[12px] overflow-hidden">
+      <div className="w-full h-[58px] flex items-center justify-center relative text-icon"
+           style={{ background: 'linear-gradient(135deg, var(--s2), var(--s3))' }}>
         {icon}
-        {badge && <span className={`home-badge ${badge.cls}`}>{badge.label}</span>}
+        {badge && (
+          <span className={clsx(
+            'absolute top-[7px] right-[7px] rounded-[5px] px-[7px] py-0.5 text-[8px] font-bold text-white',
+            badge.color === 'blue'  && 'bg-blue',
+            badge.color === 'green' && 'bg-green',
+            badge.color === 'amber' && 'bg-amber',
+          )}>{badge.label}</span>
+        )}
       </div>
-      <div className="home-ecard-body">
-        <p className="home-ecard-title">{title}</p>
-        <p className="home-ecard-date"><CalendarIcon size={12} />{date}</p>
+      <div className="px-[9px] py-2 pb-[10px]">
+        <p className="text-[10px] font-semibold text-t1 mb-0.5 whitespace-nowrap overflow-hidden text-ellipsis">{title}</p>
+        <p className="text-[9px] text-t3 flex items-center gap-[3px]"><CalendarIcon size={12} />{date}</p>
       </div>
     </div>
   )
 }
 
-function MobileNewsCard({ icon, tag, tagCls, title, time }) {
+function MobileNewsCard({ icon, tag, tagColor, title, time }) {
   return (
-    <div className="home-ncard">
-      <div className="home-ncard-img">{icon}</div>
-      <div className="home-ncard-body">
-        <p className={`home-ncard-tag ${tagCls}`}>{tag}</p>
-        <p className="home-ncard-title">{title}</p>
-        <p className="home-ncard-date"><ClockIcon />{time}</p>
+    <div className="bg-s1 border border-bdr rounded-[12px] p-[10px] flex gap-[9px] items-center mb-[7px]">
+      <div className="w-10 h-10 rounded-[10px] flex-shrink-0 flex items-center justify-center text-icon"
+           style={{ background: 'linear-gradient(135deg, var(--s2), var(--s3))' }}>
+        {icon}
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className={clsx(
+          'text-[8px] font-bold tracking-[0.5px] uppercase mb-0.5',
+          tagColor === 'blue'  && 'text-blue-l',
+          tagColor === 'green' && 'text-green',
+          tagColor === 'amber' && 'text-amber',
+        )}>{tag}</p>
+        <p className="text-[10px] font-semibold text-t1 leading-[1.3] mb-px whitespace-nowrap overflow-hidden text-ellipsis">{title}</p>
+        <p className="text-[9px] text-t3 flex items-center gap-[3px]"><ClockIcon />{time}</p>
       </div>
     </div>
   )
@@ -177,39 +195,49 @@ function MobileNewsCard({ icon, tag, tagCls, title, time }) {
 
 /* ── Sub-componentes desktop ── */
 
-function WebStatCard({ icon, cls, n, label, trend }) {
+function WebStatCard({ icon, iconCls, n, label, trend }) {
   return (
-    <div className="home-wstat">
-      <div className="home-wstat-top">
-        <div className={`home-wstat-ico ${cls}`}>{icon}</div>
-        <span className="home-wstat-trend"><TrendingUpIcon />{trend}</span>
+    <div className="flex-1 bg-s1 border border-bdr rounded-[13px] px-[13px] py-[14px]">
+      <div className="flex justify-between items-center mb-[9px]">
+        <div className={clsx('w-8 h-8 rounded-[9px] flex items-center justify-center', iconCls)}>{icon}</div>
+        <span className="text-[10px] font-bold text-green flex items-center gap-[3px]"><TrendingUpIcon />{trend}</span>
       </div>
-      <p className="home-wstat-n">{n}</p>
-      <p className="home-wstat-l">{label}</p>
+      <p className="text-[24px] font-black text-t1">{n}</p>
+      <p className="text-[10px] text-t3 mt-0.5">{label}</p>
     </div>
   )
 }
 
-function WebEventItem({ icon, name, meta, tag, tagCls }) {
+function WebEventItem({ icon, name, meta, tag, tagColor }) {
   return (
-    <div className="home-wev-item">
-      <div className="home-wev-dot">{icon}</div>
-      <div style={{ minWidth: 0 }}>
-        <p className="home-wev-name">{name}</p>
-        <p className="home-wev-meta"><CalendarIcon size={12} />{meta}</p>
+    <div className="flex items-center gap-[10px] py-[9px] border-b border-bdr2 last:border-b-0 last:pb-0">
+      <div className="w-[34px] h-[34px] rounded-[9px] bg-[var(--blue-sub)] border border-[var(--blue-bdr)] flex items-center justify-center text-blue-l flex-shrink-0">
+        {icon}
       </div>
-      <span className={`home-tag ${tagCls}`}>{tag}</span>
+      <div style={{ minWidth: 0 }}>
+        <p className="text-[11px] font-semibold text-t1 mb-0.5">{name}</p>
+        <p className="text-[10px] text-t3 flex items-center gap-[3px]"><CalendarIcon size={12} />{meta}</p>
+      </div>
+      <span className={clsx(
+        'ml-auto flex-shrink-0 inline-flex items-center px-2 py-0.5 rounded-[20px] text-[8px] font-bold tracking-[0.3px] uppercase',
+        tagColor === 'blue'  && 'bg-[var(--blue-sub)] text-blue-l border border-[var(--blue-bdr)]',
+        tagColor === 'green' && 'bg-green/[0.1] text-green',
+        tagColor === 'amber' && 'bg-amber/[0.1] text-amber',
+      )}>{tag}</span>
     </div>
   )
 }
 
 function WebActivityItem({ av, avColor, text, time }) {
   return (
-    <div className="home-wact-item">
-      <div className="home-wact-av" style={{ background: avColor }}>{av}</div>
+    <div className="flex items-center gap-[9px] py-[9px] border-b border-bdr2 last:border-b-0">
+      <div className="w-7 h-7 rounded-[8px] flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0 font-sans"
+           style={{ background: avColor }}>
+        {av}
+      </div>
       <div>
-        <p className="home-wact-txt">{text}</p>
-        <p className="home-wact-time">{time}</p>
+        <p className="text-[10px] text-t1 leading-[1.4] [&_b]:text-blue-l [&_b]:font-semibold">{text}</p>
+        <p className="text-[9px] text-t3 mt-px">{time}</p>
       </div>
     </div>
   )
