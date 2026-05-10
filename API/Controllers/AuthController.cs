@@ -6,8 +6,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
-using System.Web;
+using System.Text;
 
 namespace API.Controllers
 {
@@ -56,7 +57,7 @@ namespace API.Controllers
             if (user == null) return Unauthorized();
 
             var isPersistent = useCookies == true && useSessionCookies != true;
-            var result = await _signInManager.PasswordSignInAsync(user.UserName!, request.Password, isPersistent, lockoutOnFailure: true);
+            var result = await _signInManager.PasswordSignInAsync(user, request.Password, isPersistent, lockoutOnFailure: true);
 
             if (result.RequiresTwoFactor) return Problem(detail: "Requires two-factor authentication.", statusCode: StatusCodes.Status401Unauthorized);
             if (result.IsLockedOut) return Problem(detail: "User account locked out.", statusCode: StatusCodes.Status401Unauthorized);
@@ -99,7 +100,8 @@ namespace API.Controllers
             return Ok(new
             {
                 id = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value,
-                matricula = User.Identity.Name
+                matricula = User.Identity.Name,
+                admin = User.IsInRole("Admin")
             });
         }
 
@@ -114,14 +116,13 @@ namespace API.Controllers
             if (user != null)
             {
                 var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-
-                var encodedToken = HttpUtility.UrlEncode(token);
-                var encodedEmail = HttpUtility.UrlEncode(dto.Email);
+                var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+                var encodedEmail = Uri.EscapeDataString(dto.Email);
 
                 //TODO: ajustar url correta
                 //var baseUrl = _configuration["Frontend:BaseUrl"];
                 var baseUrl = "http://localhost:5173";
-                var resetLink = $"{baseUrl}/resetar-senha?email={encodedEmail}&token={encodedToken}";
+                var resetLink = $"{baseUrl}/redefinir-senha?email={encodedEmail}&token={encodedToken}";
 
                 var body = $@"
                 <p>Olá,</p>
@@ -146,8 +147,8 @@ namespace API.Controllers
             if (user == null)
                 return BadRequest("Token inválido ou expirado.");
 
-            var decodedToken = HttpUtility.UrlDecode(dto.Token);
-            var result = await _userManager.ResetPasswordAsync(user, decodedToken!, dto.NovaSenha);
+            var decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(dto.Token));
+            var result = await _userManager.ResetPasswordAsync(user, decodedToken, dto.NovaSenha);
 
             if (!result.Succeeded)
                 return BadRequest(new { erros = result.Errors.Select(e => e.Description) });
