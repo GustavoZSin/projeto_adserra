@@ -49,7 +49,7 @@ export default function RedefinirSenhaPage() {
     if (!validate()) return
     setLoading(true)
     try {
-      await axios.post('/Auth/resetPassword', { email, resetCode: token, newPassword: novaSenha }, { withCredentials: true })
+      await axios.post('/Auth/resetar-senha', { email, token: token, novaSenha: novaSenha }, { withCredentials: true })
       setSuccess(true)
     } catch (err) {
       const msg = err.response?.data?.detail || err.response?.data?.title || err.response?.data || 'Erro ao redefinir senha. O link pode ter expirado.'
