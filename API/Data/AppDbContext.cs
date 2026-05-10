@@ -10,6 +10,8 @@ public class AppDbContext : IdentityDbContext<User>
 
     public DbSet<SolicitacaoIngresso> SolicitacoesIngresso { get; set; }
     public DbSet<Professor> Professores { get; set; }
+    public DbSet<Publicacao> Publicacoes { get; set; }
+    public DbSet<Imagem> Imagens { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -50,5 +52,25 @@ public class AppDbContext : IdentityDbContext<User>
         builder.Entity<SolicitacaoIngresso>()
             .Property(s => s.StatusSolicitacao)
             .HasConversion<int>();
+
+        builder.Entity<Publicacao>()
+            .HasOne(p => p.PublicadoPor)
+            .WithMany()
+            .HasForeignKey(p => p.PublicadoPorId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Entity<Publicacao>()
+            .Property(p => p.PublicadoEm)
+            .HasColumnType("timestamp without time zone");
+
+        builder.Entity<Publicacao>()
+            .Property(p => p.Data)
+            .HasColumnType("timestamp without time zone");
+
+        builder.Entity<Publicacao>()
+            .HasOne(p => p.ImagemCapa)
+            .WithMany()
+            .HasForeignKey(p => p.ImagemCapaId)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }
