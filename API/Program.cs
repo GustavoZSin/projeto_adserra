@@ -36,10 +36,12 @@ builder.Services.AddCors(options =>
 builder.Services.AddScoped<UsuariosService>();
 builder.Services.AddScoped<ProfessorService>();
 builder.Services.AddScoped<SolicitacaoIngressoService>();
+builder.Services.AddScoped<PublicacaoService>();
 builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("Smtp"));
-builder.Services.AddTransient<IEmailSender, EmailSender>();
 builder.Services.AddScoped<EmailTemplateService>();
 builder.Services.AddScoped<EmailService>();
+builder.Services.AddTransient<IEmailSender, EmailSender>();
+
 builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
 {
     options.TokenLifespan = TimeSpan.FromHours(2);
