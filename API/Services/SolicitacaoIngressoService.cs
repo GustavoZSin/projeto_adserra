@@ -48,12 +48,11 @@ namespace API.Services
 
             if (!professorCriado) return false;
 
-            var token = await _userManager.GenerateEmailConfirmationTokenAsync(identityUser);
+            var token = await _userManager.GeneratePasswordResetTokenAsync(identityUser);
             var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
-            var encodedEmail = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(identityUser.Email!));
 
             var frontendUrl = _configuration["Frontend:BaseUrl"] ?? "http://localhost:5173"; 
-            var link = $"{frontendUrl}/confirmar-email?userId={identityUser.Id}&token={encodedToken}&email={encodedEmail}";
+            var link = $"{frontendUrl}/redefinir-senha?token={encodedToken}&email={identityUser.Email}";
             await _emailService.EnviarConfirmacao(identityUser.Email!, link);
 
             solicitacao.StatusSolicitacao = EnumeradorDeStatus.Aprovado;
