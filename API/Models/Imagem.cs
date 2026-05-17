@@ -7,7 +7,7 @@ namespace API.Models
         public int Id { get; set; }
 
         [Required]
-        public byte[] Conteudo { get; set; } = null!;
+        public string CaminhoArquivo { get; set; } = null!;
 
         [Required]
         public string ContentType { get; set; } = null!;

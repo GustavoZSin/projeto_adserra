@@ -7,13 +7,9 @@ namespace API.Controllers
     [Authorize(Roles = "Admin")]
     [ApiController]
     [Route("[controller]")]
-    public class UsuariosController : ControllerBase
+    public class UsuariosController(UsuariosService usuariosService) : ControllerBase
     {
-        private readonly UsuariosService _usuariosService;
-        public UsuariosController(UsuariosService usuariosService)
-        {
-            _usuariosService = usuariosService;
-        }
+        private readonly UsuariosService _usuariosService = usuariosService;
 
         [HttpGet]
         public async Task<IActionResult> Usuarios()

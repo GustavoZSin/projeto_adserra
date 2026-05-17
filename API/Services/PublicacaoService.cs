@@ -7,9 +7,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Services
 {
-    public class PublicacaoService(AppDbContext context)
+    public class PublicacaoService(AppDbContext context, SupabaseStorageService storageService)
     {
         private readonly AppDbContext _context = context;
+        private readonly SupabaseStorageService _storageService = storageService;
+
         internal async Task<bool> NovaPublicacao(Publicacao publicacao)
         {
             if (publicacao == null)
@@ -71,31 +73,21 @@ namespace API.Services
                 query = query.Where(p => p.Data <= dataFim);
             }
 
-            var publicacoes = query
-            .Select(p => new PublicacaoResponse
-            {
-                Id = p.Id,
-                Tipo = p.Tipo.ToString(),
-                Titulo = p.Titulo,
-                Descricao = p.Descricao,
-                Data = p.Data,
-                Local = p.Local,
-                PublicadoEm = p.PublicadoEm,
-                NomePublicadoPor = p.PublicadoPor.UserName,
-                ImagemCapaBase64 = p.ImagemCapa != null
-                    ? $"data:{p.ImagemCapa.ContentType};base64,{Convert.ToBase64String(p.ImagemCapa.Conteudo)}"
-                    : null
-            });
+            var entidades = await query.ToListAsync();
 
-            return await publicacoes.ToListAsync();
-        }
-        internal async Task<PublicacaoResponse?> ObterPublicacaoPorIdAsync(int id)
-        {
-            return await _context.Publicacoes
-                .Include(p => p.PublicadoPor)
-                .Include(p => p.ImagemCapa)
-                .Where(p => p.Id == id)
-                .Select(p => new PublicacaoResponse
+            var publicacoes = new List<PublicacaoResponse>();
+
+            foreach (var p in entidades)
+            {
+                string? imagemUrl = null;
+
+                if (p.ImagemCapa != null)
+                {
+                    imagemUrl = await _storageService.GerarSignedUrlAsync(
+                        p.ImagemCapa.CaminhoArquivo);
+                }
+
+                publicacoes.Add(new PublicacaoResponse
                 {
                     Id = p.Id,
                     Tipo = p.Tipo.ToString(),
@@ -104,12 +96,39 @@ namespace API.Services
                     Data = p.Data,
                     Local = p.Local,
                     PublicadoEm = p.PublicadoEm,
-                    NomePublicadoPor = p.PublicadoPor.UserName,
-                    ImagemCapaBase64 = p.ImagemCapa != null
-                    ? $"data:{p.ImagemCapa.ContentType};base64,{Convert.ToBase64String(p.ImagemCapa.Conteudo)}"
-                    : null
-                })
-                .FirstOrDefaultAsync();
+                    NomePublicadoPor = p.PublicadoPor.UserName!,
+                    ImagemCapaUrl = imagemUrl
+                });
+            }
+
+            return publicacoes;
+        }
+        internal async Task<PublicacaoResponse?> ObterPublicacaoPorIdAsync(int id)
+        {
+            var p = await _context.Publicacoes.Include(x => x.PublicadoPor).Include(x => x.ImagemCapa).FirstOrDefaultAsync(x => x.Id == id);
+
+            if (p == null)
+                return null;
+
+            string? imagemUrl = null;
+
+            if (p.ImagemCapa != null)
+            {
+                imagemUrl = await _storageService.GerarSignedUrlAsync(p.ImagemCapa.CaminhoArquivo);
+            }
+
+            return new PublicacaoResponse
+            {
+                Id = p.Id,
+                Tipo = p.Tipo.ToString(),
+                Titulo = p.Titulo,
+                Descricao = p.Descricao,
+                Data = p.Data,
+                Local = p.Local,
+                PublicadoEm = p.PublicadoEm,
+                NomePublicadoPor = p.PublicadoPor.UserName!,
+                ImagemCapaUrl = imagemUrl
+            };
         }
         internal async Task<bool> DeletarPublicacaoAsync(int id)
         {
@@ -121,7 +140,10 @@ namespace API.Services
                 return false;
 
             if (publicacao.ImagemCapa != null)
+            {
+                await _storageService.DeletarImagemAsync(publicacao.ImagemCapa.CaminhoArquivo);
                 _context.Imagens.Remove(publicacao.ImagemCapa);
+            }
 
             _context.Publicacoes.Remove(publicacao);
 
@@ -156,13 +178,21 @@ namespace API.Services
             if (imagem != null)
             {
                 if (publicacao.ImagemCapa != null)
+                {
+                    await _storageService.DeletarImagemAsync(publicacao.ImagemCapa.CaminhoArquivo);
                     _context.Imagens.Remove(publicacao.ImagemCapa);
+                }
 
                 publicacao.ImagemCapa = imagem;
             }
 
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        internal async Task<string> UploadImagemAsync(IFormFile arquivo)
+        {
+            return await _storageService.UploadImagemAsync(arquivo);
         }
     }
 }
