@@ -32,5 +32,7 @@ namespace API.Models
         public int? ImagemCapaId { get; set; }
 
         public Imagem? ImagemCapa { get; set; }
+
+        public bool Publica { get; set; }
     }
 }

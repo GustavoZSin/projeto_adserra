@@ -73,6 +73,9 @@ namespace API.Services
                 query = query.Where(p => p.Data <= dataFim);
             }
 
+            if (filtro.Publicas.HasValue)
+                query = query.Where(p => p.Publica == filtro.Publicas.Value);
+
             var entidades = await query.ToListAsync();
 
             var publicacoes = new List<PublicacaoResponse>();
@@ -97,7 +100,8 @@ namespace API.Services
                     Local = p.Local,
                     PublicadoEm = p.PublicadoEm,
                     NomePublicadoPor = p.PublicadoPor.UserName!,
-                    ImagemCapaUrl = imagemUrl
+                    ImagemCapaUrl = imagemUrl,
+                    Publica = p.Publica
                 });
             }
 
@@ -127,7 +131,8 @@ namespace API.Services
                 Local = p.Local,
                 PublicadoEm = p.PublicadoEm,
                 NomePublicadoPor = p.PublicadoPor.UserName!,
-                ImagemCapaUrl = imagemUrl
+                ImagemCapaUrl = imagemUrl,
+                Publica = p.Publica
             };
         }
         internal async Task<bool> DeletarPublicacaoAsync(int id)
@@ -185,6 +190,9 @@ namespace API.Services
 
                 publicacao.ImagemCapa = imagem;
             }
+
+            if (dto.Publica.HasValue)
+                publicacao.Publica = dto.Publica.Value;
 
             await _context.SaveChangesAsync();
             return true;
