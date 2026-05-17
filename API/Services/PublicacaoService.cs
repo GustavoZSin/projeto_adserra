@@ -29,6 +29,7 @@ namespace API.Services
             var query = _context.Publicacoes
                 .Include(p => p.ImagemCapa)
                 .Include(p => p.PublicadoPor)
+                .Include(p => p.Imagens).ThenInclude(pi => pi.Imagem)
                 .AsQueryable();
 
             if (filtro.Tipo.HasValue)
@@ -85,9 +86,17 @@ namespace API.Services
                 string? imagemUrl = null;
 
                 if (p.ImagemCapa != null)
+                    imagemUrl = await _storageService.GerarSignedUrlAsync(p.ImagemCapa.CaminhoArquivo);
+
+                List<ImagemPublicacaoResponse> imagensPublicacao = [];
+                foreach (var ip in p.Imagens.Where(ip => ip.Imagem != null))
                 {
-                    imagemUrl = await _storageService.GerarSignedUrlAsync(
-                        p.ImagemCapa.CaminhoArquivo);
+                    var ipUrl = await _storageService.GerarSignedUrlAsync(ip.Imagem.CaminhoArquivo);
+                    imagensPublicacao.Add(new ImagemPublicacaoResponse
+                    {
+                        URL = ipUrl,
+                        Id = ip.Imagem.Id
+                    });
                 }
 
                 publicacoes.Add(new PublicacaoResponse
@@ -101,7 +110,8 @@ namespace API.Services
                     PublicadoEm = p.PublicadoEm,
                     NomePublicadoPor = p.PublicadoPor.UserName!,
                     ImagemCapaUrl = imagemUrl,
-                    Publica = p.Publica
+                    Publica = p.Publica,
+                    ImagensPublicacao = imagensPublicacao.Count > 0 ? imagensPublicacao : null
                 });
             }
 
@@ -109,7 +119,11 @@ namespace API.Services
         }
         internal async Task<PublicacaoResponse?> ObterPublicacaoPorIdAsync(int id)
         {
-            var p = await _context.Publicacoes.Include(x => x.PublicadoPor).Include(x => x.ImagemCapa).FirstOrDefaultAsync(x => x.Id == id);
+            var p = await _context.Publicacoes
+                .Include(x => x.PublicadoPor)
+                .Include(x => x.ImagemCapa)
+                .Include(x => x.Imagens).ThenInclude(pi => pi.Imagem)
+                .FirstOrDefaultAsync(x => x.Id == id);
 
             if (p == null)
                 return null;
@@ -117,8 +131,17 @@ namespace API.Services
             string? imagemUrl = null;
 
             if (p.ImagemCapa != null)
-            {
                 imagemUrl = await _storageService.GerarSignedUrlAsync(p.ImagemCapa.CaminhoArquivo);
+
+            List<ImagemPublicacaoResponse> imagensPublicacao = [];
+            foreach (var ip in p.Imagens.Where(ip => ip.Imagem != null))
+            {
+                var ipUrl = await _storageService.GerarSignedUrlAsync(ip.Imagem.CaminhoArquivo);
+                imagensPublicacao.Add(new ImagemPublicacaoResponse
+                {
+                    URL = ipUrl,
+                    Id = ip.Imagem.Id
+                });
             }
 
             return new PublicacaoResponse
@@ -132,17 +155,25 @@ namespace API.Services
                 PublicadoEm = p.PublicadoEm,
                 NomePublicadoPor = p.PublicadoPor.UserName!,
                 ImagemCapaUrl = imagemUrl,
-                Publica = p.Publica
+                Publica = p.Publica,
+                ImagensPublicacao = imagensPublicacao.Count > 0 ? imagensPublicacao : null
             };
         }
         internal async Task<bool> DeletarPublicacaoAsync(int id)
         {
             var publicacao = await _context.Publicacoes
                 .Include(p => p.ImagemCapa)
+                .Include(x => x.Imagens).ThenInclude(pi => pi.Imagem)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
             if (publicacao == null)
                 return false;
+
+            foreach (var item in publicacao.Imagens)
+            {
+                await _storageService.DeletarImagemAsync(item.Imagem.CaminhoArquivo);
+                _context.Imagens.Remove(item.Imagem);
+            }
 
             if (publicacao.ImagemCapa != null)
             {
@@ -156,10 +187,11 @@ namespace API.Services
 
             return true;
         }
-        internal async Task<bool> EditarPublicacaoAsync(int id, EditarPublicacaoDto dto, Imagem? imagem)
+        internal async Task<bool> EditarPublicacaoAsync(int id, EditarPublicacaoDto dto, Imagem? imagemCapa, List<PublicacaoImagem> imagensGaleria)
         {
             var publicacao = await _context.Publicacoes
                 .Include(p => p.ImagemCapa)
+                .Include(p => p.Imagens).ThenInclude(pi => pi.Imagem)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
             if (publicacao == null)
@@ -180,7 +212,7 @@ namespace API.Services
             if (!string.IsNullOrWhiteSpace(dto.Local))
                 publicacao.Local = dto.Local;
 
-            if (imagem != null)
+            if (imagemCapa != null)
             {
                 if (publicacao.ImagemCapa != null)
                 {
@@ -188,11 +220,25 @@ namespace API.Services
                     _context.Imagens.Remove(publicacao.ImagemCapa);
                 }
 
-                publicacao.ImagemCapa = imagem;
+                publicacao.ImagemCapa = imagemCapa;
             }
 
             if (dto.Publica.HasValue)
                 publicacao.Publica = dto.Publica.Value;
+
+            if (imagensGaleria != null && imagensGaleria.Count != 0)
+            {
+                foreach (var item in publicacao.Imagens)
+                {
+                    await _storageService.DeletarImagemAsync(item.Imagem.CaminhoArquivo);
+                    _context.Imagens.Remove(item.Imagem);
+                }
+
+                publicacao.Imagens.Clear();
+
+                foreach (var imagem in imagensGaleria)
+                    publicacao.Imagens.Add(imagem);
+            }
 
             await _context.SaveChangesAsync();
             return true;
