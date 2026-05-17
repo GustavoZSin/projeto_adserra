@@ -40,6 +40,7 @@ namespace API.Controllers
                 Data = DateTime.SpecifyKind(dto.Data, DateTimeKind.Unspecified),
                 Local = dto.Local,
                 ImagemCapa = imagem,
+                Publica = dto.Publica,
                 PublicadoEm = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified)
             };
 

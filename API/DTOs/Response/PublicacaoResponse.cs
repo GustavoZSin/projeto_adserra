@@ -11,5 +11,6 @@
         public string NomePublicadoPor { get; set; }
         public DateTime PublicadoEm { get; set; }
         public string? ImagemCapaUrl { get; set; }
+        public bool Publica { get; set; }
     }
 }
