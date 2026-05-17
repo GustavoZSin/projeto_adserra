@@ -12,6 +12,7 @@ public class AppDbContext : IdentityDbContext<User>
     public DbSet<Professor> Professores { get; set; }
     public DbSet<Publicacao> Publicacoes { get; set; }
     public DbSet<Imagem> Imagens { get; set; }
+    public DbSet<PublicacaoImagem> PublicacaoImagens { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -72,5 +73,20 @@ public class AppDbContext : IdentityDbContext<User>
             .WithMany()
             .HasForeignKey(p => p.ImagemCapaId)
             .OnDelete(DeleteBehavior.SetNull);
+
+        builder.Entity<PublicacaoImagem>()
+        .HasKey(pi => new { pi.PublicacaoId, pi.ImagemId });
+
+        builder.Entity<PublicacaoImagem>()
+            .HasOne(pi => pi.Publicacao)
+            .WithMany(p => p.Imagens)
+            .HasForeignKey(pi => pi.PublicacaoId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<PublicacaoImagem>()
+            .HasOne(pi => pi.Imagem)
+            .WithMany()
+            .HasForeignKey(pi => pi.ImagemId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

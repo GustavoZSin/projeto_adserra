@@ -11,5 +11,6 @@ namespace API.DTOs
         public string? Local { get; set; }
         public IFormFile? ImagemCapa { get; set; }
         public bool? Publica { get; set; }
+        public List<IFormFile>? ImagensParaGaleria { get; set; }
     }
 }
