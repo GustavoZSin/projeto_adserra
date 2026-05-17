@@ -41,6 +41,7 @@ builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("Smtp"
 builder.Services.AddScoped<EmailTemplateService>();
 builder.Services.AddScoped<EmailService>();
 builder.Services.AddTransient<IEmailSender, EmailSender>();
+builder.Services.AddHttpClient<SupabaseStorageService>();
 
 builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
 {
