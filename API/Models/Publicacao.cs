@@ -34,5 +34,7 @@ namespace API.Models
         public Imagem? ImagemCapa { get; set; }
 
         public bool Publica { get; set; }
+
+        public ICollection<PublicacaoImagem> Imagens { get; set; } = [];
     }
 }

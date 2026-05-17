@@ -17,19 +17,44 @@ namespace API.Controllers
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> NovaPublicacao([FromForm] PublicacaoDto dto)
         {
-            Imagem? imagem = null;
+            Imagem? imagemCapa = null;
 
             if (dto.ImagemCapa != null)
             {
                 var caminhoArquivo = await publicacaoService.UploadImagemAsync(dto.ImagemCapa);
 
-                imagem = new Imagem
+                imagemCapa = new Imagem
                 {
                     CaminhoArquivo = caminhoArquivo,
                     ContentType = dto.ImagemCapa.ContentType,
                     NomeArquivo = dto.ImagemCapa.FileName,
                     CriadoEm = DateTime.UtcNow
                 };
+            }
+
+            var imagensParaGaleria = new List<PublicacaoImagem>();
+            if (dto.ImagensParaGaleria != null && dto.ImagensParaGaleria.Count != 0)
+            {
+                int ordem = 0;
+
+                foreach (var arquivo in dto.ImagensParaGaleria)
+                {
+                    var caminhoArquivo = await publicacaoService.UploadImagemAsync(arquivo);
+
+                    var imagemPublicacao = new Imagem
+                    {
+                        CaminhoArquivo = caminhoArquivo,
+                        ContentType = arquivo.ContentType,
+                        NomeArquivo = arquivo.FileName,
+                        CriadoEm = DateTime.UtcNow
+                    };
+
+                    imagensParaGaleria.Add(new PublicacaoImagem
+                    {
+                        Imagem = imagemPublicacao,
+                        Ordem = ordem++
+                    });
+                }
             }
 
             var publicacao = new Publicacao
@@ -39,9 +64,10 @@ namespace API.Controllers
                 Descricao = dto.Descricao,
                 Data = DateTime.SpecifyKind(dto.Data, DateTimeKind.Unspecified),
                 Local = dto.Local,
-                ImagemCapa = imagem,
+                ImagemCapa = imagemCapa,
                 Publica = dto.Publica,
-                PublicadoEm = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified)
+                PublicadoEm = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified),
+                Imagens = imagensParaGaleria,
             };
 
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
@@ -60,10 +86,7 @@ namespace API.Controllers
             if (!result)
                 return BadRequest(new { message = "Falha ao criar a publicação. Tente novamente mais tarde." });
 
-            return Ok(new
-            {
-                message = "Nova publicação criada com sucesso."
-            });
+            return Ok(new { message = "Nova publicação criada com sucesso." });
         }
 
         [HttpGet]
@@ -79,10 +102,7 @@ namespace API.Controllers
             var publicacao = await publicacaoService.ObterPublicacaoPorIdAsync(id);
 
             if (publicacao == null)
-                return NotFound(new
-                {
-                    message = "Publicação não encontrada."
-                });
+                return NotFound(new { message = "Publicação não encontrada." });
 
             return Ok(publicacao);
         }
@@ -94,15 +114,9 @@ namespace API.Controllers
             var result = await publicacaoService.DeletarPublicacaoAsync(id);
 
             if (!result)
-                return NotFound(new
-                {
-                    message = "Publicação não encontrada."
-                });
+                return NotFound(new { message = "Publicação não encontrada." });
 
-            return Ok(new
-            {
-                message = "Publicação deletada com sucesso."
-            });
+            return Ok(new { message = "Publicação deletada com sucesso." });
         }
 
         [Authorize(Roles = "Admin")]
@@ -110,13 +124,13 @@ namespace API.Controllers
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> EditarPublicacao(int id, [FromForm] EditarPublicacaoDto dto)
         {
-            Imagem? imagem = null;
+            Imagem? imagemCapa = null;
 
             if (dto.ImagemCapa != null)
             {
                 var caminhoArquivo = await publicacaoService.UploadImagemAsync(dto.ImagemCapa);
 
-                imagem = new Imagem
+                imagemCapa = new Imagem
                 {
                     CaminhoArquivo = caminhoArquivo,
                     ContentType = dto.ImagemCapa.ContentType,
@@ -125,20 +139,37 @@ namespace API.Controllers
                 };
             }
 
-            var result = await publicacaoService.EditarPublicacaoAsync(id, dto, imagem);
-
-            if (!result)
+            var imagensGaleria = new List<PublicacaoImagem>();
+            if (dto.ImagensParaGaleria != null && dto.ImagensParaGaleria.Count != 0)
             {
-                return NotFound(new
+                int ordem = 0;
+
+                foreach (var arquivo in dto.ImagensParaGaleria)
                 {
-                    message = "Publicação não encontrada."
-                });
+                    var caminhoArquivo = await publicacaoService.UploadImagemAsync(arquivo);
+
+                    var imagemGaleria = new Imagem
+                    {
+                        CaminhoArquivo = caminhoArquivo,
+                        ContentType = arquivo.ContentType,
+                        NomeArquivo = arquivo.FileName,
+                        CriadoEm = DateTime.UtcNow
+                    };
+
+                    imagensGaleria.Add(new PublicacaoImagem
+                    {
+                        Imagem = imagemGaleria,
+                        Ordem = ordem++
+                    });
+                }
             }
 
-            return Ok(new
-            {
-                message = "Publicação atualizada com sucesso."
-            });
+            var result = await publicacaoService.EditarPublicacaoAsync(id, dto, imagemCapa, imagensGaleria);
+
+            if (!result)
+                return NotFound(new { message = "Publicação não encontrada." });
+
+            return Ok(new { message = "Publicação atualizada com sucesso." });
         }
     }
 }
