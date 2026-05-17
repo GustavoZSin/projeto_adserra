@@ -6,6 +6,7 @@ namespace API.DTOs
     {
         public EnumeradorDeTipoDePublicacao? Tipo { get; set; }
         public EnumeradorDeStatusPublicacaoTemporal? StatusTemporal { get; set; }
+        public bool? Publicas { get; set; }
         public DateTime? DataInicio { get; set; }
         public DateTime? DataFim { get; set; }
     }
