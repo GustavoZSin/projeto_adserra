@@ -10,6 +10,6 @@
         public string Local { get; set; }
         public string NomePublicadoPor { get; set; }
         public DateTime PublicadoEm { get; set; }
-        public string? ImagemCapaBase64 { get; set; }
+        public string? ImagemCapaUrl { get; set; }
     }
 }

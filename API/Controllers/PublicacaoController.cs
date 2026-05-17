@@ -21,13 +21,11 @@ namespace API.Controllers
 
             if (dto.ImagemCapa != null)
             {
-                using var memoryStream = new MemoryStream();
-
-                await dto.ImagemCapa.CopyToAsync(memoryStream);
+                var caminhoArquivo = await publicacaoService.UploadImagemAsync(dto.ImagemCapa);
 
                 imagem = new Imagem
                 {
-                    Conteudo = memoryStream.ToArray(),
+                    CaminhoArquivo = caminhoArquivo,
                     ContentType = dto.ImagemCapa.ContentType,
                     NomeArquivo = dto.ImagemCapa.FileName,
                     CriadoEm = DateTime.UtcNow
@@ -115,17 +113,14 @@ namespace API.Controllers
 
             if (dto.ImagemCapa != null)
             {
-                using var memoryStream = new MemoryStream();
-
-                await dto.ImagemCapa.CopyToAsync(memoryStream);
+                var caminhoArquivo = await publicacaoService.UploadImagemAsync(dto.ImagemCapa);
 
                 imagem = new Imagem
                 {
-                    Conteudo = memoryStream.ToArray(),
+                    CaminhoArquivo = caminhoArquivo,
                     ContentType = dto.ImagemCapa.ContentType,
                     NomeArquivo = dto.ImagemCapa.FileName,
-
-                    CriadoEm = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified)
+                    CriadoEm = DateTime.UtcNow
                 };
             }
 
