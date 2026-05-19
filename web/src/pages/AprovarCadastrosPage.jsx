@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { useAprovacoesPendentes } from '../contexts/AprovacoesPendentesContext'
 import { getIniciais } from '../utils/usuario'
 import { solicitacaoIngressoService } from '../services/api'
+import MenuAvatar from '../components/ui/MenuAvatar'
 import clsx from 'clsx'
 
 const AVATAR_GRADS = [
@@ -129,9 +130,7 @@ export default function AprovarCadastrosPage() {
               <span className="bg-amber text-white rounded-[10px] px-[7px] py-px text-[9px] font-bold leading-[1.4]">{contagem.pendentes}</span>
             )}
           </div>
-          <div className="w-[30px] h-[30px] bg-blue-grad rounded-[9px] flex items-center justify-center text-[11px] font-bold text-white tracking-[0.5px] font-sans select-none flex-shrink-0">
-            {initials}
-          </div>
+          <MenuAvatar />
         </div>
 
         <div className="flex-1 overflow-y-auto min-h-0 px-[13px] py-[11px] pb-5 scrollbar-hide">

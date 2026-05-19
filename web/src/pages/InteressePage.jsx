@@ -32,10 +32,16 @@ export default function InteressePage() {
     if (!validate()) return
     setLoading(true)
     try {
-      await authService.solicitarIngresso({ nomeCompleto: form.nomeCompleto, email: form.email, departamento: form.departamento, matricula: form.matricula || null, mensagem: form.mensagem || null, autorizaDesconto })
+      await authService.solicitarIngresso({ nomeCompleto: form.nomeCompleto, email: form.email, departamento: form.departamento, matricula: form.matricula || '', mensagem: form.mensagem || '', autorizaDesconto })
       setSuccess(true)
     } catch (err) {
-      setApiError(err.response?.data?.message || err.response?.data || 'Erro ao enviar solicitação. Tente novamente.')
+      const data = err.response?.data
+      const mensagem =
+        data?.message ||
+        data?.title ||
+        (typeof data === 'string' ? data : null) ||
+        'Erro ao enviar solicitação. Tente novamente.'
+      setApiError(mensagem)
     } finally {
       setLoading(false)
     }

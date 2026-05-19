@@ -18,6 +18,14 @@ export default defineConfig({
         target: 'http://localhost:5079',
         changeOrigin: true,
       },
+      '/publicacao': {
+        target: 'http://localhost:5079',
+        changeOrigin: true,
+      },
+      '/usuarios': {
+        target: 'http://localhost:5079',
+        changeOrigin: true,
+      },
     },
   },
 })

@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { useSearchParams } from 'react-router-dom'
 import { publicacaoService } from '../services/api'
+import MenuAvatar from '../components/ui/MenuAvatar'
 import clsx from 'clsx'
 
 function getInitials(user) {
@@ -182,9 +183,7 @@ export default function PublicarPage() {
       <div className="flex flex-col md:hidden h-[calc(100vh-60px)] overflow-hidden">
         <div className="px-[15px] py-[11px] flex items-center justify-between flex-shrink-0 border-b border-bdr2 bg-bg">
           <span className="text-[15px] font-extrabold text-t1">{isEditing ? 'Editar publicação' : 'Nova publicação'}</span>
-          <div className="w-[30px] h-[30px] bg-blue-grad rounded-[9px] flex items-center justify-center text-[11px] font-bold text-white tracking-[0.5px] flex-shrink-0 font-sans select-none">
-            {initials}
-          </div>
+          <MenuAvatar />
         </div>
 
         <div className="flex-1 overflow-y-auto min-h-0 px-[14px] py-3 pb-5 scrollbar-hide">

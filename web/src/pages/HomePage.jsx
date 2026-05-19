@@ -3,7 +3,8 @@ import clsx from 'clsx'
 import { useAuth } from '../contexts/AuthContext'
 import { getIniciais } from '../utils/usuario'
 import logoImg from '../assets/adserra-logo.png'
-import { publicacaoService } from '../services/api'
+import { publicacaoService, usuariosService } from '../services/api'
+import MenuAvatar from '../components/ui/MenuAvatar'
 
 const COR_AVATARES = [
   'linear-gradient(135deg,var(--blue-d),var(--blue-l))',
@@ -65,11 +66,18 @@ export default function HomePage() {
   const primeiroNome = user?.name ? user.name.split(' ')[0] : 'Professor'
 
   const [publicacoes, setPublicacoes] = useState([])
+  const [qtdDocentes, setQtdDocentes] = useState(null)
   const [carregando, setCarregando]   = useState(true)
 
   useEffect(() => {
-    publicacaoService.listar({ Publicas: true })
-      .then(r => setPublicacoes(r.data ?? []))
+    Promise.all([
+      publicacaoService.listar({ Publicas: true }),
+      usuariosService.listar(),
+    ])
+      .then(([resPublicacoes, resUsuarios]) => {
+        setPublicacoes(Array.isArray(resPublicacoes.data) ? resPublicacoes.data : [])
+        setQtdDocentes(Array.isArray(resUsuarios.data) ? resUsuarios.data.length : 0)
+      })
       .catch(() => {})
       .finally(() => setCarregando(false))
   }, [])
@@ -117,9 +125,7 @@ export default function HomePage() {
               <IconeSino size={16} />
               <span className="w-[6px] h-[6px] bg-red rounded-full absolute top-[5px] right-[5px] border-[1.5px] border-bg" aria-hidden="true" />
             </button>
-            <div className="w-[30px] h-[30px] bg-blue-grad rounded-[9px] flex items-center justify-center text-[11px] font-bold text-white tracking-[0.5px] flex-shrink-0 font-sans select-none">
-              {iniciais}
-            </div>
+            <MenuAvatar />
           </div>
         </header>
 
@@ -196,15 +202,10 @@ export default function HomePage() {
         {/* Topbar web */}
         <div className="flex items-center justify-between mb-[18px]">
           <p className="text-[19px] font-black text-t1">Início</p>
-          <div className="flex items-center gap-[9px]">
-            <div className="flex items-center gap-[7px] bg-s1 border-[1.5px] border-bdr rounded-[9px] px-3 py-[7px] text-[11px] text-t3 cursor-pointer hover:border-blue-l transition-colors">
-              <IconeBusca /> <span>Buscar...</span>
-            </div>
-            <button className="w-[33px] h-[33px] bg-s1 border-[1.5px] border-bdr rounded-[9px] flex items-center justify-center text-t2 cursor-pointer relative flex-shrink-0" aria-label="Notificações">
-              <IconeSino size={16} />
-              <span className="w-[6px] h-[6px] bg-red rounded-full absolute top-[5px] right-[5px] border-[1.5px] border-bg" aria-hidden="true" />
-            </button>
-          </div>
+          <button className="w-[33px] h-[33px] bg-s1 border-[1.5px] border-bdr rounded-[9px] flex items-center justify-center text-t2 cursor-pointer relative flex-shrink-0" aria-label="Notificações">
+            <IconeSino size={16} />
+            <span className="w-[6px] h-[6px] bg-red rounded-full absolute top-[5px] right-[5px] border-[1.5px] border-bg" aria-hidden="true" />
+          </button>
         </div>
 
         {/* Stats (4) */}
@@ -212,7 +213,7 @@ export default function HomePage() {
           <CardEstatisticaWeb icon={<IconeCalendario size={16} />}  iconCls="bg-[var(--blue-sub)] text-blue-l" n={carregando ? '—' : qtdEventos}  label="Eventos próximos"    tendencia={tendEventos} />
           <CardEstatisticaWeb icon={<IconeRelampago size={16} />}   iconCls="bg-green/[0.12] text-green"       n={carregando ? '—' : qtdAcoes}     label="Ações registradas"   tendencia={tendAcoes} />
           <CardEstatisticaWeb icon={<IconeJornal size={16} />}      iconCls="bg-amber/[0.12] text-amber"       n={carregando ? '—' : qtdNoticias}  label="Notícias publicadas" tendencia={tendNoticias} />
-          <CardEstatisticaWeb icon={<IconeUsuarios size={16} />}    iconCls="bg-[var(--blue-sub)] text-blue-l" n="—"                               label="Docentes ativos"     tendencia={null} />
+          <CardEstatisticaWeb icon={<IconeUsuarios size={16} />}    iconCls="bg-[var(--blue-sub)] text-blue-l" n={carregando ? '—' : qtdDocentes ?? '—'} label="Docentes ativos"     tendencia={null} />
         </div>
 
         {/* Grid 2 colunas */}
@@ -381,8 +382,7 @@ function LogoPequena() {
     <img
       src={logoImg}
       alt="ADSerra"
-      height={40}
-      style={{ width: 'auto', display: 'block', userSelect: 'none' }}
+      className="h-20 w-auto block select-none"
       draggable={false}
     />
   )
