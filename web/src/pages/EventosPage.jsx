@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { getIniciais } from '../utils/usuario'
 import { publicacaoService } from '../services/api'
+import MenuAvatar from '../components/ui/MenuAvatar'
 import clsx from 'clsx'
 
 const TAG_MAP = {
@@ -56,14 +57,24 @@ const btnBase    = 'flex items-center gap-[5px] rounded-[8px] px-[11px] py-[6px]
 export default function EventosPage() {
   const navigate              = useNavigate()
   const { user, isAdmin }     = useAuth()
-  const [filtro, setFiltro]   = useState('Todos')
+  const [filtro, setFiltro]         = useState('Todos')
+  const [busca, setBusca]           = useState('')
+  const [mostrarBusca, setMostrarBusca] = useState(false)
   const [eventos, setEventos] = useState([])
   const [carregando, setCarregando] = useState(true)
   const [deletando, setDeletando] = useState(null)
   const [confirmId, setConfirmId] = useState(null)
 
-  const initials      = getIniciais(user)
-  const visiveis      = useMemo(() => filtrarEventos(eventos, filtro), [eventos, filtro])
+  const initials = getIniciais(user)
+  const visiveis = useMemo(() => {
+    const porFiltro = filtrarEventos(eventos, filtro)
+    const termo = busca.toLowerCase().trim()
+    if (!termo) return porFiltro
+    return porFiltro.filter(e =>
+      e.titulo.toLowerCase().includes(termo) ||
+      e.local?.toLowerCase().includes(termo)
+    )
+  }, [eventos, filtro, busca])
   const eventoMap     = useMemo(() => new Map(eventos.map(e => [e.id, e])), [eventos])
   const eventoConfirm = eventoMap.get(confirmId)
 
@@ -113,16 +124,31 @@ export default function EventosPage() {
         <div className="px-[15px] py-[11px] flex items-center justify-between flex-shrink-0 border-b border-bdr2 bg-bg">
           <span className="text-[15px] font-extrabold text-t1">Eventos</span>
           <div className="flex items-center gap-2">
-            <button className="w-[30px] h-[30px] bg-s2 rounded-[9px] flex items-center justify-center text-t2 border-none cursor-pointer hover:bg-s3" aria-label="Buscar">
+            <button
+              className={clsx('w-[30px] h-[30px] rounded-[9px] flex items-center justify-center border-none cursor-pointer transition-colors', mostrarBusca ? 'bg-blue-grad text-white' : 'bg-s2 text-t2 hover:bg-s3')}
+              aria-label="Buscar"
+              onClick={() => { setMostrarBusca(v => !v); if (mostrarBusca) setBusca('') }}
+            >
               <SearchIcon />
             </button>
-            <div className="w-[30px] h-[30px] bg-blue-grad rounded-[9px] flex items-center justify-center text-[11px] font-bold text-white tracking-[0.5px] font-sans select-none flex-shrink-0">
-              {initials}
-            </div>
+            <MenuAvatar />
           </div>
         </div>
 
         <div className="flex-1 overflow-y-auto min-h-0 px-[13px] py-[11px] pb-5 scrollbar-hide">
+          {mostrarBusca && (
+            <div className="relative mb-3">
+              <span className="absolute left-[10px] top-1/2 -translate-y-1/2 text-t3 pointer-events-none"><SearchIcon /></span>
+              <input
+                autoFocus
+                className="w-full bg-s1 border border-bdr rounded-[10px] pl-[30px] pr-3 py-[8px] text-[11px] text-t1 placeholder-t3 outline-none focus:border-blue-l transition-colors font-sans"
+                placeholder="Buscar por título ou local..."
+                value={busca}
+                onChange={e => setBusca(e.target.value)}
+              />
+            </div>
+          )}
+
           <Filters filtro={filtro} setFiltro={setFiltro} className="mb-3" />
 
           {carregando && <p className="text-[11px] text-t3 text-center py-8">Carregando...</p>}
@@ -174,8 +200,14 @@ export default function EventosPage() {
         <div className="flex items-center justify-between mb-[18px]">
           <p className="text-[19px] font-black text-t1">Eventos</p>
           <div className="flex items-center gap-[9px]">
-            <div className="flex items-center gap-[7px] bg-s1 border-[1.5px] border-bdr rounded-[9px] px-3 py-[7px] text-[11px] text-t3 cursor-text hover:border-blue-l transition-colors">
-              <SearchIcon s={13} /><span>Buscar eventos...</span>
+            <div className="relative">
+              <span className="absolute left-[10px] top-1/2 -translate-y-1/2 text-t3 pointer-events-none"><SearchIcon s={13} /></span>
+              <input
+                className="bg-s1 border-[1.5px] border-bdr rounded-[9px] pl-[30px] pr-3 py-[7px] text-[11px] text-t1 placeholder-t3 outline-none focus:border-blue-l transition-colors font-sans w-[200px]"
+                placeholder="Buscar eventos..."
+                value={busca}
+                onChange={e => setBusca(e.target.value)}
+              />
             </div>
             {isAdmin && (
               <button className={clsx(btnBase, 'bg-blue-grad text-white shadow-[0_3px_10px_var(--blue-glow)] hover:opacity-90')} onClick={() => navigate('/publicar')}>

@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
 import { AprovacoesPendentesProvider } from './contexts/AprovacoesPendentesContext'
+import { NotificacoesProvider } from './contexts/NotificacoesContext'
 import { PrivateRoute } from './components/layout/PrivateRoute'
 import { AdminRoute }   from './components/layout/AdminRoute'
 import AuthLayout from './components/layout/AuthLayout'
@@ -23,6 +24,7 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <AprovacoesPendentesProvider>
+        <NotificacoesProvider>
         <Suspense fallback={null}>
         <Routes>
           {/* ── Públicas — painel azul no desktop ── */}
@@ -48,6 +50,7 @@ export default function App() {
           <Route path="*"  element={<Navigate to="/login" replace />} />
         </Routes>
         </Suspense>
+        </NotificacoesProvider>
         </AprovacoesPendentesProvider>
       </AuthProvider>
     </BrowserRouter>

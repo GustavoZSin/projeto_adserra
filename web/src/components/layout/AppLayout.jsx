@@ -1,6 +1,8 @@
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
+import { authService } from '../../services/api'
 import { useAprovacoesPendentes } from '../../contexts/AprovacoesPendentesContext'
+import { useNotificacoes } from '../../contexts/NotificacoesContext'
 import logoImg from '../../assets/adserra-logo.png'
 import clsx from 'clsx'
 
@@ -15,18 +17,24 @@ function getInitials(user) {
 export default function AppLayout() {
   const navigate     = useNavigate()
   const { pathname } = useLocation()
-  const { user, isAdmin } = useAuth()
-  const { pendentes }     = useAprovacoesPendentes()
+  const { user, isAdmin }  = useAuth()
+  const { pendentes }      = useAprovacoesPendentes()
+  const { notificacoes }   = useNotificacoes()
 
   const isActive    = (path) => pathname === path
   const initials    = getInitials(user)
   const displayName = user?.matricula || user?.id || 'Usuário'
 
+  const handleLogout = async () => {
+    try { await authService.logout() } catch { /* ignora erro */ }
+    navigate('/login')
+  }
+
   return (
     <div className="flex min-h-screen bg-bg">
 
       {/* ── Sidebar — desktop apenas ── */}
-      <aside className="hidden md:flex md:flex-col md:w-48 md:flex-shrink-0 md:bg-sb-bg md:border-r md:border-bdr md:h-screen md:sticky md:top-0 md:px-[10px] md:py-[18px] md:overflow-y-auto md:scrollbar-hide">
+      <aside className="hidden md:flex md:flex-col md:w-72 md:flex-shrink-0 md:bg-sb-bg md:border-r md:border-bdr md:h-screen md:sticky md:top-0 md:px-[10px] md:py-[18px] md:overflow-y-auto md:scrollbar-hide">
         <div className="mb-[22px] px-[6px] flex-shrink-0">
           <LogoSidebar />
         </div>
@@ -34,7 +42,7 @@ export default function AppLayout() {
         <div className="mb-[18px]">
           <span className="block text-[8px] font-bold tracking-[2px] uppercase text-t3 mb-[7px] px-2">Menu principal</span>
           <SbItem icon={<HomeIcon />}     label="Início"   active={isActive('/dashboard')} onClick={() => navigate('/dashboard')} />
-          <SbItem icon={<CalendarIcon />} label="Eventos"  active={isActive('/eventos')}   badge="3"           onClick={() => navigate('/eventos')} />
+          <SbItem icon={<CalendarIcon />} label="Eventos"  active={isActive('/eventos')}   onClick={() => navigate('/eventos')} />
           <SbItem icon={<ImageIcon />}    label="Galeria"  active={isActive('/galeria')}   onClick={() => navigate('/galeria')} />
           <SbItem icon={<SendIcon />}     label="Publicar" active={isActive('/publicar')}  onClick={() => navigate('/publicar')} />
           {isAdmin && (
@@ -47,9 +55,9 @@ export default function AppLayout() {
 
         <div className="mb-[18px]">
           <span className="block text-[8px] font-bold tracking-[2px] uppercase text-t3 mb-[7px] px-2">Conta</span>
-          <SbItem icon={<UserIcon />}     label="Meu Perfil"    active={isActive('/perfil')}        onClick={() => navigate('/perfil')} />
-          <SbItem icon={<BellIcon />}     label="Notificações"  active={isActive('/notificacoes')}  badgeRed="2" onClick={() => navigate('/notificacoes')} />
-          <SbItem icon={<SettingsIcon />} label="Configurações" active={isActive('/configuracoes')} onClick={() => navigate('/configuracoes')} />
+          <SbItem icon={<UserIcon />} label="Meu Perfil"   active={isActive('/perfil')}       onClick={() => navigate('/perfil')} />
+          <SbItem icon={<BellIcon />} label="Notificações" active={isActive('/notificacoes')} badgeRed={notificacoes > 0 ? String(notificacoes) : undefined} onClick={() => navigate('/notificacoes')} />
+          <SbItem icon={<LogoutIcon />} label="Sair" active={false} onClick={handleLogout} danger />
         </div>
 
         <div className="mt-auto px-[10px] py-[10px] bg-s2 rounded-[11px] border border-bdr flex items-center gap-[9px] flex-shrink-0">
@@ -77,7 +85,7 @@ export default function AppLayout() {
         <NavItem icon={<SendIcon lg />}     label="Publicar" active={isActive('/publicar')}  onClick={() => navigate('/publicar')} />
         {isAdmin
           ? <>
-              <NavItem icon={<ClipboardIcon lg />} label="Aprovações" active={isActive('/aprovar-cadastros')}  badge={pendentes > 0 ? String(pendentes) : undefined} onClick={() => navigate('/aprovar-cadastros')} />
+              <NavItem icon={<ClipboardIcon lg />} label="Aprovações" active={isActive('/aprovar-cadastros')} badge={pendentes > 0 ? String(pendentes) : undefined} onClick={() => navigate('/aprovar-cadastros')} />
               <NavItem icon={<UsersIcon lg />}     label="Usuários"   active={isActive('/gerenciar-usuarios')} onClick={() => navigate('/gerenciar-usuarios')} />
             </>
           : <NavItem icon={<UserIcon lg />} label="Perfil" active={isActive('/perfil')} onClick={() => navigate('/perfil')} />
@@ -90,12 +98,14 @@ export default function AppLayout() {
 
 /* ── Sub-componentes ── */
 
-function SbItem({ icon, label, active, badge, badgeRed, onClick }) {
+function SbItem({ icon, label, active, badge, badgeRed, onClick, danger }) {
   return (
     <button
       className={clsx(
         'flex items-center gap-[9px] w-full px-[10px] py-2 rounded-[10px] cursor-pointer text-[11px] font-semibold mb-px border-none font-sans text-left transition-all duration-[250ms]',
-        active ? 'bg-[var(--blue-sub)] text-blue-l' : 'bg-transparent text-t2 hover:bg-s2 hover:text-t1'
+        danger  ? 'bg-transparent text-red hover:bg-red/[0.08]' :
+        active  ? 'bg-[var(--blue-sub)] text-blue-l' :
+                  'bg-transparent text-t2 hover:bg-s2 hover:text-t1'
       )}
       onClick={onClick}
       aria-current={active ? 'page' : undefined}
@@ -138,7 +148,7 @@ function LogoSidebar() {
     <img
       src={logoImg}
       alt="ADSerra"
-      style={{ width: '100%', height: 'auto', display: 'block', userSelect: 'none' }}
+      className="w-full h-auto block select-none"
       draggable={false}
     />
   )
@@ -170,8 +180,8 @@ function UserIcon({ lg }) {
 function BellIcon() {
   return <svg width="14" height="14" viewBox="0 0 24 24" {...IC}><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
 }
-function SettingsIcon() {
-  return <svg width="14" height="14" viewBox="0 0 24 24" {...IC}><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+function LogoutIcon() {
+  return <svg width="14" height="14" viewBox="0 0 24 24" {...IC}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
 }
 function ClipboardIcon({ lg }) {
   const s = lg ? 20 : 14
