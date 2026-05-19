@@ -4,13 +4,14 @@ using API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace API.Controllers
 {
     [Authorize]
     [ApiController]
     [Route("[controller]")]
-    public class PublicacaoController(PublicacaoService publicacaoService, UserManager<User> userManager) : ControllerBase
+    public class PublicacaoController(PublicacaoService publicacaoService, UserManager<User> userManager, NotificacaoService notificacaoService) : ControllerBase
     {
         [Authorize(Roles = "Admin")]
         [HttpPost]
@@ -85,6 +86,8 @@ namespace API.Controllers
 
             if (!result)
                 return BadRequest(new { message = "Falha ao criar a publicação. Tente novamente mais tarde." });
+
+            await notificacaoService.CriarNotificacoesParaPublicacaoAsync(publicacao, userId);
 
             return Ok(new { message = "Nova publicação criada com sucesso." });
         }

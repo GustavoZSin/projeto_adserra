@@ -13,6 +13,7 @@ public class AppDbContext : IdentityDbContext<User>
     public DbSet<Publicacao> Publicacoes { get; set; }
     public DbSet<Imagem> Imagens { get; set; }
     public DbSet<PublicacaoImagem> PublicacaoImagens { get; set; }
+    public DbSet<Notificacao> Notificacoes { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -88,5 +89,19 @@ public class AppDbContext : IdentityDbContext<User>
             .WithMany()
             .HasForeignKey(pi => pi.ImagemId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<Notificacao>()
+            .HasOne(n => n.Usuario)
+            .WithMany()
+            .HasForeignKey(n => n.IdUsuario)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<Notificacao>()
+            .Property(n => n.Tipo)
+            .HasConversion<int>();
+
+        builder.Entity<Notificacao>()
+            .Property(n => n.DataCriacao)
+            .HasColumnType("timestamp without time zone");
     }
 }
