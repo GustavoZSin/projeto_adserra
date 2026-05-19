@@ -23,6 +23,7 @@ const normalizarPublicacao = (p) => {
     data: p.data.split('T')[0],
     local: p.local ?? '',
     imagemCapaUrl: p.imagemCapaUrl ?? null,
+    publica: p.publica,
     tag,
     tagColor,
   }
@@ -83,7 +84,8 @@ export default function EventosPage() {
       setCarregando(true)
       try {
         const { data } = await publicacaoService.listar()
-        setEventos(data.map(normalizarPublicacao))
+        const visiveis = isAdmin ? data : data.filter(p => p.publica)
+        setEventos(visiveis.map(normalizarPublicacao))
       } catch {
         // mantém lista vazia em caso de erro
       } finally {
@@ -91,7 +93,7 @@ export default function EventosPage() {
       }
     }
     carregar()
-  }, [])
+  }, [isAdmin])
 
   const handleEditar = (id) => navigate(`/publicar?id=${id}`)
 
@@ -155,12 +157,13 @@ export default function EventosPage() {
           {!carregando && visiveis.length === 0 && <p className="text-[11px] text-t3 text-center py-8">Nenhum evento encontrado.</p>}
 
           {visiveis.map(ev => (
-            <div key={ev.id} className="bg-s1 border border-bdr rounded-[13px] overflow-hidden mb-[9px]">
+            <div key={ev.id} className={clsx('bg-s1 rounded-[13px] overflow-hidden mb-[9px] border', !ev.publica ? 'border-amber/40 opacity-75' : 'border-bdr')}>
               <div className="w-full h-20 flex items-center justify-center text-icon relative overflow-hidden"
                    style={ev.imagemCapaUrl ? {} : { background: 'linear-gradient(135deg, var(--s2), var(--s3))' }}>
                 {ev.imagemCapaUrl
                   ? <img src={ev.imagemCapaUrl} alt={ev.titulo} className="absolute inset-0 w-full h-full object-cover" />
                   : <EventIcon tipo={ev.tipo} />}
+                {!ev.publica && <RascunhoBadge />}
               </div>
               <div className="px-3 py-[10px] pb-3">
                 <div className="flex justify-between items-start mb-[5px] gap-[6px]">
@@ -170,8 +173,8 @@ export default function EventosPage() {
                 <p className="text-[9px] text-t3 flex items-center gap-1 mb-0.5"><CalendarIcon s={12} />{formatarDataLonga(ev.data)}</p>
                 <p className="text-[9px] text-t3 flex items-center gap-1 mb-0.5"><MapPinIcon s={12} />{ev.local}</p>
                 <div className="flex flex-wrap gap-[6px] mt-[9px]">
-                  <button className={clsx(btnBase, 'bg-blue-grad text-white shadow-[0_3px_10px_var(--blue-glow)] hover:opacity-90')}><EyeIcon s={12} />Detalhes</button>
-                  <button className={clsx(btnBase, 'bg-s2 border border-bdr text-t2 hover:bg-s3')}><ImageIcon s={12} />Galeria</button>
+                  <button className={clsx(btnBase, 'bg-blue-grad text-white shadow-[0_3px_10px_var(--blue-glow)] hover:opacity-90')} onClick={() => navigate(`/eventos/${ev.id}`)}><EyeIcon s={12} />Detalhes</button>
+                  <button className={clsx(btnBase, 'bg-s2 border border-bdr text-t2 hover:bg-s3')} onClick={() => navigate(`/eventos/${ev.id}`)}><ImageIcon s={12} />Galeria</button>
                   {isAdmin && <>
                     <button className={clsx(btnBase, 'bg-s2 border border-bdr text-t2 hover:bg-s3')} onClick={() => handleEditar(ev.id)}>
                       <EditIcon s={12} />Editar
@@ -224,12 +227,13 @@ export default function EventosPage() {
 
         <div className="grid grid-cols-3 gap-3">
           {visiveis.map(ev => (
-            <div key={ev.id} className="bg-s1 border border-bdr rounded-[13px] overflow-hidden">
+            <div key={ev.id} className={clsx('bg-s1 rounded-[13px] overflow-hidden border', !ev.publica ? 'border-amber/40 opacity-75' : 'border-bdr')}>
               <div className="w-full h-[100px] flex items-center justify-center text-icon relative overflow-hidden"
                    style={ev.imagemCapaUrl ? {} : { background: 'linear-gradient(135deg, var(--s2), var(--s3))' }}>
                 {ev.imagemCapaUrl
                   ? <img src={ev.imagemCapaUrl} alt={ev.titulo} className="absolute inset-0 w-full h-full object-cover" />
                   : <EventIcon tipo={ev.tipo} s={24} />}
+                {!ev.publica && <RascunhoBadge />}
               </div>
               <div className="p-3">
                 <p className="text-[12px] font-bold text-t1 mb-1">{ev.titulo}</p>
@@ -239,8 +243,8 @@ export default function EventosPage() {
                   <MapPinIcon s={12} />{ev.local}
                 </p>
                 <div className="flex gap-[6px] flex-wrap">
-                  <button className={clsx(btnBase, 'bg-blue-grad text-white shadow-[0_3px_10px_var(--blue-glow)] hover:opacity-90')}><EyeIcon s={12} />Ver mais</button>
-                  <button className={clsx(btnBase, 'bg-s2 border border-bdr text-t2 hover:bg-s3')}><ImageIcon s={12} />Galeria</button>
+                  <button className={clsx(btnBase, 'bg-blue-grad text-white shadow-[0_3px_10px_var(--blue-glow)] hover:opacity-90')} onClick={() => navigate(`/eventos/${ev.id}`)}><EyeIcon s={12} />Ver mais</button>
+                  <button className={clsx(btnBase, 'bg-s2 border border-bdr text-t2 hover:bg-s3')} onClick={() => navigate(`/eventos/${ev.id}`)}><ImageIcon s={12} />Galeria</button>
                   {isAdmin && <>
                     <button className={clsx(btnBase, 'bg-s2 border border-bdr text-t2 hover:bg-s3')} onClick={() => handleEditar(ev.id)}>
                       <EditIcon s={12} />Editar
@@ -275,6 +279,14 @@ function Filters({ filtro, setFiltro, className }) {
         </button>
       ))}
     </div>
+  )
+}
+
+function RascunhoBadge() {
+  return (
+    <span className="absolute top-[7px] left-[7px] flex items-center gap-[4px] bg-amber text-white rounded-[5px] px-[7px] py-[3px] text-[8px] font-bold tracking-[0.3px] shadow-sm">
+      <LockSmallIcon /> Rascunho
+    </span>
   )
 }
 
@@ -342,5 +354,6 @@ function EditIcon({ s = 12 })         { return <svg width={s} height={s} viewBox
 function TrashIcon({ s = 12 })        { return <svg width={s} height={s} viewBox="0 0 24 24" {...SV}><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg> }
 function PlusIcon({ s = 18 })         { return <svg width={s} height={s} viewBox="0 0 24 24" {...SV}><path d="M5 12h14"/><path d="M12 5v14"/></svg> }
 function LandmarkIcon({ s = 24 })     { return <svg width={s} height={s} viewBox="0 0 24 24" {...SV}><line x1="3" x2="21" y1="22" y2="22"/><line x1="6" x2="6" y1="18" y2="11"/><line x1="10" x2="10" y1="18" y2="11"/><line x1="14" x2="14" y1="18" y2="11"/><line x1="18" x2="18" y1="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg> }
+function LockSmallIcon()              { return <svg width="8" height="8" viewBox="0 0 24 24" {...SV} strokeWidth="2.5"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> }
 function GraduationCapIcon({ s = 24 }){ return <svg width={s} height={s} viewBox="0 0 24 24" {...SV}><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg> }
 function MicIcon({ s = 24 })          { return <svg width={s} height={s} viewBox="0 0 24 24" {...SV}><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg> }

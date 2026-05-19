@@ -40,14 +40,8 @@ function labelAtividadePorTipo(tipo) {
   }
 }
 
-function rotaPorTipo(tipo) {
-  switch (tipo) {
-    case 'Evento':  return '/eventos'
-    case 'Acao':    return '/eventos'
-    case 'Noticia': return '/eventos'
-    case 'Aviso':   return '/eventos'
-    default:        return '/eventos'
-  }
+function rotaPorId(id) {
+  return `/eventos/${id}`
 }
 
 function iconePorTipo(tipo) {
@@ -195,6 +189,7 @@ export default function HomePage() {
               eventosProximos.map(ev => (
                 <CardEventoMobile
                   key={ev.id}
+                  id={ev.id}
                   icon={<IconeCalendario size={22} />}
                   title={ev.titulo}
                   date={formatarDataEventoCurta(ev.data)}
@@ -262,6 +257,7 @@ export default function HomePage() {
               eventosProximos.map(ev => (
                 <ItemEventoWeb
                   key={ev.id}
+                  id={ev.id}
                   icon={<IconeCalendario size={16} />}
                   nome={ev.titulo}
                   meta={formatarDataEvento(ev.data, ev.local)}
@@ -290,7 +286,7 @@ export default function HomePage() {
                   iconeCls={corIconePorTipo(p.tipo)}
                   label={labelAtividadePorTipo(p.tipo)}
                   titulo={p.titulo}
-                  rota={rotaPorTipo(p.tipo)}
+                  rota={rotaPorId(p.id)}
                   tempo={formatarTempo(p.publicadoEm)}
                 />
               ))
@@ -314,10 +310,10 @@ function CardEstatistica({ icon, iconCls, n, label }) {
   )
 }
 
-function CardEventoMobile({ icon, badge, title, date }) {
+function CardEventoMobile({ icon, badge, title, date, id }) {
   const navigate = useNavigate()
   return (
-    <button onClick={() => navigate('/eventos')} className="flex-shrink-0 w-[120px] bg-s1 border border-bdr rounded-[12px] overflow-hidden text-left cursor-pointer font-sans hover:brightness-95 transition-all duration-200">
+    <button onClick={() => navigate(`/eventos/${id}`)} className="flex-shrink-0 w-[120px] bg-s1 border border-bdr rounded-[12px] overflow-hidden text-left cursor-pointer font-sans hover:brightness-95 transition-all duration-200">
       <div className="w-full h-[58px] flex items-center justify-center relative text-icon"
            style={{ background: 'linear-gradient(135deg, var(--s2), var(--s3))' }}>
         {icon}
@@ -374,7 +370,7 @@ function CardEstatisticaWeb({ icon, iconCls, n, label, tendencia }) {
   )
 }
 
-function ItemEventoWeb({ icon, nome, meta, tag, corTag }) {
+function ItemEventoWeb({ icon, nome, meta, tag, corTag, id }) {
   const navigate = useNavigate()
   return (
     <div className="flex items-center gap-[10px] py-[9px] border-b border-bdr2 last:border-b-0 last:pb-0">
@@ -382,7 +378,7 @@ function ItemEventoWeb({ icon, nome, meta, tag, corTag }) {
         {icon}
       </div>
       <div style={{ minWidth: 0 }}>
-        <button onClick={() => navigate('/eventos')} className="text-[11px] font-semibold text-blue-l bg-transparent border-none p-0 cursor-pointer font-sans text-left whitespace-nowrap overflow-hidden text-ellipsis max-w-full block mb-0.5 hover:opacity-75 transition-opacity">
+        <button onClick={() => navigate(`/eventos/${id}`)} className="text-[11px] font-semibold text-blue-l bg-transparent border-none p-0 cursor-pointer font-sans text-left whitespace-nowrap overflow-hidden text-ellipsis max-w-full block mb-0.5 hover:opacity-75 transition-opacity">
           {nome}
         </button>
         <p className="text-[10px] text-t3 flex items-center gap-[3px]"><IconeCalendario size={12} />{meta}</p>

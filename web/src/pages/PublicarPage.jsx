@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, useNavigate } from 'react-router-dom'
 import { publicacaoService } from '../services/api'
 import MenuAvatar from '../components/ui/MenuAvatar'
 import clsx from 'clsx'
@@ -27,6 +27,7 @@ const btnG    = 'w-full bg-transparent border-[1.5px] border-bdr rounded-[11px] 
 
 export default function PublicarPage() {
   const { user }       = useAuth()
+  const navigate       = useNavigate()
   const [searchParams] = useSearchParams()
   const eventoId       = searchParams.get('id')
   const isEditing      = !!eventoId
@@ -45,6 +46,8 @@ export default function PublicarPage() {
   const [galeriaExistente, setGaleriaExistente] = useState([])  // [{id, url}]
   const [galeriaFiles, setGaleriaFiles]         = useState([])  // File[]
   const [galeriaPreviews, setGaleriaPreviews]   = useState([])  // blob URL[]
+
+  const [publica, setPublica]   = useState(true)
 
   const [loading, setLoading]   = useState(false)
   const [errors, setErrors]     = useState({})
@@ -67,6 +70,7 @@ export default function PublicarPage() {
         setData(pub.data.split('T')[0])
         setLocal(pub.local ?? '')
         setTipo(pub.tipo.toLowerCase())
+        setPublica(pub.publica ?? true)
         if (pub.imagemCapaUrl) setCapaPreview(pub.imagemCapaUrl)
         if (pub.imagensPublicacao?.length)
           setGaleriaExistente(pub.imagensPublicacao.map(img => ({ id: img.id, url: img.uRL })))
@@ -83,7 +87,7 @@ export default function PublicarPage() {
     setTitulo(''); setDescricao(''); setData(''); setLocal('')
     setCapaPreview(null); setCapaFile(null)
     setGaleriaExistente([]); setGaleriaFiles([]); setGaleriaPreviews([])
-    setErrors({}); setApiError(null)
+    setErrors({}); setApiError(null); setPublica(true)
   }
 
   const handleCapaFile = (e) => {
@@ -128,29 +132,16 @@ export default function PublicarPage() {
     return fd
   }
 
-  const handlePublicar = async () => {
+  const handleSalvar = async () => {
     if (!validate()) return
     setLoading(true); setApiError(null)
     try {
-      const fd = buildFormData(true)
+      const fd = buildFormData(publica)
       if (isEditing) await publicacaoService.editar(Number(eventoId), fd)
       else await publicacaoService.criar(fd)
       setSuccess(true)
     } catch {
       setApiError(isEditing ? 'Erro ao salvar alterações.' : 'Erro ao publicar. Tente novamente.')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleRascunho = async () => {
-    if (!validate()) return
-    setLoading(true); setApiError(null)
-    try {
-      await publicacaoService.criar(buildFormData(false))
-      setSuccess(true)
-    } catch {
-      setApiError('Erro ao salvar rascunho.')
     } finally {
       setLoading(false)
     }
@@ -164,11 +155,16 @@ export default function PublicarPage() {
             <CheckCircleIcon />
           </div>
           <h1 className="text-[18px] font-extrabold text-t1 mb-2">
-            {isEditing ? 'Alterações salvas!' : 'Publicado com sucesso!'}
+            {isEditing ? 'Alterações salvas!' : publica ? 'Publicado com sucesso!' : 'Rascunho salvo!'}
           </h1>
-          <p className="text-[12px] text-t3 leading-[1.6] mb-6">Sua publicação já está visível para os docentes.</p>
-          <button className={btnP} onClick={() => { setSuccess(false); resetForm() }}>
+          <p className="text-[12px] text-t3 leading-[1.6] mb-6">
+            {publica ? 'Sua publicação já está visível para todos os docentes.' : 'Visível apenas para administradores. Você pode ativá-la a qualquer momento.'}
+          </p>
+          <button className={clsx(btnP, 'mb-2')} onClick={() => { setSuccess(false); resetForm() }}>
             Nova publicação
+          </button>
+          <button className={btnG} onClick={() => navigate('/eventos')}>
+            Ver publicações
           </button>
         </div>
       </div>
@@ -244,16 +240,13 @@ export default function PublicarPage() {
             </div>
           </div>
 
+          <VisibilidadeToggle publica={publica} onChange={setPublica} />
+
           {apiError && <div className="bg-red/[0.1] border border-red/25 rounded-[9px] px-3 py-[9px] text-[11px] text-red mb-2">{apiError}</div>}
 
-          <button className={clsx(btnP, 'mb-2')} onClick={handlePublicar} disabled={loading}>
-            {loading ? <Spinner /> : isEditing ? 'Salvar alterações' : 'Publicar'}
+          <button className={clsx(btnP)} onClick={handleSalvar} disabled={loading}>
+            {loading ? <Spinner /> : isEditing ? 'Salvar alterações' : publica ? 'Publicar' : 'Salvar rascunho'}
           </button>
-          {!isEditing && (
-            <button className={btnG} onClick={handleRascunho} disabled={loading}>
-              Salvar rascunho
-            </button>
-          )}
         </div>
       </div>
 
@@ -328,15 +321,11 @@ export default function PublicarPage() {
 
             <div className="bg-s1 border border-bdr rounded-[13px] p-[15px]">
               <p className="text-[12px] font-bold text-t1 mb-3">Publicação</p>
+              <VisibilidadeToggle publica={publica} onChange={setPublica} />
               {apiError && <div className="bg-red/[0.1] border border-red/25 rounded-[9px] px-3 py-[9px] text-[11px] text-red mb-2">{apiError}</div>}
-              <button className={clsx(btnP, 'mb-2')} onClick={handlePublicar} disabled={loading}>
-                {loading ? <Spinner /> : isEditing ? 'Salvar alterações' : 'Publicar agora'}
+              <button className={clsx(btnP)} onClick={handleSalvar} disabled={loading}>
+                {loading ? <Spinner /> : isEditing ? 'Salvar alterações' : publica ? 'Publicar agora' : 'Salvar rascunho'}
               </button>
-              {!isEditing && (
-                <button className={btnG} onClick={handleRascunho} disabled={loading}>
-                  Salvar rascunho
-                </button>
-              )}
             </div>
           </div>
         </div>
@@ -453,6 +442,36 @@ function GaleriaSection({ existentes, previews, onAdd, onRemoveNew }) {
   )
 }
 
+function VisibilidadeToggle({ publica, onChange }) {
+  return (
+    <div className="mb-3">
+      <span className={lbl}>Visibilidade</span>
+      <div className="flex rounded-[10px] border border-bdr overflow-hidden">
+        <button
+          type="button"
+          onClick={() => onChange(true)}
+          className={clsx(
+            'flex-1 flex items-center justify-center gap-[6px] py-[9px] text-[11px] font-semibold font-sans cursor-pointer border-none transition-all duration-200',
+            publica ? 'bg-blue-grad text-white shadow-[inset_0_1px_3px_rgba(0,0,0,0.15)]' : 'bg-s2 text-t3 hover:bg-s3'
+          )}
+        >
+          <GlobeIcon /> Todos os docentes
+        </button>
+        <button
+          type="button"
+          onClick={() => onChange(false)}
+          className={clsx(
+            'flex-1 flex items-center justify-center gap-[6px] py-[9px] text-[11px] font-semibold font-sans cursor-pointer border-none border-l border-bdr transition-all duration-200',
+            !publica ? 'bg-[var(--blue-sub)] text-blue-l' : 'bg-s2 text-t3 hover:bg-s3'
+          )}
+        >
+          <LockIcon /> Só administradores
+        </button>
+      </div>
+    </div>
+  )
+}
+
 /* ── Icons ── */
 const SV = { fill: 'none', stroke: 'currentColor', strokeWidth: '1.8', strokeLinecap: 'round', strokeLinejoin: 'round' }
 
@@ -467,3 +486,5 @@ function PlusIcon({ s = 18 })       { return <svg width={s} height={s} viewBox="
 function XIcon({ s = 10 })          { return <svg width={s} height={s} viewBox="0 0 24 24" {...SV} strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> }
 function ImagePlusIcon()            { return <svg width="14" height="14" viewBox="0 0 24 24" {...SV}><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7"/><line x1="16" x2="22" y1="5" y2="5"/><line x1="19" x2="19" y1="2" y2="8"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg> }
 function Spinner()                  { return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="animate-spin-fast flex-shrink-0"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> }
+function GlobeIcon()                { return <svg width="12" height="12" viewBox="0 0 24 24" {...SV}><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> }
+function LockIcon()                 { return <svg width="12" height="12" viewBox="0 0 24 24" {...SV}><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> }
