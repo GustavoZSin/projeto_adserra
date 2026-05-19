@@ -39,6 +39,14 @@ export const publicacaoService = {
     axios.delete(`/publicacao/${id}`, { withCredentials: true }),
 }
 
+export const usuariosService = {
+  listar: () =>
+    axios.get('/usuarios', { withCredentials: true }),
+
+  deletar: (id) =>
+    axios.delete('/usuarios', { params: { id }, withCredentials: true }),
+}
+
 export const solicitacaoIngressoService = {
   listar: (status) =>
     axios.get('/SolicitacaoIngresso/listar-solicitacoes-por-status', {
