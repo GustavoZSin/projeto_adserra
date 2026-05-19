@@ -2,46 +2,35 @@ import { useState, useMemo, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { useAprovacoesPendentes } from '../contexts/AprovacoesPendentesContext'
 import { getIniciais } from '../utils/usuario'
+import { solicitacaoIngressoService } from '../services/api'
 import clsx from 'clsx'
 
-// TODO: substituir por chamada à API — solicitacaoIngressoService.listar()
-const MOCK_SOLICITACOES = [
-  {
-    id: 1, nome: 'Lucas Silveira',      email: 'lucas.silveira@fsg.edu.br',
-    matricula: '987654321', departamento: 'Engenharia',    data: '22 Abr 2026',
-    status: 'pendente',
-    mensagem: 'Sou docente do curso de Engenharia Civil há 3 anos e gostaria de participar ativamente das ações da associação.',
-    avatarGrad: 'linear-gradient(135deg,var(--blue-d),var(--blue-l))',
-  },
-  {
-    id: 2, nome: 'Ana Paula Rodrigues', email: 'ana.rodrigues@fsg.edu.br',
-    matricula: '112233445', departamento: 'Direito',       data: '21 Abr 2026',
-    status: 'pendente',
-    mensagem: 'Leciono no curso de Direito e tenho interesse em acompanhar e contribuir com as atividades da ADSerra.',
-    avatarGrad: 'linear-gradient(135deg,#059669,#10B981)',
-  },
-  {
-    id: 3, nome: 'Roberto Menezes',     email: 'roberto.menezes@fsg.edu.br',
-    matricula: '556677889', departamento: 'Administração', data: '20 Abr 2026',
-    status: 'pendente',
-    mensagem: '',
-    avatarGrad: 'linear-gradient(135deg,#D97706,#F59E0B)',
-  },
-  {
-    id: 4, nome: 'Davi Chidem',         email: 'davi.chidem@fsg.edu.br',
-    matricula: '334455667', departamento: 'Medicina',      data: '10 Abr 2026',
-    status: 'aprovado',
-    mensagem: '',
-    avatarGrad: 'linear-gradient(135deg,var(--blue-d),var(--blue-l))',
-  },
-  {
-    id: 5, nome: 'Carlos Ferreira',     email: 'carlos.ferreira@fsg.edu.br',
-    matricula: '998877665', departamento: 'Psicologia',    data: '08 Abr 2026',
-    status: 'recusado',
-    mensagem: '',
-    avatarGrad: 'linear-gradient(135deg,var(--s3),var(--s2))',
-  },
+const AVATAR_GRADS = [
+  'linear-gradient(135deg,var(--blue-d),var(--blue-l))',
+  'linear-gradient(135deg,#059669,#10B981)',
+  'linear-gradient(135deg,#D97706,#F59E0B)',
+  'linear-gradient(135deg,#7C3AED,#A78BFA)',
+  'linear-gradient(135deg,var(--s3),var(--s2))',
 ]
+const MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez']
+
+const toAvatarGrad = (id) => AVATAR_GRADS[id % AVATAR_GRADS.length]
+const formatarData = (iso) => {
+  const d = new Date(iso)
+  return `${d.getDate()} ${MESES[d.getMonth()]} ${d.getFullYear()}`
+}
+const normalizar = (lista, status) =>
+  lista.map(s => ({
+    id: s.id,
+    nome: s.nomeCompleto,
+    email: s.emailInstitucional,
+    matricula: s.matricula,
+    departamento: s.departamento,
+    data: formatarData(s.dataCriacao),
+    status,
+    mensagem: s.mensagem ?? '',
+    avatarGrad: toAvatarGrad(s.id),
+  }))
 
 const FILTROS = ['Todos', 'Pendentes', 'Aprovados', 'Recusados']
 
@@ -57,9 +46,33 @@ export default function AprovarCadastrosPage() {
   const { setPendentes } = useAprovacoesPendentes()
   const initials   = getIniciais(user)
   const [filtro, setFiltro]               = useState('Todos')
-  const [solicitacoes, setSolicitacoes]   = useState(MOCK_SOLICITACOES)
+  const [solicitacoes, setSolicitacoes]   = useState([])
+  const [carregando, setCarregando]       = useState(true)
   const [processando, setProcessando]     = useState(null)
   const [confirmando, setConfirmando]     = useState(null)
+
+  useEffect(() => {
+    const carregar = async () => {
+      setCarregando(true)
+      try {
+        const [resPendentes, resAprovados, resReprovados] = await Promise.all([
+          solicitacaoIngressoService.listar('Pendente'),
+          solicitacaoIngressoService.listar('Aprovado'),
+          solicitacaoIngressoService.listar('Reprovado'),
+        ])
+        setSolicitacoes([
+          ...normalizar(resPendentes.data, 'pendente'),
+          ...normalizar(resAprovados.data, 'aprovado'),
+          ...normalizar(resReprovados.data, 'recusado'),
+        ])
+      } catch {
+        // mantém lista vazia em caso de erro
+      } finally {
+        setCarregando(false)
+      }
+    }
+    carregar()
+  }, [])
 
   const contagem = useMemo(() => ({
     pendentes: solicitacoes.filter(s => s.status === 'pendente').length,
@@ -82,8 +95,8 @@ export default function AprovarCadastrosPage() {
     setConfirmando(null)
     setProcessando(id)
     try {
-      // TODO: await solicitacaoService.aprovar(id) / .reprovar(id)
-      await new Promise(r => setTimeout(r, 700))
+      if (acao === 'aprovar') await solicitacaoIngressoService.aprovar(id)
+      else await solicitacaoIngressoService.reprovar(id)
       setSolicitacoes(prev =>
         prev.map(s => s.id === id ? { ...s, status: acao === 'aprovar' ? 'aprovado' : 'recusado' } : s)
       )
@@ -133,7 +146,8 @@ export default function AprovarCadastrosPage() {
           <Filters filtro={filtro} setFiltro={setFiltro} className="mb-3" />
 
           {/* Cards */}
-          {visiveis.length === 0 && <p className="text-[11px] text-t3 text-center py-8">Nenhuma solicitação encontrada.</p>}
+          {carregando && <p className="text-[11px] text-t3 text-center py-8">Carregando...</p>}
+          {!carregando && visiveis.length === 0 && <p className="text-[11px] text-t3 text-center py-8">Nenhuma solicitação encontrada.</p>}
           {visiveis.map(s => (
             <CardSolicitacao
               key={s.id}
@@ -174,7 +188,8 @@ export default function AprovarCadastrosPage() {
 
         {/* Lista */}
         <div className="flex flex-col gap-2">
-          {visiveis.length === 0 && <p className="text-[11px] text-t3 text-center py-8">Nenhuma solicitação encontrada.</p>}
+          {carregando && <p className="text-[11px] text-t3 text-center py-8">Carregando...</p>}
+          {!carregando && visiveis.length === 0 && <p className="text-[11px] text-t3 text-center py-8">Nenhuma solicitação encontrada.</p>}
           {visiveis.map(s => (
             <CardSolicitacao
               key={s.id}
