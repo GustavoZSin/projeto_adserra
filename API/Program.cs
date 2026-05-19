@@ -35,6 +35,7 @@ builder.Services.AddCors(options =>
 //Services
 builder.Services.AddScoped<UsuariosService>();
 builder.Services.AddScoped<ProfessorService>();
+builder.Services.AddScoped<PerfilService>();
 builder.Services.AddScoped<SolicitacaoIngressoService>();
 builder.Services.AddScoped<PublicacaoService>();
 builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("Smtp"));
