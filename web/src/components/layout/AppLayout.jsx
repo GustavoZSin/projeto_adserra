@@ -7,10 +7,10 @@ import logoImg from '../../assets/adserra-logo.png'
 import clsx from 'clsx'
 
 function getInitials(user) {
-  if (user?.name) {
-    return user.name.split(' ').filter(Boolean).slice(0, 2).map(n => n[0].toUpperCase()).join('')
-  }
-  if (user?.matricula) return user.matricula.slice(0, 2)
+  const nome = user?.nomeCompleto || user?.name
+  if (nome)
+    return nome.split(' ').filter(Boolean).slice(0, 2).map(n => n[0].toUpperCase()).join('')
+  if (user?.matricula) return user.matricula.slice(0, 2).toUpperCase()
   return 'P'
 }
 
@@ -44,7 +44,9 @@ export default function AppLayout() {
           <SbItem icon={<HomeIcon />}     label="Início"   active={isActive('/dashboard')} onClick={() => navigate('/dashboard')} />
           <SbItem icon={<CalendarIcon />} label="Eventos"  active={isActive('/eventos')}   onClick={() => navigate('/eventos')} />
           <SbItem icon={<ImageIcon />}    label="Galeria"  active={isActive('/galeria')}   onClick={() => navigate('/galeria')} />
-          <SbItem icon={<SendIcon />}     label="Publicar" active={isActive('/publicar')}  onClick={() => navigate('/publicar')} />
+          {isAdmin && (
+            <SbItem icon={<SendIcon />}   label="Publicar" active={isActive('/publicar')}  onClick={() => navigate('/publicar')} />
+          )}
           {isAdmin && (
             <SbItem icon={<ClipboardIcon />} label="Aprovações"  active={isActive('/aprovar-cadastros')}  badge={pendentes > 0 ? String(pendentes) : undefined} onClick={() => navigate('/aprovar-cadastros')} />
           )}
@@ -81,8 +83,8 @@ export default function AppLayout() {
            aria-label="Navegação principal">
         <NavItem icon={<HomeIcon lg />}     label="Início"   active={isActive('/dashboard')} onClick={() => navigate('/dashboard')} />
         <NavItem icon={<CalendarIcon lg />} label="Eventos"  active={isActive('/eventos')}   onClick={() => navigate('/eventos')} />
-        {!isAdmin && <NavItem icon={<ImageIcon lg />} label="Galeria" active={isActive('/galeria')} onClick={() => navigate('/galeria')} />}
-        <NavItem icon={<SendIcon lg />}     label="Publicar" active={isActive('/publicar')}  onClick={() => navigate('/publicar')} />
+        <NavItem icon={<ImageIcon lg />} label="Galeria" active={isActive('/galeria')} onClick={() => navigate('/galeria')} />
+        {isAdmin && <NavItem icon={<SendIcon lg />} label="Publicar" active={isActive('/publicar')} onClick={() => navigate('/publicar')} />}
         {isAdmin
           ? <>
               <NavItem icon={<ClipboardIcon lg />} label="Aprovações" active={isActive('/aprovar-cadastros')} badge={pendentes > 0 ? String(pendentes) : undefined} onClick={() => navigate('/aprovar-cadastros')} />

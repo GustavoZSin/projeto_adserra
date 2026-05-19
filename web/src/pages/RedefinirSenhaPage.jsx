@@ -35,8 +35,11 @@ export default function RedefinirSenhaPage() {
 
   const validate = () => {
     const errs = {}
-    if (!novaSenha)                  errs.novaSenha = 'Informe a nova senha'
-    else if (novaSenha.length < 6)   errs.novaSenha = 'A senha deve ter ao menos 6 caracteres'
+    if (!novaSenha)                              errs.novaSenha = 'Informe a nova senha'
+    else if (novaSenha.length < 6)               errs.novaSenha = 'A senha deve ter ao menos 6 caracteres'
+    else if (!/[A-Z]/.test(novaSenha))           errs.novaSenha = 'A senha deve ter ao menos uma letra maiúscula'
+    else if (!/[0-9]/.test(novaSenha))           errs.novaSenha = 'A senha deve ter ao menos um número'
+    else if (!/[^A-Za-z0-9]/.test(novaSenha))   errs.novaSenha = 'A senha deve ter ao menos um caractere especial'
     if (!confirmarSenha)             errs.confirmarSenha = 'Confirme a nova senha'
     else if (novaSenha !== confirmarSenha) errs.confirmarSenha = 'As senhas não coincidem'
     setErrors(errs)
@@ -49,11 +52,15 @@ export default function RedefinirSenhaPage() {
     if (!validate()) return
     setLoading(true)
     try {
-      await axios.post('/Auth/resetar-senha', { email, token: token, novaSenha: novaSenha }, { withCredentials: true })
+      await axios.post('/Auth/resetar-senha', { email, token: token, novaSenha: novaSenha })
       setSuccess(true)
     } catch (err) {
-      const msg = err.response?.data?.detail || err.response?.data?.title || err.response?.data || 'Erro ao redefinir senha. O link pode ter expirado.'
-      setApiError(typeof msg === 'string' ? msg : 'Tente solicitar um novo link.')
+      const data = err.response?.data
+      const erros = data?.erros
+      const msg = Array.isArray(erros) && erros.length > 0
+        ? erros.join(' ')
+        : (typeof data === 'string' ? data : data?.detail || data?.title || 'Erro ao redefinir senha. O link pode ter expirado.')
+      setApiError(msg)
     } finally {
       setLoading(false)
     }
@@ -109,9 +116,10 @@ export default function RedefinirSenhaPage() {
 
           {/* Requisitos */}
           <div className="flex flex-col gap-[5px] mt-1 mb-4">
-            <Req ok={novaSenha.length >= 6}    text="Mínimo 6 caracteres" />
-            <Req ok={/[A-Z]/.test(novaSenha)}  text="Uma letra maiúscula" />
-            <Req ok={/[0-9]/.test(novaSenha)}  text="Um número" />
+            <Req ok={novaSenha.length >= 6}              text="Mínimo 6 caracteres" />
+            <Req ok={/[A-Z]/.test(novaSenha)}            text="Uma letra maiúscula" />
+            <Req ok={/[0-9]/.test(novaSenha)}            text="Um número" />
+            <Req ok={/[^A-Za-z0-9]/.test(novaSenha)}    text="Um caractere especial (!@#$...)" />
           </div>
 
           <Input
