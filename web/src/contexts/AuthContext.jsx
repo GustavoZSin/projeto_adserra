@@ -54,8 +54,7 @@ export function AuthProvider({ children }) {
 
   const clearError = () => setError(null)
 
-  // TODO: remover após testes — forçando admin para visualizar páginas de admin
-  const isAdmin = true // user?.admin === true
+  const isAdmin = user?.admin === true
 
   return (
     <AuthContext.Provider value={{ user, loading, error, login, logout, clearError, isAdmin }}>
