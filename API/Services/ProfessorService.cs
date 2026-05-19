@@ -35,5 +35,12 @@ namespace API.Services
         {
             return await _context.Professores.FirstOrDefaultAsync(p => p.Matricula == matricula);
         }
+
+        internal async Task<string?> ObterNomePorIdUsuario(string idUsuario)
+        {
+            var professor = await _context.Professores
+                .FirstOrDefaultAsync(p => p.IdUsuario == idUsuario);
+            return professor?.NomeCompleto;
+        }
     }
 }

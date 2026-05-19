@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import clsx from 'clsx'
 import { useAuth } from '../contexts/AuthContext'
 import { getIniciais } from '../utils/usuario'
@@ -6,13 +7,6 @@ import logoImg from '../assets/adserra-logo.png'
 import { publicacaoService, usuariosService } from '../services/api'
 import MenuAvatar from '../components/ui/MenuAvatar'
 
-const COR_AVATARES = [
-  'linear-gradient(135deg,var(--blue-d),var(--blue-l))',
-  'linear-gradient(135deg,#10B981,#059669)',
-  'linear-gradient(135deg,#F59E0B,#D97706)',
-  'linear-gradient(135deg,#8B5CF6,#6D28D9)',
-  'linear-gradient(135deg,#EF4444,#DC2626)',
-]
 
 function formatarDataEvento(dataStr, local) {
   const data = new Date(dataStr)
@@ -36,13 +30,43 @@ function formatarTempo(dataStr) {
   return `${data.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })} · ${hhmm}`
 }
 
-function textoAtividadePorTipo(tipo) {
+function labelAtividadePorTipo(tipo) {
   switch (tipo) {
-    case 'Evento':  return 'publicou um novo evento'
-    case 'Acao':    return 'registrou uma ação'
-    case 'Noticia': return 'publicou uma notícia'
-    case 'Aviso':   return 'publicou um aviso'
-    default:        return 'fez uma publicação'
+    case 'Evento':  return 'Novo evento publicado'
+    case 'Acao':    return 'Nova ação registrada'
+    case 'Noticia': return 'Nova notícia publicada'
+    case 'Aviso':   return 'Novo aviso publicado'
+    default:        return 'Nova publicação'
+  }
+}
+
+function rotaPorTipo(tipo) {
+  switch (tipo) {
+    case 'Evento':  return '/eventos'
+    case 'Acao':    return '/eventos'
+    case 'Noticia': return '/eventos'
+    case 'Aviso':   return '/eventos'
+    default:        return '/eventos'
+  }
+}
+
+function iconePorTipo(tipo) {
+  switch (tipo) {
+    case 'Evento':  return <IconeCalendario size={14} />
+    case 'Acao':    return <IconeRelampago size={14} />
+    case 'Noticia': return <IconeJornal size={14} />
+    case 'Aviso':   return <IconeSino size={14} />
+    default:        return <IconeJornal size={14} />
+  }
+}
+
+function corIconePorTipo(tipo) {
+  switch (tipo) {
+    case 'Evento':  return 'bg-[var(--blue-sub)] text-blue-l'
+    case 'Acao':    return 'bg-green/[0.12] text-green'
+    case 'Noticia': return 'bg-amber/[0.12] text-amber'
+    case 'Aviso':   return 'bg-red/[0.10] text-red'
+    default:        return 'bg-[var(--blue-sub)] text-blue-l'
   }
 }
 
@@ -61,26 +85,32 @@ function obterDataHero() {
 }
 
 export default function HomePage() {
-  const { user } = useAuth()
+  const { user, isAdmin } = useAuth()
   const iniciais  = getIniciais(user)
-  const primeiroNome = user?.name ? user.name.split(' ')[0] : 'Professor'
+  const primeiroNome = user?.nomeCompleto ? user.nomeCompleto.split(' ')[0] : 'Professor'
 
   const [publicacoes, setPublicacoes] = useState([])
   const [qtdDocentes, setQtdDocentes] = useState(null)
   const [carregando, setCarregando]   = useState(true)
 
   useEffect(() => {
-    Promise.all([
-      publicacaoService.listar({ Publicas: true }),
-      usuariosService.listar(),
-    ])
-      .then(([resPublicacoes, resUsuarios]) => {
-        setPublicacoes(Array.isArray(resPublicacoes.data) ? resPublicacoes.data : [])
-        setQtdDocentes(Array.isArray(resUsuarios.data) ? resUsuarios.data.length : 0)
-      })
-      .catch(() => {})
-      .finally(() => setCarregando(false))
-  }, [])
+    const carregar = async () => {
+      try {
+        const res = await publicacaoService.listar({ Publicas: true })
+        setPublicacoes(Array.isArray(res.data) ? res.data : [])
+      } catch {}
+
+      if (isAdmin) {
+        try {
+          const res = await usuariosService.listar()
+          setQtdDocentes(Array.isArray(res.data) ? res.data.length : 0)
+        } catch {}
+      }
+
+      setCarregando(false)
+    }
+    carregar()
+  }, [isAdmin])
 
   const hoje = new Date()
   hoje.setHours(0, 0, 0, 0)
@@ -213,7 +243,7 @@ export default function HomePage() {
           <CardEstatisticaWeb icon={<IconeCalendario size={16} />}  iconCls="bg-[var(--blue-sub)] text-blue-l" n={carregando ? '—' : qtdEventos}  label="Eventos próximos"    tendencia={tendEventos} />
           <CardEstatisticaWeb icon={<IconeRelampago size={16} />}   iconCls="bg-green/[0.12] text-green"       n={carregando ? '—' : qtdAcoes}     label="Ações registradas"   tendencia={tendAcoes} />
           <CardEstatisticaWeb icon={<IconeJornal size={16} />}      iconCls="bg-amber/[0.12] text-amber"       n={carregando ? '—' : qtdNoticias}  label="Notícias publicadas" tendencia={tendNoticias} />
-          <CardEstatisticaWeb icon={<IconeUsuarios size={16} />}    iconCls="bg-[var(--blue-sub)] text-blue-l" n={carregando ? '—' : qtdDocentes ?? '—'} label="Docentes ativos"     tendencia={null} />
+          {isAdmin && <CardEstatisticaWeb icon={<IconeUsuarios size={16} />} iconCls="bg-[var(--blue-sub)] text-blue-l" n={carregando ? '—' : qtdDocentes ?? '—'} label="Docentes ativos" tendencia={null} />}
         </div>
 
         {/* Grid 2 colunas */}
@@ -253,12 +283,14 @@ export default function HomePage() {
             ) : atividadeRecente.length === 0 ? (
               <p className="text-[11px] text-t3">Sem atividade recente</p>
             ) : (
-              atividadeRecente.map((p, i) => (
+              atividadeRecente.map((p) => (
                 <ItemAtividadeWeb
                   key={p.id}
-                  iniciais={getIniciais({ name: p.nomePublicadoPor })}
-                  corAvatar={COR_AVATARES[i % COR_AVATARES.length]}
-                  texto={<><b>{p.nomePublicadoPor}</b> {textoAtividadePorTipo(p.tipo)}</>}
+                  icone={iconePorTipo(p.tipo)}
+                  iconeCls={corIconePorTipo(p.tipo)}
+                  label={labelAtividadePorTipo(p.tipo)}
+                  titulo={p.titulo}
+                  rota={rotaPorTipo(p.tipo)}
                   tempo={formatarTempo(p.publicadoEm)}
                 />
               ))
@@ -283,8 +315,9 @@ function CardEstatistica({ icon, iconCls, n, label }) {
 }
 
 function CardEventoMobile({ icon, badge, title, date }) {
+  const navigate = useNavigate()
   return (
-    <div className="flex-shrink-0 w-[120px] bg-s1 border border-bdr rounded-[12px] overflow-hidden">
+    <button onClick={() => navigate('/eventos')} className="flex-shrink-0 w-[120px] bg-s1 border border-bdr rounded-[12px] overflow-hidden text-left cursor-pointer font-sans hover:brightness-95 transition-all duration-200">
       <div className="w-full h-[58px] flex items-center justify-center relative text-icon"
            style={{ background: 'linear-gradient(135deg, var(--s2), var(--s3))' }}>
         {icon}
@@ -298,10 +331,10 @@ function CardEventoMobile({ icon, badge, title, date }) {
         )}
       </div>
       <div className="px-[9px] py-2 pb-[10px]">
-        <p className="text-[10px] font-semibold text-t1 mb-0.5 whitespace-nowrap overflow-hidden text-ellipsis">{title}</p>
+        <p className="text-[10px] font-semibold text-blue-l mb-0.5 whitespace-nowrap overflow-hidden text-ellipsis">{title}</p>
         <p className="text-[9px] text-t3 flex items-center gap-[3px]"><IconeCalendario size={12} />{date}</p>
       </div>
-    </div>
+    </button>
   )
 }
 
@@ -342,13 +375,16 @@ function CardEstatisticaWeb({ icon, iconCls, n, label, tendencia }) {
 }
 
 function ItemEventoWeb({ icon, nome, meta, tag, corTag }) {
+  const navigate = useNavigate()
   return (
     <div className="flex items-center gap-[10px] py-[9px] border-b border-bdr2 last:border-b-0 last:pb-0">
       <div className="w-[34px] h-[34px] rounded-[9px] bg-[var(--blue-sub)] border border-[var(--blue-bdr)] flex items-center justify-center text-blue-l flex-shrink-0">
         {icon}
       </div>
       <div style={{ minWidth: 0 }}>
-        <p className="text-[11px] font-semibold text-t1 mb-0.5">{nome}</p>
+        <button onClick={() => navigate('/eventos')} className="text-[11px] font-semibold text-blue-l bg-transparent border-none p-0 cursor-pointer font-sans text-left whitespace-nowrap overflow-hidden text-ellipsis max-w-full block mb-0.5 hover:opacity-75 transition-opacity">
+          {nome}
+        </button>
         <p className="text-[10px] text-t3 flex items-center gap-[3px]"><IconeCalendario size={12} />{meta}</p>
       </div>
       <span className={clsx(
@@ -361,15 +397,21 @@ function ItemEventoWeb({ icon, nome, meta, tag, corTag }) {
   )
 }
 
-function ItemAtividadeWeb({ iniciais, corAvatar, texto, tempo }) {
+function ItemAtividadeWeb({ icone, iconeCls, label, titulo, rota, tempo }) {
+  const navigate = useNavigate()
   return (
     <div className="flex items-center gap-[9px] py-[9px] border-b border-bdr2 last:border-b-0">
-      <div className="w-7 h-7 rounded-[8px] flex items-center justify-center text-[10px] font-bold text-white flex-shrink-0 font-sans"
-           style={{ background: corAvatar }}>
-        {iniciais}
+      <div className={clsx('w-7 h-7 rounded-[8px] flex items-center justify-center flex-shrink-0', iconeCls)}>
+        {icone}
       </div>
-      <div>
-        <p className="text-[10px] text-t1 leading-[1.4] [&_b]:text-blue-l [&_b]:font-semibold">{texto}</p>
+      <div style={{ minWidth: 0 }}>
+        <p className="text-[10px] text-t2 leading-[1.4]">{label}</p>
+        <button
+          onClick={() => navigate(rota)}
+          className="text-[10px] font-semibold text-blue-l bg-transparent border-none p-0 cursor-pointer font-sans text-left whitespace-nowrap overflow-hidden text-ellipsis max-w-full block hover:opacity-75 transition-opacity"
+        >
+          {titulo}
+        </button>
         <p className="text-[9px] text-t3 mt-px">{tempo}</p>
       </div>
     </div>

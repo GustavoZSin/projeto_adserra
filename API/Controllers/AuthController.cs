@@ -92,16 +92,20 @@ namespace API.Controllers
         }
 
         [HttpGet("me")]
-        public IActionResult Me()
+        public async Task<IActionResult> Me()
         {
             if (!User.Identity.IsAuthenticated)
                 return Unauthorized();
 
+            var id = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var nomeCompleto = id != null ? await _professorService.ObterNomePorIdUsuario(id) : null;
+
             return Ok(new
             {
-                id = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value,
+                id,
                 matricula = User.Identity.Name,
-                admin = User.IsInRole("Admin")
+                admin = User.IsInRole("Admin"),
+                nomeCompleto,
             });
         }
 
