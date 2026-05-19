@@ -22,6 +22,26 @@ api.interceptors.response.use(
   }
 )
 
+export const solicitacaoIngressoService = {
+  listar: (status) =>
+    axios.get('/SolicitacaoIngresso/listar-solicitacoes-por-status', {
+      params: { status },
+      withCredentials: true,
+    }),
+
+  aprovar: (id) =>
+    axios.post('/SolicitacaoIngresso/aprovar-solicitacao', null, {
+      params: { id },
+      withCredentials: true,
+    }),
+
+  reprovar: (id) =>
+    axios.post('/SolicitacaoIngresso/reprovar-solicitacao', null, {
+      params: { id },
+      withCredentials: true,
+    }),
+}
+
 export const authService = {
   loginComMatricula: (matricula, senha) =>
     api.post('/login-com-matricula', { matricula, senha }),
