@@ -38,7 +38,10 @@ export default function AppLayout() {
           <SbItem icon={<ImageIcon />}    label="Galeria"  active={isActive('/galeria')}   onClick={() => navigate('/galeria')} />
           <SbItem icon={<SendIcon />}     label="Publicar" active={isActive('/publicar')}  onClick={() => navigate('/publicar')} />
           {isAdmin && (
-            <SbItem icon={<ClipboardIcon />} label="Aprovações" active={isActive('/aprovar-cadastros')} badge={pendentes > 0 ? String(pendentes) : undefined} onClick={() => navigate('/aprovar-cadastros')} />
+            <SbItem icon={<ClipboardIcon />} label="Aprovações"  active={isActive('/aprovar-cadastros')}  badge={pendentes > 0 ? String(pendentes) : undefined} onClick={() => navigate('/aprovar-cadastros')} />
+          )}
+          {isAdmin && (
+            <SbItem icon={<UsersIcon />}     label="Usuários"    active={isActive('/gerenciar-usuarios')} onClick={() => navigate('/gerenciar-usuarios')} />
           )}
         </div>
 
@@ -70,11 +73,14 @@ export default function AppLayout() {
            aria-label="Navegação principal">
         <NavItem icon={<HomeIcon lg />}     label="Início"   active={isActive('/dashboard')} onClick={() => navigate('/dashboard')} />
         <NavItem icon={<CalendarIcon lg />} label="Eventos"  active={isActive('/eventos')}   onClick={() => navigate('/eventos')} />
-        <NavItem icon={<ImageIcon lg />}    label="Galeria"  active={isActive('/galeria')}   onClick={() => navigate('/galeria')} />
+        {!isAdmin && <NavItem icon={<ImageIcon lg />} label="Galeria" active={isActive('/galeria')} onClick={() => navigate('/galeria')} />}
         <NavItem icon={<SendIcon lg />}     label="Publicar" active={isActive('/publicar')}  onClick={() => navigate('/publicar')} />
         {isAdmin
-          ? <NavItem icon={<ClipboardIcon lg />} label="Aprovações" active={isActive('/aprovar-cadastros')} badge={pendentes > 0 ? String(pendentes) : undefined} onClick={() => navigate('/aprovar-cadastros')} />
-          : <NavItem icon={<UserIcon lg />}      label="Perfil"     active={isActive('/perfil')}            onClick={() => navigate('/perfil')} />
+          ? <>
+              <NavItem icon={<ClipboardIcon lg />} label="Aprovações" active={isActive('/aprovar-cadastros')}  badge={pendentes > 0 ? String(pendentes) : undefined} onClick={() => navigate('/aprovar-cadastros')} />
+              <NavItem icon={<UsersIcon lg />}     label="Usuários"   active={isActive('/gerenciar-usuarios')} onClick={() => navigate('/gerenciar-usuarios')} />
+            </>
+          : <NavItem icon={<UserIcon lg />} label="Perfil" active={isActive('/perfil')} onClick={() => navigate('/perfil')} />
         }
       </nav>
 
@@ -170,4 +176,8 @@ function SettingsIcon() {
 function ClipboardIcon({ lg }) {
   const s = lg ? 20 : 14
   return <svg width={s} height={s} viewBox="0 0 24 24" {...IC}><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg>
+}
+function UsersIcon({ lg }) {
+  const s = lg ? 20 : 14
+  return <svg width={s} height={s} viewBox="0 0 24 24" {...IC}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
 }
