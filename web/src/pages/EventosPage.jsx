@@ -1,15 +1,31 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { getIniciais } from '../utils/usuario'
+import { publicacaoService } from '../services/api'
 import clsx from 'clsx'
 
-// TODO: substituir por chamada à API — eventosService.listar()
-const MOCK_EVENTOS = [
-  { id: 1, titulo: 'Evento 2 FSG',      tipo: 'evento',   data: '2025-04-26', local: 'Campus Sede FSG',       badge: 'Em breve', badgeColor: 'blue',  tag: 'Evento',    tagColor: 'blue'  },
-  { id: 2, titulo: 'Semana Acadêmica',  tipo: 'acao',     data: '2025-04-30', local: 'Auditório Principal',   badge: 'Novo',     badgeColor: 'green', tag: 'Acadêmico', tagColor: 'green' },
-  { id: 3, titulo: 'Palestra STEM',     tipo: 'palestra', data: '2025-05-05', local: 'Sala 201 — Bloco B',    badge: null,       badgeColor: null,    tag: 'Palestra',  tagColor: 'amber' },
-]
+const TAG_MAP = {
+  evento:  { tag: 'Evento',  tagColor: 'blue'  },
+  acao:    { tag: 'Ação',    tagColor: 'green' },
+  noticia: { tag: 'Notícia', tagColor: 'amber' },
+  aviso:   { tag: 'Aviso',   tagColor: 'amber' },
+}
+
+const normalizarPublicacao = (p) => {
+  const tipo = p.tipo.toLowerCase()
+  const { tag, tagColor } = TAG_MAP[tipo] ?? { tag: p.tipo, tagColor: 'blue' }
+  return {
+    id: p.id,
+    titulo: p.titulo,
+    tipo,
+    data: p.data.split('T')[0],
+    local: p.local ?? '',
+    imagemCapaUrl: p.imagemCapaUrl ?? null,
+    tag,
+    tagColor,
+  }
+}
 
 const FILTROS = ['Todos', 'Próximos', 'Passados', 'Ações', 'Palestras']
 
@@ -41,7 +57,8 @@ export default function EventosPage() {
   const navigate              = useNavigate()
   const { user, isAdmin }     = useAuth()
   const [filtro, setFiltro]   = useState('Todos')
-  const [eventos, setEventos] = useState(MOCK_EVENTOS)
+  const [eventos, setEventos] = useState([])
+  const [carregando, setCarregando] = useState(true)
   const [deletando, setDeletando] = useState(null)
   const [confirmId, setConfirmId] = useState(null)
 
@@ -50,6 +67,21 @@ export default function EventosPage() {
   const eventoMap     = useMemo(() => new Map(eventos.map(e => [e.id, e])), [eventos])
   const eventoConfirm = eventoMap.get(confirmId)
 
+  useEffect(() => {
+    const carregar = async () => {
+      setCarregando(true)
+      try {
+        const { data } = await publicacaoService.listar()
+        setEventos(data.map(normalizarPublicacao))
+      } catch {
+        // mantém lista vazia em caso de erro
+      } finally {
+        setCarregando(false)
+      }
+    }
+    carregar()
+  }, [])
+
   const handleEditar = (id) => navigate(`/publicar?id=${id}`)
 
   const handleDeletar = async () => {
@@ -57,8 +89,7 @@ export default function EventosPage() {
     setConfirmId(null)
     setDeletando(id)
     try {
-      // TODO: await eventosService.deletar(id)
-      await new Promise(r => setTimeout(r, 600))
+      await publicacaoService.deletar(id)
       setEventos(prev => prev.filter(e => e.id !== id))
     } catch {
       // TODO: exibir feedback de erro
@@ -94,14 +125,16 @@ export default function EventosPage() {
         <div className="flex-1 overflow-y-auto min-h-0 px-[13px] py-[11px] pb-5 scrollbar-hide">
           <Filters filtro={filtro} setFiltro={setFiltro} className="mb-3" />
 
-          {visiveis.length === 0 && <p className="text-[11px] text-t3 text-center py-8">Nenhum evento encontrado.</p>}
+          {carregando && <p className="text-[11px] text-t3 text-center py-8">Carregando...</p>}
+          {!carregando && visiveis.length === 0 && <p className="text-[11px] text-t3 text-center py-8">Nenhum evento encontrado.</p>}
 
           {visiveis.map(ev => (
             <div key={ev.id} className="bg-s1 border border-bdr rounded-[13px] overflow-hidden mb-[9px]">
-              <div className="w-full h-20 flex items-center justify-center text-icon relative"
-                   style={{ background: 'linear-gradient(135deg, var(--s2), var(--s3))' }}>
-                <EventIcon tipo={ev.tipo} />
-                {ev.badge && <EventBadge label={ev.badge} color={ev.badgeColor} />}
+              <div className="w-full h-20 flex items-center justify-center text-icon relative overflow-hidden"
+                   style={ev.imagemCapaUrl ? {} : { background: 'linear-gradient(135deg, var(--s2), var(--s3))' }}>
+                {ev.imagemCapaUrl
+                  ? <img src={ev.imagemCapaUrl} alt={ev.titulo} className="absolute inset-0 w-full h-full object-cover" />
+                  : <EventIcon tipo={ev.tipo} />}
               </div>
               <div className="px-3 py-[10px] pb-3">
                 <div className="flex justify-between items-start mb-[5px] gap-[6px]">
@@ -154,15 +187,17 @@ export default function EventosPage() {
 
         <Filters filtro={filtro} setFiltro={setFiltro} className="mb-4" />
 
-        {visiveis.length === 0 && <p className="text-[11px] text-t3 text-center py-8">Nenhum evento encontrado.</p>}
+        {carregando && <p className="text-[11px] text-t3 text-center py-8">Carregando...</p>}
+        {!carregando && visiveis.length === 0 && <p className="text-[11px] text-t3 text-center py-8">Nenhum evento encontrado.</p>}
 
         <div className="grid grid-cols-3 gap-3">
           {visiveis.map(ev => (
             <div key={ev.id} className="bg-s1 border border-bdr rounded-[13px] overflow-hidden">
-              <div className="w-full h-[100px] flex items-center justify-center text-icon relative"
-                   style={{ background: 'linear-gradient(135deg, var(--s2), var(--s3))' }}>
-                <EventIcon tipo={ev.tipo} s={24} />
-                {ev.badge && <EventBadge label={ev.badge} color={ev.badgeColor} />}
+              <div className="w-full h-[100px] flex items-center justify-center text-icon relative overflow-hidden"
+                   style={ev.imagemCapaUrl ? {} : { background: 'linear-gradient(135deg, var(--s2), var(--s3))' }}>
+                {ev.imagemCapaUrl
+                  ? <img src={ev.imagemCapaUrl} alt={ev.titulo} className="absolute inset-0 w-full h-full object-cover" />
+                  : <EventIcon tipo={ev.tipo} s={24} />}
               </div>
               <div className="p-3">
                 <p className="text-[12px] font-bold text-t1 mb-1">{ev.titulo}</p>

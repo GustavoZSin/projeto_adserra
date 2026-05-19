@@ -22,6 +22,23 @@ api.interceptors.response.use(
   }
 )
 
+export const publicacaoService = {
+  listar: (params = {}) =>
+    axios.get('/publicacao', { params, withCredentials: true }),
+
+  obter: (id) =>
+    axios.get(`/publicacao/${id}`, { withCredentials: true }),
+
+  criar: (formData) =>
+    axios.post('/publicacao', formData, { withCredentials: true }),
+
+  editar: (id, formData) =>
+    axios.patch(`/publicacao/${id}`, formData, { withCredentials: true }),
+
+  deletar: (id) =>
+    axios.delete(`/publicacao/${id}`, { withCredentials: true }),
+}
+
 export const solicitacaoIngressoService = {
   listar: (status) =>
     axios.get('/SolicitacaoIngresso/listar-solicitacoes-por-status', {
