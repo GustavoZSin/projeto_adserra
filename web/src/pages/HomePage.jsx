@@ -6,6 +6,7 @@ import { getIniciais } from '../utils/usuario'
 import logoImg from '../assets/adserra-logo.png'
 import { publicacaoService, usuariosService } from '../services/api'
 import MenuAvatar from '../components/ui/MenuAvatar'
+import SinoDropdown from '../components/ui/SinoDropdown'
 
 
 function formatarDataEvento(dataStr, local) {
@@ -144,13 +145,7 @@ export default function HomePage() {
       <div className="flex flex-col md:hidden h-[calc(100vh-60px)] overflow-hidden">
         <header className="px-[15px] py-[11px] flex items-center justify-between flex-shrink-0 border-b border-bdr2 bg-bg">
           <LogoPequena />
-          <div className="flex items-center gap-2">
-            <button className="w-[30px] h-[30px] bg-s2 rounded-[9px] flex items-center justify-center text-t2 relative cursor-pointer border-none hover:bg-s3" aria-label="Notificações">
-              <IconeSino size={16} />
-              <span className="w-[6px] h-[6px] bg-red rounded-full absolute top-[5px] right-[5px] border-[1.5px] border-bg" aria-hidden="true" />
-            </button>
-            <MenuAvatar />
-          </div>
+          <MenuAvatar />
         </header>
 
         <div className="flex-1 overflow-y-auto min-h-0 px-[13px] py-[11px] pb-4 scrollbar-hide">
@@ -227,10 +222,7 @@ export default function HomePage() {
         {/* Topbar web */}
         <div className="flex items-center justify-between mb-[18px]">
           <p className="text-[19px] font-black text-t1">Início</p>
-          <button className="w-[33px] h-[33px] bg-s1 border-[1.5px] border-bdr rounded-[9px] flex items-center justify-center text-t2 cursor-pointer relative flex-shrink-0" aria-label="Notificações">
-            <IconeSino size={16} />
-            <span className="w-[6px] h-[6px] bg-red rounded-full absolute top-[5px] right-[5px] border-[1.5px] border-bg" aria-hidden="true" />
-          </button>
+          <SinoDropdown />
         </div>
 
         {/* Stats (4) */}

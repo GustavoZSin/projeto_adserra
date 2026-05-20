@@ -67,6 +67,23 @@ export const solicitacaoIngressoService = {
     }),
 }
 
+export const notificacaoService = {
+  listar: (status) =>
+    axios.get('/notificacoes', {
+      params: status ? { status } : {},
+      withCredentials: true,
+    }),
+
+  contarNaoLidas: () =>
+    axios.get('/notificacoes/nao-lidas/contagem', { withCredentials: true }),
+
+  marcarComoLida: (id) =>
+    axios.patch(`/notificacoes/${id}/ler`, null, { withCredentials: true }),
+
+  marcarTodasComoLidas: () =>
+    axios.patch('/notificacoes/ler-todas', null, { withCredentials: true }),
+}
+
 export const perfilService = {
   obter: () =>
     axios.get('/perfil', { withCredentials: true }),

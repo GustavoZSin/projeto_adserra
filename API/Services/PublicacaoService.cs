@@ -187,15 +187,18 @@ namespace API.Services
 
             return true;
         }
-        internal async Task<bool> EditarPublicacaoAsync(int id, EditarPublicacaoDto dto, Imagem? imagemCapa, List<PublicacaoImagem> imagensGaleria)
+        internal async Task<(bool Sucesso, Publicacao? PublicadaAgora)> EditarPublicacaoAsync(int id, EditarPublicacaoDto dto, Imagem? imagemCapa, List<PublicacaoImagem> imagensGaleria)
         {
             var publicacao = await _context.Publicacoes
                 .Include(p => p.ImagemCapa)
                 .Include(p => p.Imagens).ThenInclude(pi => pi.Imagem)
+                .Include(p => p.PublicadoPor)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
             if (publicacao == null)
-                return false;
+                return (false, null);
+
+            var eraRascunho = !publicacao.Publica;
 
             if (dto.Tipo.HasValue)
                 publicacao.Tipo = dto.Tipo.Value;
@@ -241,7 +244,9 @@ namespace API.Services
             }
 
             await _context.SaveChangesAsync();
-            return true;
+
+            var transitouParaPublico = eraRascunho && publicacao.Publica;
+            return (true, transitouParaPublico ? publicacao : null);
         }
 
         internal async Task<string> UploadImagemAsync(IFormFile arquivo)

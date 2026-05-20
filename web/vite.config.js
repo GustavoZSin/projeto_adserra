@@ -26,6 +26,13 @@ export default defineConfig({
         target: 'http://localhost:5079',
         changeOrigin: true,
       },
+      '/notificacoes': {
+        target: 'http://localhost:5079',
+        changeOrigin: true,
+        bypass(req) {
+          if (req.headers.accept?.includes('text/html')) return '/index.html'
+        },
+      },
       '/perfil': {
         target: 'http://localhost:5079',
         changeOrigin: true,

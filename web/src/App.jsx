@@ -21,6 +21,7 @@ const GerenciarUsuariosPage  = lazy(() => import('./pages/GerenciarUsuariosPage'
 const EventoDetalhePage      = lazy(() => import('./pages/EventoDetalhePage'))
 const GaleriaPage            = lazy(() => import('./pages/GaleriaPage'))
 const PerfilPage             = lazy(() => import('./pages/PerfilPage'))
+const NotificacoesPage       = lazy(() => import('./pages/NotificacoesPage'))
 
 export default function App() {
   return (
@@ -45,7 +46,8 @@ export default function App() {
             <Route path="/eventos"      element={<EventosPage />} />
             <Route path="/eventos/:id"  element={<EventoDetalhePage />} />
             <Route path="/galeria"      element={<GaleriaPage />} />
-            <Route path="/perfil"       element={<PerfilPage />} />
+            <Route path="/perfil"         element={<PerfilPage />} />
+            <Route path="/notificacoes"  element={<NotificacoesPage />} />
             <Route path="/publicar"          element={<AdminRoute><PublicarPage /></AdminRoute>} />
             <Route path="/aprovar-cadastros"   element={<AdminRoute><AprovarCadastrosPage /></AdminRoute>} />
             <Route path="/gerenciar-usuarios"  element={<AdminRoute><GerenciarUsuariosPage /></AdminRoute>} />

@@ -87,7 +87,8 @@ namespace API.Controllers
             if (!result)
                 return BadRequest(new { message = "Falha ao criar a publicação. Tente novamente mais tarde." });
 
-            await notificacaoService.CriarNotificacoesParaPublicacaoAsync(publicacao, userId);
+            if (publicacao.Publica)
+                await notificacaoService.CriarNotificacoesParaPublicacaoAsync(publicacao, userId);
 
             return Ok(new { message = "Nova publicação criada com sucesso." });
         }
@@ -167,10 +168,17 @@ namespace API.Controllers
                 }
             }
 
-            var result = await publicacaoService.EditarPublicacaoAsync(id, dto, imagemCapa, imagensGaleria);
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrWhiteSpace(userId))
+                return Unauthorized();
+
+            var (result, publicacaoPublicada) = await publicacaoService.EditarPublicacaoAsync(id, dto, imagemCapa, imagensGaleria);
 
             if (!result)
                 return NotFound(new { message = "Publicação não encontrada." });
+
+            if (publicacaoPublicada != null)
+                await notificacaoService.CriarNotificacoesParaPublicacaoAsync(publicacaoPublicada, userId);
 
             return Ok(new { message = "Publicação atualizada com sucesso." });
         }
