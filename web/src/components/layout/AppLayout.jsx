@@ -18,8 +18,8 @@ export default function AppLayout() {
   const navigate     = useNavigate()
   const { pathname } = useLocation()
   const { user, isAdmin }  = useAuth()
-  const { pendentes }      = useAprovacoesPendentes()
-  const { notificacoes }   = useNotificacoes()
+  const { pendentes }    = useAprovacoesPendentes()
+  const { notificacoes } = useNotificacoes()
 
   const isActive    = (path) => pathname === path
   const initials    = getInitials(user)

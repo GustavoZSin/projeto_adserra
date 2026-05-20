@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { getIniciais } from '../../utils/usuario'
 import { authService } from '../../services/api'
+import SinoDropdown from './SinoDropdown'
 
 export default function MenuAvatar() {
   const { user }    = useAuth()
@@ -25,6 +26,8 @@ export default function MenuAvatar() {
   }
 
   return (
+    <div className="flex items-center gap-2">
+    <SinoDropdown />
     <div className="relative flex-shrink-0" ref={ref}>
       <button
         className="w-[30px] h-[30px] bg-blue-grad rounded-[9px] flex items-center justify-center text-[11px] font-bold text-white tracking-[0.5px] font-sans select-none cursor-pointer border-none"
@@ -50,6 +53,7 @@ export default function MenuAvatar() {
           </button>
         </div>
       )}
+    </div>
     </div>
   )
 }
