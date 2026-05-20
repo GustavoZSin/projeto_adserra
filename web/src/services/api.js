@@ -67,6 +67,17 @@ export const solicitacaoIngressoService = {
     }),
 }
 
+export const perfilService = {
+  obter: () =>
+    axios.get('/perfil', { withCredentials: true }),
+
+  atualizar: (dados) =>
+    axios.patch('/perfil', dados, { withCredentials: true }),
+
+  alterarSenha: (dados) =>
+    axios.patch('/perfil/senha', dados, { withCredentials: true }),
+}
+
 export const authService = {
   loginComMatricula: (matricula, senha) =>
     api.post('/login-com-matricula', { matricula, senha }),
