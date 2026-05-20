@@ -26,6 +26,15 @@ export default defineConfig({
         target: 'http://localhost:5079',
         changeOrigin: true,
       },
+      '/perfil': {
+        target: 'http://localhost:5079',
+        changeOrigin: true,
+        bypass(req) {
+          // Navegação de página → serve o index.html do React
+          // Chamadas de API (fetch/axios) → encaminha ao backend
+          if (req.headers.accept?.includes('text/html')) return '/index.html'
+        },
+      },
     },
   },
 })
