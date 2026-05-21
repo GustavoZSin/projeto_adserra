@@ -43,6 +43,12 @@ public class AppDbContext : IdentityDbContext<User>
             .Property(p => p.Departamento)
             .HasMaxLength(100);
 
+        builder.Entity<Professor>()
+            .HasOne(p => p.SolicitacaoIngresso)
+            .WithOne()
+            .HasForeignKey<Professor>(p => p.SolicitacaoIngressoId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         builder.Entity<SolicitacaoIngresso>()
             .Property(s => s.EmailInstitucional)
             .HasMaxLength(255);

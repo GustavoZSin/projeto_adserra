@@ -13,5 +13,7 @@ namespace API.Models
         public DateTime DataCriacao { get; set; } = DateTime.UtcNow;
         public string IdUsuario { get; set; } = null!;
         public User Usuario { get; set; } = null!;
+        public int? SolicitacaoIngressoId { get; set; }
+        public SolicitacaoIngresso? SolicitacaoIngresso { get; set; }
     }
 }

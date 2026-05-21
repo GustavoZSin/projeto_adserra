@@ -36,15 +36,26 @@ namespace API.Services
         {
             var professor = await _context.Professores
                 .Include(p => p.Usuario)
+                .Include(p => p.SolicitacaoIngresso)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
             if (professor == null)
                 return false;
 
-            _context.Professores.Remove(professor);
-            await _userManager.DeleteAsync(professor.Usuario);
+            if (professor.SolicitacaoIngresso != null)
+                _context.SolicitacoesIngresso.Remove(professor.SolicitacaoIngresso);
 
+            _context.Professores.Remove(professor);
             await _context.SaveChangesAsync();
+
+            if (professor.Usuario != null)
+            {
+                var identityResult = await _userManager.DeleteAsync(professor.Usuario);
+
+                if (!identityResult.Succeeded)
+                    throw new Exception("Erro ao remover usuário.");
+            }
+
             return true;
         }
     }
