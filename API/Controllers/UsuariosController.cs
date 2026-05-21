@@ -19,14 +19,21 @@ namespace API.Controllers
         }
 
         [HttpDelete]
-        public async Task<IActionResult> DeletarUsuario([FromQuery]int id)
+        public async Task<IActionResult> DeletarUsuario([FromQuery] int id)
         {
-            var result = await _usuariosService.DeletarUsuarioAsync(id);
+            try
+            {
+                var result = await _usuariosService.DeletarUsuarioAsync(id);
 
-            if (!result)
-                return NotFound(new { message = "Usuário não encontrado" });
+                if (!result)
+                    return NotFound(new { message = "Usuário não encontrado" });
 
-            return Ok(new { message = "Usuário deletado com sucesso" });
+                return Ok(new { message = "Usuário deletado com sucesso" });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { message = "Ocorreu um erro ao deletar o usuário." });
+            }
         }
     }
 }

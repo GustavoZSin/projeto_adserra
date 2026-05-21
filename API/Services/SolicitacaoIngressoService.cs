@@ -22,7 +22,7 @@ namespace API.Services
 
             if (solicitacao == null || solicitacao.StatusSolicitacao != EnumeradorDeStatus.Pendente)
                 return false;
-            
+
             var identityUser = await _userManager.FindByEmailAsync(solicitacao.EmailInstitucional);
             if (identityUser == null)
             {
@@ -43,7 +43,9 @@ namespace API.Services
                 solicitacao.EmailInstitucional,
                 solicitacao.Departamento,
                 identityUser.Id,
-                identityUser
+                identityUser,
+                solicitacao.Id,
+                solicitacao
             );
 
             if (!professorCriado) return false;
@@ -51,7 +53,7 @@ namespace API.Services
             var token = await _userManager.GeneratePasswordResetTokenAsync(identityUser);
             var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
 
-            var frontendUrl = _configuration["Frontend:BaseUrl"] ?? "http://localhost:5173"; 
+            var frontendUrl = _configuration["Frontend:BaseUrl"] ?? "http://localhost:5173";
             var link = $"{frontendUrl}/redefinir-senha?token={encodedToken}&email={identityUser.Email}";
             await _emailService.EnviarConfirmacao(identityUser.Email!, link);
 

@@ -47,7 +47,7 @@ builder.Services.AddScoped<NotificacaoService>();
 
 builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
 {
-    options.TokenLifespan = TimeSpan.FromHours(2);
+    options.TokenLifespan = TimeSpan.FromDays(3);
 });
 
 builder.Services.ConfigureApplicationCookie(options =>

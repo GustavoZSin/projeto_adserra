@@ -13,7 +13,7 @@ namespace API.Services
             _context = context;
         }
 
-        internal async Task<bool> CriarProfessorAsync(string nomeCompleto, string matricula, string emailInstitucional, string departamento, string idUserIdentity, User userIdentity)
+        internal async Task<bool> CriarProfessorAsync(string nomeCompleto, string matricula, string emailInstitucional, string departamento, string idUserIdentity, User userIdentity, int solicitacaoIngressoId, SolicitacaoIngresso solicitacao)
         {
             var professor = new Professor
             {
@@ -22,7 +22,9 @@ namespace API.Services
                 EmailInstitucional = emailInstitucional,
                 Departamento = departamento,
                 IdUsuario = idUserIdentity,
-                Usuario = userIdentity
+                Usuario = userIdentity,
+                SolicitacaoIngressoId = solicitacaoIngressoId,
+                SolicitacaoIngresso = solicitacao
             };
 
             _context.Professores.Add(professor);
