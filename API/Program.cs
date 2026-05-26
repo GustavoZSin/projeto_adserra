@@ -43,6 +43,7 @@ builder.Services.AddScoped<EmailTemplateService>();
 builder.Services.AddScoped<EmailService>();
 builder.Services.AddTransient<IEmailSender, EmailSender>();
 builder.Services.AddHttpClient<SupabaseStorageService>();
+builder.Services.AddScoped<ImagemService>();
 builder.Services.AddScoped<NotificacaoService>();
 
 builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>

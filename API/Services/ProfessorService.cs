@@ -1,17 +1,12 @@
-﻿using API.Data;
+using API.Data;
 using API.Models;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Services
 {
-    public class ProfessorService
+    public class ProfessorService(AppDbContext context)
     {
-        private readonly AppDbContext _context;
-        public ProfessorService(AppDbContext context)
-        {
-            _context = context;
-        }
+        private readonly AppDbContext _context = context;
 
         internal async Task<bool> CriarProfessorAsync(string nomeCompleto, string matricula, string emailInstitucional, string departamento, string idUserIdentity, User userIdentity, int solicitacaoIngressoId, SolicitacaoIngresso solicitacao)
         {
@@ -33,16 +28,20 @@ namespace API.Services
             return true;
         }
 
-        internal async Task<Professor> ObterPorMatricula(string matricula)
+        internal async Task<Professor?> ObterPorMatricula(string matricula)
         {
-            return await _context.Professores.FirstOrDefaultAsync(p => p.Matricula == matricula);
+            return await _context.Professores
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.Matricula == matricula);
         }
 
         internal async Task<string?> ObterNomePorIdUsuario(string idUsuario)
         {
-            var professor = await _context.Professores
-                .FirstOrDefaultAsync(p => p.IdUsuario == idUsuario);
-            return professor?.NomeCompleto;
+            return await _context.Professores
+                .AsNoTracking()
+                .Where(p => p.IdUsuario == idUsuario)
+                .Select(p => p.NomeCompleto)
+                .FirstOrDefaultAsync();
         }
     }
 }

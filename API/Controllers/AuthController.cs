@@ -1,13 +1,13 @@
-﻿using API.DTOs;
+using API.DTOs;
 using API.DTOs.Senha;
 using API.Models;
 using API.Services;
+using API.Services.Email;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.Data;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using System.Text;
 
 namespace API.Controllers
@@ -15,13 +15,18 @@ namespace API.Controllers
     [ApiController]
     [Route("[controller]")]
     [Tags("Autenticação")]
-    public class AuthController(SignInManager<User> signInManager, UserManager<User> userManager, ProfessorService professorService, IConfiguration configuration, IEmailSender emailSender) : ControllerBase
+    public class AuthController(
+        SignInManager<User> signInManager,
+        UserManager<User> userManager,
+        ProfessorService professorService,
+        IConfiguration configuration,
+        EmailService emailService) : ControllerBase
     {
         private readonly SignInManager<User> _signInManager = signInManager;
         private readonly UserManager<User> _userManager = userManager;
         private readonly ProfessorService _professorService = professorService;
         private readonly IConfiguration _configuration = configuration;
-        private readonly IEmailSender _emailSender = emailSender;
+        private readonly EmailService _emailService = emailService;
 
         [HttpPost("registrar-admin")]
         public async Task<IActionResult> RegistrarAdmin([FromBody] RegistrarAdminDto dto)
@@ -69,9 +74,12 @@ namespace API.Controllers
         [HttpPost("login-com-matricula")]
         public async Task<IActionResult> LoginComMatricula([FromBody] LoginDto dto)
         {
-            //TODO: Ajustar retorno para casos de erro
             var professor = await _professorService.ObterPorMatricula(dto.Matricula);
-            var user = await _userManager.Users.FirstOrDefaultAsync(u => u.Id == professor.IdUsuario);
+
+            if (professor == null)
+                return Unauthorized("Usuário não encontrado");
+
+            var user = await _userManager.FindByIdAsync(professor.IdUsuario);
 
             if (user == null)
                 return Unauthorized("Usuário não encontrado");
@@ -94,10 +102,10 @@ namespace API.Controllers
         [HttpGet("me")]
         public async Task<IActionResult> Me()
         {
-            if (!User.Identity.IsAuthenticated)
+            if (!User.Identity!.IsAuthenticated)
                 return Unauthorized();
 
-            var id = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var id = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var nomeCompleto = id != null ? await _professorService.ObterNomePorIdUsuario(id) : null;
 
             return Ok(new
@@ -123,18 +131,10 @@ namespace API.Controllers
                 var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
                 var encodedEmail = Uri.EscapeDataString(dto.Email);
 
-                //TODO: ajustar url correta
-                //var baseUrl = _configuration["Frontend:BaseUrl"];
-                var baseUrl = "http://localhost:5173";
-                var resetLink = $"{baseUrl}/redefinir-senha?email={encodedEmail}&token={encodedToken}";
+                var frontendUrl = _configuration["Frontend:BaseUrl"] ?? "http://localhost:5173";
+                var resetLink = $"{frontendUrl}/redefinir-senha?email={encodedEmail}&token={encodedToken}";
 
-                var body = $@"
-                <p>Olá,</p>
-                <p>Você solicitou a redefinição de senha.</p>
-                <p><a href='{resetLink}'>Clique aqui para redefinir sua senha</a></p>
-                <p>Se você não solicitou, ignore este e-mail.</p>";
-
-                await _emailSender.SendEmailAsync(dto.Email, "Recuperação de Senha", body);
+                await _emailService.EnviarResetSenha(dto.Email, resetLink);
             }
 
             return Ok(new { mensagem = "Se o e-mail estiver cadastrado, você receberá instruções para redefinir sua senha." });
