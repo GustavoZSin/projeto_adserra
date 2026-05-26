@@ -4,6 +4,7 @@ using API.Models.Enums;
 using API.Services.Email;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.EntityFrameworkCore;
 using System.Text;
 
 namespace API.Services
@@ -72,9 +73,12 @@ namespace API.Services
             return true;
         }
 
-        internal List<SolicitacaoIngresso> ListarSolicitacoesPorStatus(EnumeradorDeStatus status)
+        internal async Task<List<SolicitacaoIngresso>> ListarSolicitacoesPorStatus(EnumeradorDeStatus status)
         {
-            return _context.SolicitacoesIngresso.Where(s => s.StatusSolicitacao == status).ToList();
+            return await _context.SolicitacoesIngresso
+                .AsNoTracking()
+                .Where(s => s.StatusSolicitacao == status)
+                .ToListAsync();
         }
 
         internal async Task<bool> ReprovarSolicitacao(int id)

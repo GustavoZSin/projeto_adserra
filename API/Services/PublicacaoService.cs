@@ -1,4 +1,4 @@
-﻿using API.Data;
+using API.Data;
 using API.DTOs;
 using API.DTOs.Response;
 using API.Models;
@@ -24,9 +24,11 @@ namespace API.Services
             await _context.SaveChangesAsync();
             return true;
         }
+
         internal async Task<List<PublicacaoResponse>> ListarPublicacoesAsync(FiltroPublicacaoDto filtro)
         {
             var query = _context.Publicacoes
+                .AsNoTracking()
                 .Include(p => p.ImagemCapa)
                 .Include(p => p.PublicadoPor)
                 .Include(p => p.Imagens).ThenInclude(pi => pi.Imagem)
@@ -35,10 +37,7 @@ namespace API.Services
             if (filtro.Tipo.HasValue)
                 query = query.Where(p => p.Tipo == filtro.Tipo.Value);
 
-            var hoje = DateTime.SpecifyKind(
-                DateTime.Now,
-                DateTimeKind.Unspecified
-            );
+            var hoje = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified);
 
             if (filtro.StatusTemporal.HasValue)
             {
@@ -55,51 +54,54 @@ namespace API.Services
             }
 
             if (filtro.DataInicio.HasValue)
-            {
-                var dataInicio = DateTime.SpecifyKind(
-                    filtro.DataInicio.Value,
-                    DateTimeKind.Unspecified
-                );
-
-                query = query.Where(p => p.Data >= dataInicio);
-            }
+                query = query.Where(p => p.Data >= DateTime.SpecifyKind(filtro.DataInicio.Value, DateTimeKind.Unspecified));
 
             if (filtro.DataFim.HasValue)
-            {
-                var dataFim = DateTime.SpecifyKind(
-                    filtro.DataFim.Value,
-                    DateTimeKind.Unspecified
-                );
-
-                query = query.Where(p => p.Data <= dataFim);
-            }
+                query = query.Where(p => p.Data <= DateTime.SpecifyKind(filtro.DataFim.Value, DateTimeKind.Unspecified));
 
             if (filtro.Publicas.HasValue)
                 query = query.Where(p => p.Publica == filtro.Publicas.Value);
 
             var entidades = await query.ToListAsync();
 
-            var publicacoes = new List<PublicacaoResponse>();
-
-            foreach (var p in entidades)
-            {
-                string? imagemUrl = null;
-
-                if (p.ImagemCapa != null)
-                    imagemUrl = await _storageService.GerarSignedUrlAsync(p.ImagemCapa.CaminhoArquivo);
-
-                List<ImagemPublicacaoResponse> imagensPublicacao = [];
-                foreach (var ip in p.Imagens.Where(ip => ip.Imagem != null))
+            var todosCaminhos = entidades
+                .SelectMany(p =>
                 {
-                    var ipUrl = await _storageService.GerarSignedUrlAsync(ip.Imagem.CaminhoArquivo);
-                    imagensPublicacao.Add(new ImagemPublicacaoResponse
-                    {
-                        URL = ipUrl,
-                        Id = ip.Imagem.Id
-                    });
-                }
+                    var caminhos = new List<string?>();
+                    if (p.ImagemCapa != null)
+                        caminhos.Add(p.ImagemCapa.CaminhoArquivo);
+                    caminhos.AddRange(p.Imagens.Where(ip => ip.Imagem != null).Select(ip => ip.Imagem.CaminhoArquivo));
+                    return caminhos;
+                })
+                .Where(c => c != null)
+                .Distinct()
+                .Cast<string>()
+                .ToList();
 
-                publicacoes.Add(new PublicacaoResponse
+            Dictionary<string, string> urlMap = [];
+            if (todosCaminhos.Count > 0)
+            {
+                var signTasks = todosCaminhos
+                    .Select(c => (caminho: c, task: _storageService.GerarSignedUrlAsync(c)))
+                    .ToList();
+
+                await Task.WhenAll(signTasks.Select(x => x.task));
+                urlMap = signTasks.ToDictionary(x => x.caminho, x => x.task.Result);
+            }
+
+            return entidades.Select(p =>
+            {
+                var imagemUrl = p.ImagemCapa != null && urlMap.TryGetValue(p.ImagemCapa.CaminhoArquivo, out var u) ? u : null;
+                var imagensPublicacao = p.Imagens
+                    .Where(ip => ip.Imagem != null)
+                    .Select(ip => new ImagemPublicacaoResponse
+                    {
+                        URL = urlMap[ip.Imagem.CaminhoArquivo],
+                        Id = ip.Imagem.Id
+                    })
+                    .ToList();
+
+                return new PublicacaoResponse
                 {
                     Id = p.Id,
                     Tipo = p.Tipo.ToString(),
@@ -112,14 +114,14 @@ namespace API.Services
                     ImagemCapaUrl = imagemUrl,
                     Publica = p.Publica,
                     ImagensPublicacao = imagensPublicacao.Count > 0 ? imagensPublicacao : null
-                });
-            }
-
-            return publicacoes;
+                };
+            }).ToList();
         }
+
         internal async Task<PublicacaoResponse?> ObterPublicacaoPorIdAsync(int id)
         {
             var p = await _context.Publicacoes
+                .AsNoTracking()
                 .Include(x => x.PublicadoPor)
                 .Include(x => x.ImagemCapa)
                 .Include(x => x.Imagens).ThenInclude(pi => pi.Imagem)
@@ -128,21 +130,32 @@ namespace API.Services
             if (p == null)
                 return null;
 
-            string? imagemUrl = null;
-
+            var caminhos = new List<string>();
             if (p.ImagemCapa != null)
-                imagemUrl = await _storageService.GerarSignedUrlAsync(p.ImagemCapa.CaminhoArquivo);
+                caminhos.Add(p.ImagemCapa.CaminhoArquivo);
+            caminhos.AddRange(p.Imagens.Where(ip => ip.Imagem != null).Select(ip => ip.Imagem.CaminhoArquivo));
+            caminhos = [.. caminhos.Distinct()];
 
-            List<ImagemPublicacaoResponse> imagensPublicacao = [];
-            foreach (var ip in p.Imagens.Where(ip => ip.Imagem != null))
+            Dictionary<string, string> urlMap = [];
+            if (caminhos.Count > 0)
             {
-                var ipUrl = await _storageService.GerarSignedUrlAsync(ip.Imagem.CaminhoArquivo);
-                imagensPublicacao.Add(new ImagemPublicacaoResponse
-                {
-                    URL = ipUrl,
-                    Id = ip.Imagem.Id
-                });
+                var signTasks = caminhos
+                    .Select(c => (caminho: c, task: _storageService.GerarSignedUrlAsync(c)))
+                    .ToList();
+
+                await Task.WhenAll(signTasks.Select(x => x.task));
+                urlMap = signTasks.ToDictionary(x => x.caminho, x => x.task.Result);
             }
+
+            var imagemUrl = p.ImagemCapa != null && urlMap.TryGetValue(p.ImagemCapa.CaminhoArquivo, out var url) ? url : null;
+            var imagensPublicacao = p.Imagens
+                .Where(ip => ip.Imagem != null)
+                .Select(ip => new ImagemPublicacaoResponse
+                {
+                    URL = urlMap[ip.Imagem.CaminhoArquivo],
+                    Id = ip.Imagem.Id
+                })
+                .ToList();
 
             return new PublicacaoResponse
             {
@@ -159,6 +172,7 @@ namespace API.Services
                 ImagensPublicacao = imagensPublicacao.Count > 0 ? imagensPublicacao : null
             };
         }
+
         internal async Task<bool> DeletarPublicacaoAsync(int id)
         {
             var publicacao = await _context.Publicacoes
@@ -187,6 +201,7 @@ namespace API.Services
 
             return true;
         }
+
         internal async Task<(bool Sucesso, Publicacao? PublicadaAgora)> EditarPublicacaoAsync(int id, EditarPublicacaoDto dto, Imagem? imagemCapa, List<PublicacaoImagem> imagensGaleria)
         {
             var publicacao = await _context.Publicacoes

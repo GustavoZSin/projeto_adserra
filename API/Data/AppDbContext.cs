@@ -109,5 +109,21 @@ public class AppDbContext : IdentityDbContext<User>
         builder.Entity<Notificacao>()
             .Property(n => n.DataCriacao)
             .HasColumnType("timestamp without time zone");
+
+        // Índices para consultas frequentes
+        builder.Entity<Notificacao>()
+            .HasIndex(n => n.IdUsuario);
+
+        builder.Entity<Notificacao>()
+            .HasIndex(n => new { n.IdUsuario, n.Lida });
+
+        builder.Entity<Publicacao>()
+            .HasIndex(p => p.Data);
+
+        builder.Entity<Publicacao>()
+            .HasIndex(p => new { p.Tipo, p.Publica });
+
+        builder.Entity<Professor>()
+            .HasIndex(p => p.IdUsuario);
     }
 }

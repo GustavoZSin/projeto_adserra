@@ -1,4 +1,4 @@
-﻿using API.DTOs;
+using API.DTOs;
 using API.Models;
 using API.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -33,30 +33,40 @@ namespace API.Controllers
                 };
             }
 
-            var imagensParaGaleria = new List<PublicacaoImagem>();
+            List<PublicacaoImagem> imagensParaGaleria = [];
             if (dto.ImagensParaGaleria != null && dto.ImagensParaGaleria.Count != 0)
             {
-                int ordem = 0;
-
-                foreach (var arquivo in dto.ImagensParaGaleria)
-                {
-                    var caminhoArquivo = await publicacaoService.UploadImagemAsync(arquivo);
-
-                    var imagemPublicacao = new Imagem
+                var uploadTasks = dto.ImagensParaGaleria
+                    .Select(async (arquivo, idx) =>
                     {
-                        CaminhoArquivo = caminhoArquivo,
-                        ContentType = arquivo.ContentType,
-                        NomeArquivo = arquivo.FileName,
-                        CriadoEm = DateTime.UtcNow
-                    };
-
-                    imagensParaGaleria.Add(new PublicacaoImagem
-                    {
-                        Imagem = imagemPublicacao,
-                        Ordem = ordem++
+                        var caminho = await publicacaoService.UploadImagemAsync(arquivo);
+                        return (caminho, arquivo, ordem: idx);
                     });
-                }
+
+                var resultados = await Task.WhenAll(uploadTasks);
+
+                imagensParaGaleria = [.. resultados
+                    .OrderBy(r => r.ordem)
+                    .Select(r => new PublicacaoImagem
+                    {
+                        Imagem = new Imagem
+                        {
+                            CaminhoArquivo = r.caminho,
+                            ContentType = r.arquivo.ContentType,
+                            NomeArquivo = r.arquivo.FileName,
+                            CriadoEm = DateTime.UtcNow
+                        },
+                        Ordem = r.ordem
+                    })];
             }
+
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrWhiteSpace(userId))
+                return Unauthorized();
+
+            var publicadoPor = await userManager.FindByIdAsync(userId);
+            if (publicadoPor == null)
+                return Unauthorized();
 
             var publicacao = new Publicacao
             {
@@ -68,19 +78,9 @@ namespace API.Controllers
                 ImagemCapa = imagemCapa,
                 Publica = dto.Publica,
                 PublicadoEm = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified),
+                PublicadoPor = publicadoPor,
                 Imagens = imagensParaGaleria,
             };
-
-            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrWhiteSpace(userId))
-                return Unauthorized();
-
-            var publicadoPor = await userManager.FindByIdAsync(userId);
-            if (publicadoPor == null)
-                return Unauthorized();
-
-            publicacao.PublicadoPor = publicadoPor;
-            publicacao.PublicadoEm = DateTime.UtcNow;
 
             var result = await publicacaoService.NovaPublicacao(publicacao);
 
@@ -143,29 +143,31 @@ namespace API.Controllers
                 };
             }
 
-            var imagensGaleria = new List<PublicacaoImagem>();
+            List<PublicacaoImagem> imagensGaleria = [];
             if (dto.ImagensParaGaleria != null && dto.ImagensParaGaleria.Count != 0)
             {
-                int ordem = 0;
-
-                foreach (var arquivo in dto.ImagensParaGaleria)
-                {
-                    var caminhoArquivo = await publicacaoService.UploadImagemAsync(arquivo);
-
-                    var imagemGaleria = new Imagem
+                var uploadTasks = dto.ImagensParaGaleria
+                    .Select(async (arquivo, idx) =>
                     {
-                        CaminhoArquivo = caminhoArquivo,
-                        ContentType = arquivo.ContentType,
-                        NomeArquivo = arquivo.FileName,
-                        CriadoEm = DateTime.UtcNow
-                    };
-
-                    imagensGaleria.Add(new PublicacaoImagem
-                    {
-                        Imagem = imagemGaleria,
-                        Ordem = ordem++
+                        var caminho = await publicacaoService.UploadImagemAsync(arquivo);
+                        return (caminho, arquivo, ordem: idx);
                     });
-                }
+
+                var resultados = await Task.WhenAll(uploadTasks);
+
+                imagensGaleria = [.. resultados
+                    .OrderBy(r => r.ordem)
+                    .Select(r => new PublicacaoImagem
+                    {
+                        Imagem = new Imagem
+                        {
+                            CaminhoArquivo = r.caminho,
+                            ContentType = r.arquivo.ContentType,
+                            NomeArquivo = r.arquivo.FileName,
+                            CriadoEm = DateTime.UtcNow
+                        },
+                        Ordem = r.ordem
+                    })];
             }
 
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
