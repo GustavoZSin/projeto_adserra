@@ -11,7 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("SupabaseConnection")
     ?? throw new InvalidOperationException("Connection string 'SupabaseConnection' não encontrada.");
 
-builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
+builder.Services.AddDbContextPool<AppDbContext>(options => options.UseNpgsql(connectionString));
 
 builder.Services.AddAuthorization();
 
@@ -43,6 +43,7 @@ builder.Services.AddScoped<EmailTemplateService>();
 builder.Services.AddScoped<EmailService>();
 builder.Services.AddTransient<IEmailSender, EmailSender>();
 builder.Services.AddHttpClient<SupabaseStorageService>();
+builder.Services.AddScoped<ImagemService>();
 builder.Services.AddScoped<NotificacaoService>();
 
 builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
@@ -65,6 +66,11 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.LogoutPath = "/auth/logout";
 });
 
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+});
+
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -85,6 +91,7 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+app.UseResponseCompression();
 app.UseHttpsRedirection();
 
 app.UseCors("Frontend");
