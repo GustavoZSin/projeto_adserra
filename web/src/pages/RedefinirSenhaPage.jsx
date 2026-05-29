@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate, useSearchParams, Link } from 'react-router-dom'
 import axios from 'axios'
 import { Input } from '../components/ui/Input'
+import { ArrowLeft, Key, CheckCircle2, AlertTriangle, Check, Circle, Loader2 } from 'lucide-react'
 
 export default function RedefinirSenhaPage() {
   const navigate = useNavigate()
@@ -23,7 +24,7 @@ export default function RedefinirSenhaPage() {
       <div className={root}>
         <div className={card}>
           <div className="w-16 h-16 rounded-[20px] bg-amber/10 border-[1.5px] border-amber/30 flex items-center justify-center text-amber self-center mb-5">
-            <AlertTriangleIcon />
+            <AlertTriangle size={28} strokeWidth={1.8} />
           </div>
           <h1 className={title}>Link inválido</h1>
           <p className={subtitle}>Este link de redefinição é inválido ou expirou. Solicite um novo link para continuar.</p>
@@ -72,7 +73,7 @@ export default function RedefinirSenhaPage() {
       <div className={root}>
         <div className={card}>
           <div className="w-16 h-16 rounded-[20px] bg-green/10 border-[1.5px] border-green/30 flex items-center justify-center text-green self-center mb-5">
-            <CheckCircleIcon />
+            <CheckCircle2 size={30} strokeWidth={1.8} />
           </div>
           <h1 className={title}>Senha redefinida!</h1>
           <p className={subtitle}>Sua senha foi atualizada com sucesso. Agora você já pode acessar o portal.</p>
@@ -91,11 +92,11 @@ export default function RedefinirSenhaPage() {
       <div className={card}>
 
         <button onClick={() => navigate('/login')} className={btnBack}>
-          <ArrowLeftIcon /> Voltar ao login
+          <ArrowLeft size={15} strokeWidth={1.8} /> Voltar ao login
         </button>
 
         <div className="w-14 h-14 rounded-2xl bg-[var(--blue-sub)] border-[1.5px] border-[var(--blue-bdr)] flex items-center justify-center text-blue-l mb-5">
-          <KeyIcon />
+          <Key size={26} strokeWidth={1.8} />
         </div>
 
         <h1 className={title}>Criar nova senha</h1>
@@ -134,12 +135,12 @@ export default function RedefinirSenhaPage() {
 
           {apiError && (
             <div className="flex items-center gap-2 bg-red/10 border border-red/30 rounded-[10px] px-3.5 py-2.5 mb-3 text-[12px] text-red">
-              <AlertIcon /><span>{apiError}</span>
+              <AlertTriangle size={13} strokeWidth={1.8} style={{ flexShrink: 0 }} /><span>{apiError}</span>
             </div>
           )}
 
           <button type="submit" disabled={loading} className={btnPrimary + ' mt-2'}>
-            {loading ? <Spinner /> : 'Salvar nova senha'}
+            {loading ? <Loader2 size={16} strokeWidth={1.8} className="animate-spin-fast" /> : 'Salvar nova senha'}
           </button>
         </form>
 
@@ -157,7 +158,7 @@ export default function RedefinirSenhaPage() {
 function Req({ ok, text }) {
   return (
     <div className={`flex items-center gap-[7px] text-[11px] transition-colors duration-200 ${ok ? 'text-green' : 'text-t3'}`}>
-      {ok ? <CheckSmallIcon /> : <DotIcon />}
+      {ok ? <Check size={12} strokeWidth={1.8} /> : <Circle size={12} strokeWidth={1.8} />}
       <span>{text}</span>
     </div>
   )
@@ -171,12 +172,3 @@ const subtitle  = 'text-[13px] text-t2 leading-relaxed mb-7'
 const btnPrimary = 'w-full bg-blue-grad border-none rounded-[11px] py-3.5 text-white text-[13px] font-bold flex items-center justify-center gap-2 tracking-[0.3px] shadow-[0_6px_20px_var(--blue-glow)] hover:brightness-110 disabled:opacity-65 disabled:cursor-not-allowed transition-all duration-200'
 const btnBack    = 'inline-flex items-center gap-[7px] bg-transparent border-none cursor-pointer text-t2 text-[12px] font-semibold self-start mb-8 p-0 font-sans hover:text-blue-l transition-colors duration-200'
 
-/* ── Ícones ── */
-function ArrowLeftIcon()     { return <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg> }
-function KeyIcon()           { return <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg> }
-function CheckCircleIcon()   { return <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> }
-function AlertTriangleIcon() { return <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> }
-function AlertIcon()         { return <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> }
-function CheckSmallIcon()    { return <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg> }
-function DotIcon()           { return <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="2"/></svg> }
-function Spinner()           { return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="animate-spin-fast"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> }

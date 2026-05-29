@@ -5,6 +5,7 @@ import { getIniciais } from '../utils/usuario'
 import { solicitacaoIngressoService } from '../services/api'
 import MenuAvatar from '../components/ui/MenuAvatar'
 import clsx from 'clsx'
+import { Clock, CheckCircle2, XCircle, Mail, Loader2 } from 'lucide-react'
 
 const AVATAR_GRADS = [
   'linear-gradient(135deg,var(--blue-d),var(--blue-l))',
@@ -136,9 +137,9 @@ export default function AprovarCadastrosPage() {
         <div className="flex-1 overflow-y-auto min-h-0 px-[13px] py-[11px] pb-5 scrollbar-hide">
           {/* Stats */}
           <div className="grid grid-cols-3 gap-[7px] mb-3">
-            <StatCard cor="amber" icon={<ClockIcon />}       n={contagem.pendentes} label="Pendentes" />
-            <StatCard cor="green" icon={<CheckCircleIcon />} n={contagem.aprovados} label="Aprovados" />
-            <StatCard cor="red"   icon={<XCircleIcon />}     n={contagem.recusados} label="Recusados" />
+            <StatCard cor="amber" icon={<Clock strokeWidth={1.8} />}        n={contagem.pendentes} label="Pendentes" />
+            <StatCard cor="green" icon={<CheckCircle2 strokeWidth={1.8} />} n={contagem.aprovados} label="Aprovados" />
+            <StatCard cor="red"   icon={<XCircle strokeWidth={1.8} />}      n={contagem.recusados} label="Recusados" />
           </div>
 
           {/* Filtros */}
@@ -177,9 +178,9 @@ export default function AprovarCadastrosPage() {
 
         {/* Stats */}
         <div className="grid grid-cols-3 gap-[10px] mb-[18px]">
-          <WebStatCard cor="amber" icon={<ClockIcon size={16} />}       n={contagem.pendentes} label="Pendentes" />
-          <WebStatCard cor="green" icon={<CheckCircleIcon size={16} />} n={contagem.aprovados} label="Aprovados" />
-          <WebStatCard cor="red"   icon={<XCircleIcon size={16} />}     n={contagem.recusados} label="Recusados" />
+          <WebStatCard cor="amber" icon={<Clock size={16} strokeWidth={1.8} />}        n={contagem.pendentes} label="Pendentes" />
+          <WebStatCard cor="green" icon={<CheckCircle2 size={16} strokeWidth={1.8} />} n={contagem.aprovados} label="Aprovados" />
+          <WebStatCard cor="red"   icon={<XCircle size={16} strokeWidth={1.8} />}      n={contagem.recusados} label="Recusados" />
         </div>
 
         {/* Filtros */}
@@ -270,14 +271,14 @@ function CardSolicitacao({ s, processando, onAprovar, onRecusar }) {
           <div className="flex flex-wrap gap-[6px]">
             <button className={clsx(btnBase, 'bg-green-grad text-white shadow-green-btn border-none hover:opacity-90')}
                     onClick={onAprovar} disabled={processando}>
-              {processando ? <SpinnerIcon /> : <CheckCircleIcon />} Aprovar
+              {processando ? <Loader2 size={13} strokeWidth={1.8} className="animate-spin-fast" /> : <CheckCircle2 size={13} strokeWidth={1.8} />} Aprovar
             </button>
             <button className={clsx(btnBase, 'bg-red/[0.08] border border-red/30 text-red hover:bg-red/[0.14]')}
                     onClick={onRecusar} disabled={processando}>
-              <XCircleIcon /> Recusar
+              <XCircle size={13} strokeWidth={1.8} /> Recusar
             </button>
             <button className={clsx(btnBase, 'bg-s2 border border-bdr text-t2 hover:bg-s3')}>
-              <MailIcon /> Contatar
+              <Mail size={13} strokeWidth={1.8} /> Contatar
             </button>
           </div>
         )}
@@ -353,7 +354,7 @@ function ConfirmModal({ nome, acao, onCancel, onConfirm }) {
           'w-14 h-14 rounded-[14px] flex items-center justify-center mb-4',
           aprovando ? 'bg-green/[0.12] text-green' : 'bg-red/[0.10] text-red'
         )}>
-          {aprovando ? <CheckCircleIcon size={26} /> : <XCircleIcon size={26} />}
+          {aprovando ? <CheckCircle2 size={26} strokeWidth={1.8} /> : <XCircle size={26} strokeWidth={1.8} />}
         </div>
         <p className="text-[16px] font-extrabold text-t1 mb-2">{aprovando ? 'Aprovar solicitação?' : 'Recusar solicitação?'}</p>
         <p className="text-[11px] text-t3 leading-[1.6] mb-[22px]">
@@ -377,10 +378,3 @@ function ConfirmModal({ nome, acao, onCancel, onConfirm }) {
   )
 }
 
-/* ── Ícones ── */
-const IC = { fill: 'none', stroke: 'currentColor', strokeLinecap: 'round', strokeLinejoin: 'round' }
-function CheckCircleIcon({ size = 13 }) { return <svg width={size} height={size} viewBox="0 0 24 24" {...IC} strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> }
-function XCircleIcon({ size = 13 })     { return <svg width={size} height={size} viewBox="0 0 24 24" {...IC} strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> }
-function ClockIcon({ size = 16 })       { return <svg width={size} height={size} viewBox="0 0 24 24" {...IC} strokeWidth="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> }
-function MailIcon({ size = 13 })        { return <svg width={size} height={size} viewBox="0 0 24 24" {...IC} strokeWidth="1.8"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg> }
-function SpinnerIcon()                  { return <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" className="animate-spin-fast"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> }

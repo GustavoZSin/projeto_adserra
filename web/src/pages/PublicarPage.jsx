@@ -4,6 +4,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom'
 import { publicacaoService } from '../services/api'
 import MenuAvatar from '../components/ui/MenuAvatar'
 import clsx from 'clsx'
+import { Calendar, Zap, Newspaper, Megaphone, UploadCloud, MapPin, CheckCircle2, Plus, X, ImagePlus, Loader2, Globe, Lock } from 'lucide-react'
 
 function getInitials(user) {
   const nome = user?.nomeCompleto || user?.name
@@ -14,10 +15,10 @@ function getInitials(user) {
 }
 
 const TIPOS = [
-  { key: 'evento',  label: 'Evento',  Icon: CalendarIcon },
-  { key: 'acao',    label: 'Ação',    Icon: ZapIcon },
-  { key: 'noticia', label: 'Notícia', Icon: NewspaperIcon },
-  { key: 'aviso',   label: 'Aviso',   Icon: MegaphoneIcon },
+  { key: 'evento',  label: 'Evento',  Icon: Calendar },
+  { key: 'acao',    label: 'Ação',    Icon: Zap },
+  { key: 'noticia', label: 'Notícia', Icon: Newspaper },
+  { key: 'aviso',   label: 'Aviso',   Icon: Megaphone },
 ]
 
 const lbl     = 'block text-[9px] font-bold text-t3 tracking-[1px] uppercase mb-1'
@@ -152,7 +153,7 @@ export default function PublicarPage() {
       <div className="flex-1 flex items-center justify-center min-h-[calc(100vh-60px)] md:min-h-screen p-5">
         <div className="bg-s1 border border-bdr rounded-[20px] px-7 py-9 flex flex-col items-center text-center max-w-[340px] w-full shadow-sh">
           <div className="w-16 h-16 bg-green/[0.12] rounded-2xl flex items-center justify-center text-green mb-[18px]">
-            <CheckCircleIcon />
+            <CheckCircle2 size={32} strokeWidth={1.8} />
           </div>
           <h1 className="text-[18px] font-extrabold text-t1 mb-2">
             {isEditing ? 'Alterações salvas!' : publica ? 'Publicado com sucesso!' : 'Rascunho salvo!'}
@@ -236,7 +237,7 @@ export default function PublicarPage() {
             <span className={lbl}>Local</span>
             <div className="relative">
               <input className={clsx(inpBase, 'border-bdr pr-9')} type="text" placeholder="Campus Sede FSG" value={local} onChange={e => setLocal(e.target.value)} />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-icon pointer-events-none flex items-center"><MapPinIcon /></span>
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-icon pointer-events-none flex items-center"><MapPin size={13} strokeWidth={1.8} /></span>
             </div>
           </div>
 
@@ -245,7 +246,7 @@ export default function PublicarPage() {
           {apiError && <div className="bg-red/[0.1] border border-red/25 rounded-[9px] px-3 py-[9px] text-[11px] text-red mb-2">{apiError}</div>}
 
           <button className={clsx(btnP)} onClick={handleSalvar} disabled={loading}>
-            {loading ? <Spinner /> : isEditing ? 'Salvar alterações' : publica ? 'Publicar' : 'Salvar rascunho'}
+            {loading ? <Loader2 size={16} strokeWidth={1.8} className="animate-spin-fast flex-shrink-0" /> : isEditing ? 'Salvar alterações' : publica ? 'Publicar' : 'Salvar rascunho'}
           </button>
         </div>
       </div>
@@ -295,7 +296,7 @@ export default function PublicarPage() {
                 <span className={lbl}>Local</span>
                 <div className="relative">
                   <input className={clsx(inpBase, 'border-bdr pr-9')} type="text" placeholder="Campus FSG" value={local} onChange={e => setLocal(e.target.value)} />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-icon pointer-events-none flex items-center"><MapPinIcon /></span>
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-icon pointer-events-none flex items-center"><MapPin size={13} strokeWidth={1.8} /></span>
                 </div>
               </div>
             </div>
@@ -324,7 +325,7 @@ export default function PublicarPage() {
               <VisibilidadeToggle publica={publica} onChange={setPublica} />
               {apiError && <div className="bg-red/[0.1] border border-red/25 rounded-[9px] px-3 py-[9px] text-[11px] text-red mb-2">{apiError}</div>}
               <button className={clsx(btnP)} onClick={handleSalvar} disabled={loading}>
-                {loading ? <Spinner /> : isEditing ? 'Salvar alterações' : publica ? 'Publicar agora' : 'Salvar rascunho'}
+                {loading ? <Loader2 size={16} strokeWidth={1.8} className="animate-spin-fast flex-shrink-0" /> : isEditing ? 'Salvar alterações' : publica ? 'Publicar agora' : 'Salvar rascunho'}
               </button>
             </div>
           </div>
@@ -348,7 +349,7 @@ function TipoRow({ tipo, setTipo }) {
               : 'border-bdr bg-s2 text-t3'
           )}
           onClick={() => setTipo(key)}>
-          <Icon /> {label}
+          <Icon size={12} strokeWidth={1.8} /> {label}
         </button>
       ))}
     </div>
@@ -367,7 +368,7 @@ function CapaUpload({ preview, onClickUpload, onRemove, hint, tall }) {
       >
         {preview
           ? <img src={preview} alt="capa" className="absolute inset-0 w-full h-full object-cover" />
-          : <><UploadCloudIcon /><span className="text-[10px] font-semibold">{hint}</span></>
+          : <><UploadCloud size={20} strokeWidth={1.8} /><span className="text-[10px] font-semibold">{hint}</span></>
         }
       </div>
       {preview && (
@@ -376,7 +377,7 @@ function CapaUpload({ preview, onClickUpload, onRemove, hint, tall }) {
           onClick={e => { e.stopPropagation(); onRemove() }}
           className="absolute top-[6px] right-[6px] w-5 h-5 bg-black/60 rounded-full flex items-center justify-center text-white hover:bg-black/80 transition-colors border-none cursor-pointer z-10"
         >
-          <XIcon />
+          <X size={10} strokeWidth={2.5} />
         </button>
       )}
     </div>
@@ -397,7 +398,7 @@ function GaleriaSection({ existentes, previews, onAdd, onRemoveNew }) {
           onClick={onAdd}
           className="flex items-center gap-[4px] text-[9px] font-bold text-blue-l bg-[var(--blue-sub)] border border-[var(--blue-bdr)] rounded-[6px] px-[8px] py-[4px] cursor-pointer hover:opacity-80 transition-opacity"
         >
-          <PlusIcon s={10} /> Adicionar
+          <Plus size={10} strokeWidth={1.8} /> Adicionar
         </button>
       </div>
 
@@ -406,7 +407,7 @@ function GaleriaSection({ existentes, previews, onAdd, onRemoveNew }) {
           className="w-full h-[54px] bg-s2 border-[1.5px] border-dashed border-bdr rounded-[11px] flex items-center justify-center gap-1 cursor-pointer text-t3 hover:border-blue-l hover:text-blue-l transition-all duration-[350ms]"
           onClick={onAdd}
         >
-          <ImagePlusIcon /><span className="text-[10px] font-semibold">Nenhuma imagem na galeria</span>
+          <ImagePlus size={14} strokeWidth={1.8} /><span className="text-[10px] font-semibold">Nenhuma imagem na galeria</span>
         </div>
       )}
 
@@ -426,7 +427,7 @@ function GaleriaSection({ existentes, previews, onAdd, onRemoveNew }) {
                 onClick={() => onRemoveNew(idx)}
                 className="absolute top-[3px] right-[3px] w-[16px] h-[16px] bg-black/60 rounded-full flex items-center justify-center text-white hover:bg-black/80 border-none cursor-pointer"
               >
-                <XIcon s={8} />
+                <X size={8} strokeWidth={2.5} />
               </button>
             </div>
           ))}
@@ -434,7 +435,7 @@ function GaleriaSection({ existentes, previews, onAdd, onRemoveNew }) {
             className="w-[60px] h-[60px] rounded-[8px] bg-s2 border-[1.5px] border-dashed border-bdr flex items-center justify-center text-t3 cursor-pointer hover:border-blue-l hover:text-blue-l transition-all duration-[350ms] flex-shrink-0"
             onClick={onAdd}
           >
-            <PlusIcon s={18} />
+            <Plus size={18} strokeWidth={1.8} />
           </div>
         </div>
       )}
@@ -455,7 +456,7 @@ function VisibilidadeToggle({ publica, onChange }) {
             publica ? 'bg-blue-grad text-white shadow-[inset_0_1px_3px_rgba(0,0,0,0.15)]' : 'bg-s2 text-t3 hover:bg-s3'
           )}
         >
-          <GlobeIcon /> Todos os docentes
+          <Globe size={12} strokeWidth={1.8} /> Todos os docentes
         </button>
         <button
           type="button"
@@ -465,26 +466,10 @@ function VisibilidadeToggle({ publica, onChange }) {
             !publica ? 'bg-[var(--blue-sub)] text-blue-l' : 'bg-s2 text-t3 hover:bg-s3'
           )}
         >
-          <LockIcon /> Só administradores
+          <Lock size={12} strokeWidth={1.8} /> Só administradores
         </button>
       </div>
     </div>
   )
 }
 
-/* ── Icons ── */
-const SV = { fill: 'none', stroke: 'currentColor', strokeWidth: '1.8', strokeLinecap: 'round', strokeLinejoin: 'round' }
-
-function CalendarIcon({ s = 12 })   { return <svg width={s} height={s} viewBox="0 0 24 24" {...SV}><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg> }
-function ZapIcon({ s = 12 })        { return <svg width={s} height={s} viewBox="0 0 24 24" {...SV}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> }
-function NewspaperIcon({ s = 12 })  { return <svg width={s} height={s} viewBox="0 0 24 24" {...SV}><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6z"/></svg> }
-function MegaphoneIcon({ s = 12 })  { return <svg width={s} height={s} viewBox="0 0 24 24" {...SV}><path d="m3 11 19-9-9 19-2-8-8-2z"/></svg> }
-function UploadCloudIcon({ s = 20 }){ return <svg width={s} height={s} viewBox="0 0 24 24" {...SV}><polyline points="16 16 12 12 8 16"/><line x1="12" x2="12" y1="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg> }
-function MapPinIcon({ s = 13 })     { return <svg width={s} height={s} viewBox="0 0 24 24" {...SV}><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg> }
-function CheckCircleIcon()          { return <svg width="32" height="32" viewBox="0 0 24 24" {...SV}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> }
-function PlusIcon({ s = 18 })       { return <svg width={s} height={s} viewBox="0 0 24 24" {...SV}><path d="M5 12h14"/><path d="M12 5v14"/></svg> }
-function XIcon({ s = 10 })          { return <svg width={s} height={s} viewBox="0 0 24 24" {...SV} strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> }
-function ImagePlusIcon()            { return <svg width="14" height="14" viewBox="0 0 24 24" {...SV}><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7"/><line x1="16" x2="22" y1="5" y2="5"/><line x1="19" x2="19" y1="2" y2="8"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg> }
-function Spinner()                  { return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="animate-spin-fast flex-shrink-0"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> }
-function GlobeIcon()                { return <svg width="12" height="12" viewBox="0 0 24 24" {...SV}><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> }
-function LockIcon()                 { return <svg width="12" height="12" viewBox="0 0 24 24" {...SV}><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> }

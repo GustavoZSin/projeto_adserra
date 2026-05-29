@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import { useNavigate, useSearchParams, Link } from 'react-router-dom'
 import axios from 'axios'
 import { Input } from '../components/ui/Input'
+import { ArrowLeft, UserCheck, CheckCircle2, AlertTriangle, Mail, Check, Circle, Loader2 } from 'lucide-react'
 
 export default function ConfirmarCadastroPage() {
   const navigate = useNavigate()
@@ -34,7 +35,7 @@ export default function ConfirmarCadastroPage() {
       <div className={root}>
         <div className={card}>
           <div className="w-16 h-16 rounded-[20px] bg-amber/10 border-[1.5px] border-amber/30 flex items-center justify-center text-amber self-center mb-5">
-            <AlertTriangleIcon />
+            <AlertTriangle size={28} strokeWidth={1.8} />
           </div>
           <h1 className={title}>Link inválido</h1>
           <p className={subtitle}>Este link de confirmação é inválido ou expirou. Entre em contato com o administrador para receber um novo link.</p>
@@ -76,7 +77,7 @@ export default function ConfirmarCadastroPage() {
       <div className={root}>
         <div className={card}>
           <div className="w-16 h-16 rounded-[20px] bg-green/10 border-[1.5px] border-green/30 flex items-center justify-center text-green self-center mb-5">
-            <CheckCircleIcon />
+            <CheckCircle2 size={30} strokeWidth={1.8} />
           </div>
           <h1 className={title}>Cadastro concluído!</h1>
           <p className={subtitle}>Sua senha foi criada com sucesso. Agora você já pode acessar o portal com seu e-mail e senha.</p>
@@ -95,11 +96,11 @@ export default function ConfirmarCadastroPage() {
       <div className={card}>
 
         <button onClick={() => navigate('/login')} className={btnBack}>
-          <ArrowLeftIcon /> Voltar ao login
+          <ArrowLeft size={15} strokeWidth={1.8} /> Voltar ao login
         </button>
 
         <div className="w-14 h-14 rounded-2xl bg-[var(--blue-sub)] border-[1.5px] border-[var(--blue-bdr)] flex items-center justify-center text-blue-l mb-5">
-          <UserCheckIcon />
+          <UserCheck size={26} strokeWidth={1.8} />
         </div>
 
         <h1 className={title}>Confirmar cadastro</h1>
@@ -109,7 +110,7 @@ export default function ConfirmarCadastroPage() {
         <div className="mb-5">
           <span className="block text-[9px] font-bold text-t3 tracking-[1.2px] uppercase mb-1.5">E-mail</span>
           <div className="flex items-center gap-2 bg-s2 border-[1.5px] border-bdr rounded-[11px] px-3.5 py-[11px] text-t2 text-[13px] font-sans">
-            <MailIcon />
+            <Mail size={14} strokeWidth={1.8} />
             <span>{email}</span>
           </div>
         </div>
@@ -145,12 +146,12 @@ export default function ConfirmarCadastroPage() {
 
           {apiError && (
             <div className="flex items-center gap-2 bg-red/10 border border-red/30 rounded-[10px] px-3.5 py-2.5 mb-3 text-[12px] text-red">
-              <AlertIcon /><span>{apiError}</span>
+              <AlertTriangle size={13} strokeWidth={1.8} style={{ flexShrink: 0 }} /><span>{apiError}</span>
             </div>
           )}
 
           <button type="submit" disabled={!isFormValid || loading} className={btnPrimary + ' mt-2'}>
-            {loading ? <Spinner /> : 'Concluir cadastro'}
+            {loading ? <Loader2 size={16} strokeWidth={1.8} className="animate-spin-fast" /> : 'Concluir cadastro'}
           </button>
         </form>
 
@@ -167,7 +168,7 @@ export default function ConfirmarCadastroPage() {
 function Req({ ok, text }) {
   return (
     <div className={`flex items-center gap-[7px] text-[11px] transition-colors duration-200 ${ok ? 'text-green' : 'text-t3'}`}>
-      {ok ? <CheckSmallIcon /> : <DotIcon />}
+      {ok ? <Check size={12} strokeWidth={1.8} /> : <Circle size={12} strokeWidth={1.8} />}
       <span>{text}</span>
     </div>
   )
@@ -181,13 +182,3 @@ const subtitle   = 'text-[13px] text-t2 leading-relaxed mb-7'
 const btnPrimary = 'w-full bg-blue-grad border-none rounded-[11px] py-3.5 text-white text-[13px] font-bold flex items-center justify-center gap-2 tracking-[0.3px] shadow-[0_6px_20px_var(--blue-glow)] hover:brightness-110 disabled:opacity-65 disabled:cursor-not-allowed transition-all duration-200'
 const btnBack    = 'inline-flex items-center gap-[7px] bg-transparent border-none cursor-pointer text-t2 text-[12px] font-semibold self-start mb-8 p-0 font-sans hover:text-blue-l transition-colors duration-200'
 
-/* ── Ícones ── */
-function ArrowLeftIcon()     { return <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg> }
-function UserCheckIcon()     { return <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg> }
-function CheckCircleIcon()   { return <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> }
-function AlertTriangleIcon() { return <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> }
-function AlertIcon()         { return <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> }
-function MailIcon()          { return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg> }
-function CheckSmallIcon()    { return <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg> }
-function DotIcon()           { return <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="2"/></svg> }
-function Spinner()           { return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="animate-spin-fast"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> }

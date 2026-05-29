@@ -1,17 +1,16 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Calendar, GraduationCap, Newspaper, Bell, Info, CheckCheck, ChevronRight, Loader2 } from 'lucide-react'
 import { useNotificacoes } from '../../contexts/NotificacoesContext'
 import { notificacaoService } from '../../services/api'
 import clsx from 'clsx'
 
-const SV = { fill: 'none', stroke: 'currentColor', strokeWidth: '1.8', strokeLinecap: 'round', strokeLinejoin: 'round' }
-
 const TIPO_META = {
-  NovoEvento: { cor: 'blue',  Icon: CalendarIcon  },
-  Acao:       { cor: 'green', Icon: AcaoIcon       },
-  Noticia:    { cor: 'amber', Icon: NoticiaIcon     },
-  Aviso:      { cor: 'amber', Icon: AvisoIcon       },
-  Sistema:    { cor: 'gray',  Icon: SistemaIcon     },
+  NovoEvento: { cor: 'blue',  Icon: Calendar      },
+  Acao:       { cor: 'green', Icon: GraduationCap  },
+  Noticia:    { cor: 'amber', Icon: Newspaper      },
+  Aviso:      { cor: 'amber', Icon: Bell           },
+  Sistema:    { cor: 'gray',  Icon: Info           },
 }
 
 function tempoAtras(dataStr) {
@@ -101,7 +100,7 @@ export default function SinoDropdown({ variant = 'icon' }) {
             aberto ? 'bg-[var(--blue-sub)] text-blue-l' : 'bg-transparent text-t2 hover:bg-s2 hover:text-t1'
           )}
         >
-          <BellIcon size={14} />
+          <Bell size={14} strokeWidth={1.8} />
           <span className="flex-1">Notificações</span>
           {notificacoes > 0 && (
             <span className="ml-auto bg-red text-white rounded-[10px] px-[7px] py-px text-[9px] font-bold leading-[1.4]">
@@ -116,7 +115,7 @@ export default function SinoDropdown({ variant = 'icon' }) {
           className="w-[30px] h-[30px] bg-s2 rounded-[9px] flex items-center justify-center text-t2 relative cursor-pointer border-none hover:bg-s3 transition-colors"
           aria-label="Notificações"
         >
-          <BellIcon size={16} />
+          <Bell size={16} strokeWidth={1.8} />
           {notificacoes > 0 && (
             <span className="absolute top-[5px] right-[5px] w-[7px] h-[7px] bg-red rounded-full border-[1.5px] border-bg" />
           )}
@@ -141,7 +140,7 @@ export default function SinoDropdown({ variant = 'icon' }) {
                   disabled={marcando}
                   className="flex items-center gap-1 text-[9px] font-semibold text-t3 hover:text-blue-l transition-colors border-none bg-transparent cursor-pointer font-sans disabled:opacity-50"
                 >
-                  {marcando ? <SpinIcon /> : <CheckAllIcon />}
+                  {marcando ? <Loader2 size={11} strokeWidth={1.8} className="animate-spin" /> : <CheckCheck size={11} strokeWidth={1.8} />}
                   Marcar todas
                 </button>
               )}
@@ -158,7 +157,7 @@ export default function SinoDropdown({ variant = 'icon' }) {
               </div>
             ) : lista.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-8 gap-2 text-t3">
-                <BellIcon size={24} />
+                <Bell size={24} strokeWidth={1.8} />
                 <p className="text-[11px] font-medium">Nenhuma notificação</p>
               </div>
             ) : (
@@ -182,7 +181,7 @@ export default function SinoDropdown({ variant = 'icon' }) {
                         cor === 'amber' && 'bg-amber/[0.1] text-amber',
                         cor === 'gray'  && 'bg-s3 text-t3',
                       )}>
-                        <Icon />
+                        <Icon size={13} strokeWidth={1.8} />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-1">
@@ -212,7 +211,7 @@ export default function SinoDropdown({ variant = 'icon' }) {
               onClick={() => { setAberto(false); navigate('/notificacoes') }}
               className="w-full text-[10px] font-semibold text-blue-l hover:text-blue transition-colors border-none bg-transparent cursor-pointer font-sans flex items-center justify-center gap-1"
             >
-              Ver todas as notificações <ChevronRightIcon />
+              Ver todas as notificações <ChevronRight size={10} strokeWidth={1.8} />
             </button>
           </div>
         </div>
@@ -221,13 +220,3 @@ export default function SinoDropdown({ variant = 'icon' }) {
   )
 }
 
-/* ── Ícones de tipo ── */
-function CalendarIcon() { return <svg width="13" height="13" viewBox="0 0 24 24" {...SV}><rect width="18" height="18" x="3" y="4" rx="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg> }
-function AcaoIcon()     { return <svg width="13" height="13" viewBox="0 0 24 24" {...SV}><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg> }
-function NoticiaIcon()  { return <svg width="13" height="13" viewBox="0 0 24 24" {...SV}><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 0-1.586 1.95"/><path d="M2 17h2a2 2 0 0 0 2-2v-1a2 2 0 0 0-2-2H2z"/><line x1="8" x2="16" y1="7" y2="7"/><line x1="8" x2="16" y1="11" y2="11"/></svg> }
-function AvisoIcon()    { return <svg width="13" height="13" viewBox="0 0 24 24" {...SV}><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg> }
-function SistemaIcon()  { return <svg width="13" height="13" viewBox="0 0 24 24" {...SV}><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg> }
-function BellIcon({ size = 14 }) { return <svg width={size} height={size} viewBox="0 0 24 24" {...SV}><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg> }
-function CheckAllIcon() { return <svg width="11" height="11" viewBox="0 0 24 24" {...SV}><path d="M2 12 7 17 22 7"/><path d="M16 7 11 12"/></svg> }
-function ChevronRightIcon() { return <svg width="10" height="10" viewBox="0 0 24 24" {...SV}><path d="m9 18 6-6-6-6"/></svg> }
-function SpinIcon()     { return <svg width="11" height="11" viewBox="0 0 24 24" {...SV} className="animate-spin"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> }

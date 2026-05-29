@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { Input } from '../components/ui/Input'
 import logoImg from '../assets/adserra-logo.png'
+import { User, AlertTriangle, Loader2 } from 'lucide-react'
 
 export default function LoginPage() {
   const { login, error, clearError } = useAuth()
@@ -60,7 +61,7 @@ export default function LoginPage() {
             onChange={(e) => setIdentifier(e.target.value)}
             placeholder="Ex: 123456 ou nome@fsg.edu.br"
             autoComplete="username"
-            icon={<UserIcon />}
+            icon={<User size={15} strokeWidth={1.8} />}
             error={fieldErrors.identifier}
           />
 
@@ -82,7 +83,7 @@ export default function LoginPage() {
 
           {error && (
             <div className="flex items-center gap-2 bg-red/10 border border-red/30 rounded-[10px] px-3.5 py-2.5 mb-3.5 text-[12px] text-red">
-              <AlertIcon />
+              <AlertTriangle size={14} strokeWidth={1.8} style={{ flexShrink: 0 }} />
               <span>{error}</span>
             </div>
           )}
@@ -95,7 +96,7 @@ export default function LoginPage() {
                        shadow-[0_6px_20px_var(--blue-glow)] hover:brightness-110
                        disabled:opacity-65 disabled:cursor-not-allowed transition-all duration-200"
           >
-            {loading ? <Spinner /> : 'Entrar'}
+            {loading ? <Loader2 size={16} strokeWidth={1.8} className="animate-spin-fast" /> : 'Entrar'}
           </button>
         </form>
 
@@ -119,13 +120,3 @@ export default function LoginPage() {
   )
 }
 
-function UserIcon() {
-  return <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-}
-function AlertIcon() {
-  return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
-}
-function Spinner() {
-  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
-              className="animate-spin-fast"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
-}

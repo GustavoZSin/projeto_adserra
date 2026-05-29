@@ -5,6 +5,7 @@ import { getIniciais } from '../utils/usuario'
 import { publicacaoService } from '../services/api'
 import MenuAvatar from '../components/ui/MenuAvatar'
 import clsx from 'clsx'
+import { Search, Calendar, MapPin, Eye, Image, Pencil, Trash2, Plus, Landmark, Lock, GraduationCap, Mic } from 'lucide-react'
 
 const TAG_MAP = {
   evento:  { tag: 'Evento',  tagColor: 'blue'  },
@@ -131,7 +132,7 @@ export default function EventosPage() {
               aria-label="Buscar"
               onClick={() => { setMostrarBusca(v => !v); if (mostrarBusca) setBusca('') }}
             >
-              <SearchIcon />
+              <Search size={14} strokeWidth={1.8} />
             </button>
             <MenuAvatar />
           </div>
@@ -140,7 +141,7 @@ export default function EventosPage() {
         <div className="flex-1 overflow-y-auto min-h-0 px-[13px] py-[11px] pb-5 scrollbar-hide">
           {mostrarBusca && (
             <div className="relative mb-3">
-              <span className="absolute left-[10px] top-1/2 -translate-y-1/2 text-t3 pointer-events-none"><SearchIcon /></span>
+              <span className="absolute left-[10px] top-1/2 -translate-y-1/2 text-t3 pointer-events-none"><Search size={14} strokeWidth={1.8} /></span>
               <input
                 autoFocus
                 className="w-full bg-s1 border border-bdr rounded-[10px] pl-[30px] pr-3 py-[8px] text-[11px] text-t1 placeholder-t3 outline-none focus:border-blue-l transition-colors font-sans"
@@ -170,18 +171,18 @@ export default function EventosPage() {
                   <p className="text-[12px] font-bold text-t1">{ev.titulo}</p>
                   <EventTag tag={ev.tag} color={ev.tagColor} />
                 </div>
-                <p className="text-[9px] text-t3 flex items-center gap-1 mb-0.5"><CalendarIcon s={12} />{formatarDataLonga(ev.data)}</p>
-                <p className="text-[9px] text-t3 flex items-center gap-1 mb-0.5"><MapPinIcon s={12} />{ev.local}</p>
+                <p className="text-[9px] text-t3 flex items-center gap-1 mb-0.5"><Calendar size={12} strokeWidth={1.8} />{formatarDataLonga(ev.data)}</p>
+                <p className="text-[9px] text-t3 flex items-center gap-1 mb-0.5"><MapPin size={12} strokeWidth={1.8} />{ev.local}</p>
                 <div className="flex flex-wrap gap-[6px] mt-[9px]">
-                  <button className={clsx(btnBase, 'bg-blue-grad text-white shadow-[0_3px_10px_var(--blue-glow)] hover:opacity-90')} onClick={() => navigate(`/eventos/${ev.id}`)}><EyeIcon s={12} />Detalhes</button>
-                  <button className={clsx(btnBase, 'bg-s2 border border-bdr text-t2 hover:bg-s3')} onClick={() => navigate(`/eventos/${ev.id}`)}><ImageIcon s={12} />Galeria</button>
+                  <button className={clsx(btnBase, 'bg-blue-grad text-white shadow-[0_3px_10px_var(--blue-glow)] hover:opacity-90')} onClick={() => navigate(`/eventos/${ev.id}`)}><Eye size={12} strokeWidth={1.8} />Detalhes</button>
+                  <button className={clsx(btnBase, 'bg-s2 border border-bdr text-t2 hover:bg-s3')} onClick={() => navigate(`/eventos/${ev.id}`)}><Image size={12} strokeWidth={1.8} />Galeria</button>
                   {isAdmin && <>
                     <button className={clsx(btnBase, 'bg-s2 border border-bdr text-t2 hover:bg-s3')} onClick={() => handleEditar(ev.id)}>
-                      <EditIcon s={12} />Editar
+                      <Pencil size={12} strokeWidth={1.8} />Editar
                     </button>
                     <button className={clsx(btnBase, 'bg-red/[0.1] border border-red/25 text-red hover:bg-red/[0.18]')}
                       onClick={() => setConfirmId(ev.id)} disabled={deletando === ev.id}>
-                      <TrashIcon s={12} />Excluir
+                      <Trash2 size={12} strokeWidth={1.8} />Excluir
                     </button>
                   </>}
                 </div>
@@ -193,7 +194,7 @@ export default function EventosPage() {
         {isAdmin && (
           <button className="absolute bottom-3 right-[14px] w-[42px] h-[42px] bg-blue-grad rounded-[12px] flex items-center justify-center text-white border-none shadow-[0_5px_16px_var(--blue-glow)] cursor-pointer z-[6] hover:opacity-90"
                   onClick={() => navigate('/publicar')} aria-label="Novo evento">
-            <PlusIcon s={18} />
+            <Plus size={18} strokeWidth={1.8} />
           </button>
         )}
       </div>
@@ -204,7 +205,7 @@ export default function EventosPage() {
           <p className="text-[19px] font-black text-t1">Eventos</p>
           <div className="flex items-center gap-[9px]">
             <div className="relative">
-              <span className="absolute left-[10px] top-1/2 -translate-y-1/2 text-t3 pointer-events-none"><SearchIcon s={13} /></span>
+              <span className="absolute left-[10px] top-1/2 -translate-y-1/2 text-t3 pointer-events-none"><Search size={13} strokeWidth={1.8} /></span>
               <input
                 className="bg-s1 border-[1.5px] border-bdr rounded-[9px] pl-[30px] pr-3 py-[7px] text-[11px] text-t1 placeholder-t3 outline-none focus:border-blue-l transition-colors font-sans w-[200px]"
                 placeholder="Buscar eventos..."
@@ -214,7 +215,7 @@ export default function EventosPage() {
             </div>
             {isAdmin && (
               <button className={clsx(btnBase, 'bg-blue-grad text-white shadow-[0_3px_10px_var(--blue-glow)] hover:opacity-90')} onClick={() => navigate('/publicar')}>
-                <PlusIcon s={13} />Novo evento
+                <Plus size={13} strokeWidth={1.8} />Novo evento
               </button>
             )}
           </div>
@@ -238,20 +239,20 @@ export default function EventosPage() {
               <div className="p-3">
                 <p className="text-[12px] font-bold text-t1 mb-1">{ev.titulo}</p>
                 <p className="text-[10px] text-t3 flex items-center gap-1 mb-[9px] flex-wrap">
-                  <CalendarIcon s={12} />{formatarDataCurta(ev.data)}
+                  <Calendar size={12} strokeWidth={1.8} />{formatarDataCurta(ev.data)}
                   <span className="mx-0.5">·</span>
-                  <MapPinIcon s={12} />{ev.local}
+                  <MapPin size={12} strokeWidth={1.8} />{ev.local}
                 </p>
                 <div className="flex gap-[6px] flex-wrap">
-                  <button className={clsx(btnBase, 'bg-blue-grad text-white shadow-[0_3px_10px_var(--blue-glow)] hover:opacity-90')} onClick={() => navigate(`/eventos/${ev.id}`)}><EyeIcon s={12} />Ver mais</button>
-                  <button className={clsx(btnBase, 'bg-s2 border border-bdr text-t2 hover:bg-s3')} onClick={() => navigate(`/eventos/${ev.id}`)}><ImageIcon s={12} />Galeria</button>
+                  <button className={clsx(btnBase, 'bg-blue-grad text-white shadow-[0_3px_10px_var(--blue-glow)] hover:opacity-90')} onClick={() => navigate(`/eventos/${ev.id}`)}><Eye size={12} strokeWidth={1.8} />Ver mais</button>
+                  <button className={clsx(btnBase, 'bg-s2 border border-bdr text-t2 hover:bg-s3')} onClick={() => navigate(`/eventos/${ev.id}`)}><Image size={12} strokeWidth={1.8} />Galeria</button>
                   {isAdmin && <>
                     <button className={clsx(btnBase, 'bg-s2 border border-bdr text-t2 hover:bg-s3')} onClick={() => handleEditar(ev.id)}>
-                      <EditIcon s={12} />Editar
+                      <Pencil size={12} strokeWidth={1.8} />Editar
                     </button>
                     <button className={clsx(btnBase, 'bg-red/[0.1] border border-red/25 text-red hover:bg-red/[0.18]')}
                       onClick={() => setConfirmId(ev.id)} disabled={deletando === ev.id}>
-                      <TrashIcon s={12} />Excluir
+                      <Trash2 size={12} strokeWidth={1.8} />Excluir
                     </button>
                   </>}
                 </div>
@@ -285,7 +286,7 @@ function Filters({ filtro, setFiltro, className }) {
 function RascunhoBadge() {
   return (
     <span className="absolute top-[7px] left-[7px] flex items-center gap-[4px] bg-amber text-white rounded-[5px] px-[7px] py-[3px] text-[8px] font-bold tracking-[0.3px] shadow-sm">
-      <LockSmallIcon /> Rascunho
+      <Lock size={8} strokeWidth={2.5} /> Rascunho
     </span>
   )
 }
@@ -318,7 +319,7 @@ function ConfirmModal({ titulo, onCancel, onConfirm }) {
     <div className="fixed inset-0 bg-black/55 backdrop-blur z-[200] flex items-center justify-center p-5" onClick={onCancel}>
       <div className="bg-s1 border border-bdr rounded-[18px] px-6 py-7 max-w-[320px] w-full flex flex-col items-center text-center shadow-sh" onClick={e => e.stopPropagation()}>
         <div className="w-14 h-14 bg-red/[0.12] rounded-[14px] flex items-center justify-center text-red mb-4">
-          <TrashIcon s={28} />
+          <Trash2 size={28} strokeWidth={1.8} />
         </div>
         <h2 className="text-[16px] font-extrabold text-t1 mb-2">Excluir evento?</h2>
         <p className="text-[11px] text-t3 leading-[1.6] mb-[22px] [&_strong]:text-t2 [&_strong]:font-semibold">
@@ -337,23 +338,7 @@ function ConfirmModal({ titulo, onCancel, onConfirm }) {
 
 /* ── Icon que muda conforme o tipo do evento ── */
 function EventIcon({ tipo, s = 24 }) {
-  if (tipo === 'acao')     return <GraduationCapIcon s={s} />
-  if (tipo === 'palestra') return <MicIcon s={s} />
-  return <LandmarkIcon s={s} />
+  if (tipo === 'acao')     return <GraduationCap size={s} strokeWidth={1.8} />
+  if (tipo === 'palestra') return <Mic size={s} strokeWidth={1.8} />
+  return <Landmark size={s} strokeWidth={1.8} />
 }
-
-/* ── Icons ── */
-const SV = { fill: 'none', stroke: 'currentColor', strokeWidth: '1.8', strokeLinecap: 'round', strokeLinejoin: 'round' }
-
-function SearchIcon({ s = 14 })       { return <svg width={s} height={s} viewBox="0 0 24 24" {...SV}><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg> }
-function CalendarIcon({ s = 12 })     { return <svg width={s} height={s} viewBox="0 0 24 24" {...SV}><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg> }
-function MapPinIcon({ s = 12 })       { return <svg width={s} height={s} viewBox="0 0 24 24" {...SV}><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg> }
-function EyeIcon({ s = 12 })          { return <svg width={s} height={s} viewBox="0 0 24 24" {...SV}><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg> }
-function ImageIcon({ s = 12 })        { return <svg width={s} height={s} viewBox="0 0 24 24" {...SV}><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg> }
-function EditIcon({ s = 12 })         { return <svg width={s} height={s} viewBox="0 0 24 24" {...SV}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> }
-function TrashIcon({ s = 12 })        { return <svg width={s} height={s} viewBox="0 0 24 24" {...SV}><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg> }
-function PlusIcon({ s = 18 })         { return <svg width={s} height={s} viewBox="0 0 24 24" {...SV}><path d="M5 12h14"/><path d="M12 5v14"/></svg> }
-function LandmarkIcon({ s = 24 })     { return <svg width={s} height={s} viewBox="0 0 24 24" {...SV}><line x1="3" x2="21" y1="22" y2="22"/><line x1="6" x2="6" y1="18" y2="11"/><line x1="10" x2="10" y1="18" y2="11"/><line x1="14" x2="14" y1="18" y2="11"/><line x1="18" x2="18" y1="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg> }
-function LockSmallIcon()              { return <svg width="8" height="8" viewBox="0 0 24 24" {...SV} strokeWidth="2.5"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> }
-function GraduationCapIcon({ s = 24 }){ return <svg width={s} height={s} viewBox="0 0 24 24" {...SV}><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg> }
-function MicIcon({ s = 24 })          { return <svg width={s} height={s} viewBox="0 0 24 24" {...SV}><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg> }
