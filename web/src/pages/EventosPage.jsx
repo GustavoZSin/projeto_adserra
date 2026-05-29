@@ -25,6 +25,7 @@ const normalizarPublicacao = (p) => {
     local: p.local ?? '',
     imagemCapaUrl: p.imagemCapaUrl ?? null,
     publica: p.publica,
+    temFotos: (p.imagensPublicacao?.length ?? 0) > 0,
     tag,
     tagColor,
   }
@@ -175,7 +176,7 @@ export default function EventosPage() {
                 <p className="text-[9px] text-t3 flex items-center gap-1 mb-0.5"><MapPin size={12} strokeWidth={1.8} />{ev.local}</p>
                 <div className="flex flex-wrap gap-[6px] mt-[9px]">
                   <button className={clsx(btnBase, 'bg-blue-grad text-white shadow-[0_3px_10px_var(--blue-glow)] hover:opacity-90')} onClick={() => navigate(`/eventos/${ev.id}`)}><Eye size={12} strokeWidth={1.8} />Detalhes</button>
-                  <button className={clsx(btnBase, 'bg-s2 border border-bdr text-t2 hover:bg-s3')} onClick={() => navigate(`/eventos/${ev.id}`)}><Image size={12} strokeWidth={1.8} />Galeria</button>
+                  {ev.temFotos && <button className={clsx(btnBase, 'bg-s2 border border-bdr text-t2 hover:bg-s3')} onClick={() => navigate(`/galeria?evento=${ev.id}`)}><Image size={12} strokeWidth={1.8} />Galeria</button>}
                   {isAdmin && <>
                     <button className={clsx(btnBase, 'bg-s2 border border-bdr text-t2 hover:bg-s3')} onClick={() => handleEditar(ev.id)}>
                       <Pencil size={12} strokeWidth={1.8} />Editar
@@ -245,7 +246,7 @@ export default function EventosPage() {
                 </p>
                 <div className="flex gap-[6px] flex-wrap">
                   <button className={clsx(btnBase, 'bg-blue-grad text-white shadow-[0_3px_10px_var(--blue-glow)] hover:opacity-90')} onClick={() => navigate(`/eventos/${ev.id}`)}><Eye size={12} strokeWidth={1.8} />Ver mais</button>
-                  <button className={clsx(btnBase, 'bg-s2 border border-bdr text-t2 hover:bg-s3')} onClick={() => navigate(`/eventos/${ev.id}`)}><Image size={12} strokeWidth={1.8} />Galeria</button>
+                  {ev.temFotos && <button className={clsx(btnBase, 'bg-s2 border border-bdr text-t2 hover:bg-s3')} onClick={() => navigate(`/galeria?evento=${ev.id}`)}><Image size={12} strokeWidth={1.8} />Galeria</button>}
                   {isAdmin && <>
                     <button className={clsx(btnBase, 'bg-s2 border border-bdr text-t2 hover:bg-s3')} onClick={() => handleEditar(ev.id)}>
                       <Pencil size={12} strokeWidth={1.8} />Editar

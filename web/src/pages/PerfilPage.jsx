@@ -8,7 +8,7 @@ import { Mail, Hash, Building2, Loader2, Check } from 'lucide-react'
 
 function formatarDataCriacao(dataStr) {
   if (!dataStr) return ''
-  return new Date(dataStr).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
+  return new Date(dataStr).toLocaleDateString('pt-BR')
 }
 
 export default function PerfilPage() {

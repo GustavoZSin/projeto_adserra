@@ -4,7 +4,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom'
 import { publicacaoService } from '../services/api'
 import MenuAvatar from '../components/ui/MenuAvatar'
 import clsx from 'clsx'
-import { Calendar, Zap, Newspaper, Megaphone, UploadCloud, MapPin, CheckCircle2, Plus, X, ImagePlus, Loader2, Globe, Lock } from 'lucide-react'
+import { Calendar, Zap, Newspaper, Megaphone, UploadCloud, MapPin, CheckCircle2, Plus, X, ImagePlus, Loader2, Globe, Lock, Users } from 'lucide-react'
 
 function getInitials(user) {
   const nome = user?.nomeCompleto || user?.name
@@ -48,7 +48,7 @@ export default function PublicarPage() {
   const [galeriaFiles, setGaleriaFiles]         = useState([])  // File[]
   const [galeriaPreviews, setGaleriaPreviews]   = useState([])  // blob URL[]
 
-  const [publica, setPublica]   = useState(true)
+  const [visibilidade, setVisibilidade] = useState('publica')
 
   const [loading, setLoading]   = useState(false)
   const [errors, setErrors]     = useState({})
@@ -71,7 +71,7 @@ export default function PublicarPage() {
         setData(pub.data.split('T')[0])
         setLocal(pub.local ?? '')
         setTipo(pub.tipo.toLowerCase())
-        setPublica(pub.publica ?? true)
+        setVisibilidade(pub.publica ? 'publica' : 'rascunho')
         if (pub.imagemCapaUrl) setCapaPreview(pub.imagemCapaUrl)
         if (pub.imagensPublicacao?.length)
           setGaleriaExistente(pub.imagensPublicacao.map(img => ({ id: img.id, url: img.uRL })))
@@ -88,7 +88,7 @@ export default function PublicarPage() {
     setTitulo(''); setDescricao(''); setData(''); setLocal('')
     setCapaPreview(null); setCapaFile(null)
     setGaleriaExistente([]); setGaleriaFiles([]); setGaleriaPreviews([])
-    setErrors({}); setApiError(null); setPublica(true)
+    setErrors({}); setApiError(null); setVisibilidade('publica')
   }
 
   const handleCapaFile = (e) => {
@@ -120,7 +120,7 @@ export default function PublicarPage() {
     return Object.keys(errs).length === 0
   }
 
-  const buildFormData = (publica) => {
+  const buildFormData = () => {
     const fd = new FormData()
     fd.append('Tipo', tipo.charAt(0).toUpperCase() + tipo.slice(1))
     fd.append('Titulo', titulo)
@@ -129,7 +129,7 @@ export default function PublicarPage() {
     if (local) fd.append('Local', local)
     if (capaFile) fd.append('ImagemCapa', capaFile)
     galeriaFiles.forEach(f => fd.append('ImagensParaGaleria', f))
-    fd.append('Publica', publica)
+    fd.append('Publica', String(visibilidade !== 'rascunho'))
     return fd
   }
 
@@ -137,7 +137,7 @@ export default function PublicarPage() {
     if (!validate()) return
     setLoading(true); setApiError(null)
     try {
-      const fd = buildFormData(publica)
+      const fd = buildFormData()
       if (isEditing) await publicacaoService.editar(Number(eventoId), fd)
       else await publicacaoService.criar(fd)
       setSuccess(true)
@@ -156,10 +156,14 @@ export default function PublicarPage() {
             <CheckCircle2 size={32} strokeWidth={1.8} />
           </div>
           <h1 className="text-[18px] font-extrabold text-t1 mb-2">
-            {isEditing ? 'Alterações salvas!' : publica ? 'Publicado com sucesso!' : 'Rascunho salvo!'}
+            {isEditing ? 'Alterações salvas!' : visibilidade === 'rascunho' ? 'Rascunho salvo!' : 'Publicado com sucesso!'}
           </h1>
           <p className="text-[12px] text-t3 leading-[1.6] mb-6">
-            {publica ? 'Sua publicação já está visível para todos os docentes.' : 'Visível apenas para administradores. Você pode ativá-la a qualquer momento.'}
+            {visibilidade === 'publica'
+              ? 'Sua publicação está visível publicamente.'
+              : visibilidade === 'interna'
+              ? 'Sua publicação está visível para todos os docentes.'
+              : 'Visível apenas para administradores. Você pode ativá-la a qualquer momento.'}
           </p>
           <button className={clsx(btnP, 'mb-2')} onClick={() => { setSuccess(false); resetForm() }}>
             Nova publicação
@@ -241,12 +245,12 @@ export default function PublicarPage() {
             </div>
           </div>
 
-          <VisibilidadeToggle publica={publica} onChange={setPublica} />
+          <VisibilidadeToggle visibilidade={visibilidade} onChange={setVisibilidade} />
 
           {apiError && <div className="bg-red/[0.1] border border-red/25 rounded-[9px] px-3 py-[9px] text-[11px] text-red mb-2">{apiError}</div>}
 
           <button className={clsx(btnP)} onClick={handleSalvar} disabled={loading}>
-            {loading ? <Loader2 size={16} strokeWidth={1.8} className="animate-spin-fast flex-shrink-0" /> : isEditing ? 'Salvar alterações' : publica ? 'Publicar' : 'Salvar rascunho'}
+            {loading ? <Loader2 size={16} strokeWidth={1.8} className="animate-spin-fast flex-shrink-0" /> : isEditing ? 'Salvar alterações' : visibilidade === 'rascunho' ? 'Salvar rascunho' : 'Publicar'}
           </button>
         </div>
       </div>
@@ -322,10 +326,10 @@ export default function PublicarPage() {
 
             <div className="bg-s1 border border-bdr rounded-[13px] p-[15px]">
               <p className="text-[12px] font-bold text-t1 mb-3">Publicação</p>
-              <VisibilidadeToggle publica={publica} onChange={setPublica} />
+              <VisibilidadeToggle visibilidade={visibilidade} onChange={setVisibilidade} />
               {apiError && <div className="bg-red/[0.1] border border-red/25 rounded-[9px] px-3 py-[9px] text-[11px] text-red mb-2">{apiError}</div>}
               <button className={clsx(btnP)} onClick={handleSalvar} disabled={loading}>
-                {loading ? <Loader2 size={16} strokeWidth={1.8} className="animate-spin-fast flex-shrink-0" /> : isEditing ? 'Salvar alterações' : publica ? 'Publicar agora' : 'Salvar rascunho'}
+                {loading ? <Loader2 size={16} strokeWidth={1.8} className="animate-spin-fast flex-shrink-0" /> : isEditing ? 'Salvar alterações' : visibilidade === 'rascunho' ? 'Salvar rascunho' : 'Publicar agora'}
               </button>
             </div>
           </div>
@@ -443,32 +447,40 @@ function GaleriaSection({ existentes, previews, onAdd, onRemoveNew }) {
   )
 }
 
-function VisibilidadeToggle({ publica, onChange }) {
+const VISIBILIDADE_OPCOES = [
+  { key: 'publica',  label: 'Pública',  Icon: Globe,  desc: 'Visível para todos'     },
+  { key: 'interna',  label: 'Interna',  Icon: Users,  desc: 'Só docentes'            },
+  { key: 'rascunho', label: 'Rascunho', Icon: Lock,   desc: 'Só administradores'     },
+]
+
+function VisibilidadeToggle({ visibilidade, onChange }) {
   return (
     <div className="mb-3">
       <span className={lbl}>Visibilidade</span>
       <div className="flex rounded-[10px] border border-bdr overflow-hidden">
-        <button
-          type="button"
-          onClick={() => onChange(true)}
-          className={clsx(
-            'flex-1 flex items-center justify-center gap-[6px] py-[9px] text-[11px] font-semibold font-sans cursor-pointer border-none transition-all duration-200',
-            publica ? 'bg-blue-grad text-white shadow-[inset_0_1px_3px_rgba(0,0,0,0.15)]' : 'bg-s2 text-t3 hover:bg-s3'
-          )}
-        >
-          <Globe size={12} strokeWidth={1.8} /> Todos os docentes
-        </button>
-        <button
-          type="button"
-          onClick={() => onChange(false)}
-          className={clsx(
-            'flex-1 flex items-center justify-center gap-[6px] py-[9px] text-[11px] font-semibold font-sans cursor-pointer border-none border-l border-bdr transition-all duration-200',
-            !publica ? 'bg-[var(--blue-sub)] text-blue-l' : 'bg-s2 text-t3 hover:bg-s3'
-          )}
-        >
-          <Lock size={12} strokeWidth={1.8} /> Só administradores
-        </button>
+        {VISIBILIDADE_OPCOES.map(({ key, label, Icon }, i) => {
+          const ativo = visibilidade === key
+          return (
+            <button
+              key={key}
+              type="button"
+              onClick={() => onChange(key)}
+              className={clsx(
+                'flex-1 flex flex-col items-center justify-center gap-[3px] py-[8px] px-1 text-[10px] font-semibold font-sans cursor-pointer border-none transition-all duration-200',
+                i > 0 && 'border-l border-bdr',
+                ativo ? 'bg-blue-grad text-white shadow-[inset_0_1px_3px_rgba(0,0,0,0.15)]'
+                  : 'bg-s2 text-t3 hover:bg-s3'
+              )}
+            >
+              <Icon size={12} strokeWidth={1.8} />
+              {label}
+            </button>
+          )
+        })}
       </div>
+      <p className="text-[9px] text-t3 mt-[5px]">
+        {VISIBILIDADE_OPCOES.find(o => o.key === visibilidade)?.desc}
+      </p>
     </div>
   )
 }
