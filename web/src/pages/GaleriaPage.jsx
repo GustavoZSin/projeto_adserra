@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { publicacaoService } from '../services/api'
 import clsx from 'clsx'
 import { Calendar, Image } from 'lucide-react'
@@ -10,6 +11,7 @@ function formatarData(dataStr) {
 }
 
 export default function GaleriaPage() {
+  const [searchParams]                = useSearchParams()
   const [publicacoes, setPublicacoes] = useState([])
   const [carregando, setCarregando]   = useState(true)
   const [filtroId, setFiltroId]       = useState('todos')
@@ -46,6 +48,13 @@ export default function GaleriaPage() {
     }
     carregar()
   }, [])
+
+  useEffect(() => {
+    const eventoParam = searchParams.get('evento')
+    if (!eventoParam || publicacoes.length === 0) return
+    const id = parseInt(eventoParam, 10)
+    if (publicacoes.some(p => p.id === id)) setFiltroId(id)
+  }, [searchParams, publicacoes])
 
   const todasFotos = useMemo(() =>
     publicacoes.flatMap(pub =>

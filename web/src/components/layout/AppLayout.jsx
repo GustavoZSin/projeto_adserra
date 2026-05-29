@@ -5,7 +5,7 @@ import { useAprovacoesPendentes } from '../../contexts/AprovacoesPendentesContex
 import { useNotificacoes } from '../../contexts/NotificacoesContext'
 import logoImg from '../../assets/adserra-logo.png'
 import clsx from 'clsx'
-import { Home, Calendar, Image, Send, User, Bell, LogOut, ClipboardList, Users } from 'lucide-react'
+import { Home, Calendar, Image, Send, User, Bell, LogOut, ClipboardList, Users, Shield } from 'lucide-react'
 
 function getInitials(user) {
   const nome = user?.nomeCompleto || user?.name
@@ -58,18 +58,26 @@ export default function AppLayout() {
 
         <div className="mb-[18px]">
           <span className="block text-[8px] font-bold tracking-[2px] uppercase text-t3 mb-[7px] px-2">Conta</span>
-          <SbItem icon={<User size={14} strokeWidth={1.8} />}   label="Meu Perfil"   active={isActive('/perfil')}       onClick={() => navigate('/perfil')} />
+          {!isAdmin && <SbItem icon={<User size={14} strokeWidth={1.8} />} label="Meu Perfil" active={isActive('/perfil')} onClick={() => navigate('/perfil')} />}
           <SbItem icon={<Bell size={14} strokeWidth={1.8} />}   label="Notificações" active={isActive('/notificacoes')} badgeRed={notificacoes > 0 ? String(notificacoes) : undefined} onClick={() => navigate('/notificacoes')} />
           <SbItem icon={<LogOut size={14} strokeWidth={1.8} />} label="Sair" active={false} onClick={handleLogout} danger />
         </div>
 
         <div className="mt-auto px-[10px] py-[10px] bg-s2 rounded-[11px] border border-bdr flex items-center gap-[9px] flex-shrink-0">
-          <div className="w-8 h-8 rounded-[9px] bg-blue-grad flex items-center justify-center text-[11px] font-bold text-white flex-shrink-0 font-sans">
-            {initials}
-          </div>
+          {isAdmin ? (
+            <div className="w-8 h-8 rounded-[9px] bg-red/[0.15] flex items-center justify-center flex-shrink-0 text-red">
+              <Shield size={15} strokeWidth={1.8} />
+            </div>
+          ) : (
+            <div className="w-8 h-8 rounded-[9px] bg-blue-grad flex items-center justify-center text-[11px] font-bold text-white flex-shrink-0 font-sans">
+              {initials}
+            </div>
+          )}
           <div style={{ minWidth: 0 }}>
             <p className="text-[11px] font-bold text-t1 whitespace-nowrap overflow-hidden text-ellipsis">{displayName}</p>
-            <p className="text-[9px] text-t3">Docente</p>
+            <p className={`text-[9px] ${isAdmin ? 'text-red font-semibold' : 'text-t3'}`}>
+              {isAdmin ? 'Administrador' : 'Docente'}
+            </p>
           </div>
         </div>
       </aside>
