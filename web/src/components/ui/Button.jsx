@@ -1,4 +1,5 @@
 import clsx from 'clsx'
+import { Loader2 } from 'lucide-react'
 
 export function Button({ variant = 'primary', children, loading = false, disabled = false, fullWidth = true, className = '', ...props }) {
   const base = clsx(
@@ -20,16 +21,8 @@ export function Button({ variant = 'primary', children, loading = false, disable
       disabled={disabled || loading}
       {...props}
     >
-      {loading ? <Spinner /> : children}
+      {loading ? <Loader2 size={16} strokeWidth={1.8} className="animate-spin" /> : children}
     </button>
   )
 }
 
-function Spinner() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
-         className="animate-spin-fast">
-      <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
-    </svg>
-  )
-}

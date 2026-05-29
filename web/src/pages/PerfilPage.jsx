@@ -4,8 +4,7 @@ import { perfilService } from '../services/api'
 import { Input } from '../components/ui/Input'
 import { getIniciais } from '../utils/usuario'
 import clsx from 'clsx'
-
-const SV = { fill: 'none', stroke: 'currentColor', strokeWidth: '1.8', strokeLinecap: 'round', strokeLinejoin: 'round' }
+import { Mail, Hash, Building2, Loader2, Check } from 'lucide-react'
 
 function formatarDataCriacao(dataStr) {
   if (!dataStr) return ''
@@ -361,9 +360,9 @@ function InfoCard({ perfil }) {
         Informações
       </p>
       <div className="flex flex-col gap-[10px]">
-        <InfoRow icon={<MailIcon />}       label="E-mail"      value={perfil.emailInstitucional} />
-        <InfoRow icon={<HashIcon />}       label="Matrícula"   value={perfil.matricula ?? '—'} />
-        <InfoRow icon={<BuildingIcon />}   label="Departamento" value={perfil.departamento ?? '—'} />
+        <InfoRow icon={<Mail size={12} strokeWidth={1.8} />}     label="E-mail"       value={perfil.emailInstitucional} />
+        <InfoRow icon={<Hash size={12} strokeWidth={1.8} />}     label="Matrícula"    value={perfil.matricula ?? '—'} />
+        <InfoRow icon={<Building2 size={12} strokeWidth={1.8} />} label="Departamento" value={perfil.departamento ?? '—'} />
       </div>
     </div>
   )
@@ -375,9 +374,9 @@ function InfoCardDesktop({ perfil }) {
   return (
     <div className="bg-s1 border border-bdr rounded-[14px] p-4 flex flex-col gap-[10px]">
       <p className="text-[10px] font-bold text-t3 uppercase tracking-[1.5px]">Informações</p>
-      <InfoRow icon={<MailIcon />}     label="E-mail"       value={perfil.emailInstitucional} />
-      <InfoRow icon={<HashIcon />}     label="Matrícula"    value={perfil.matricula ?? '—'} />
-      <InfoRow icon={<BuildingIcon />} label="Departamento" value={perfil.departamento ?? '—'} />
+      <InfoRow icon={<Mail size={12} strokeWidth={1.8} />}     label="E-mail"       value={perfil.emailInstitucional} />
+      <InfoRow icon={<Hash size={12} strokeWidth={1.8} />}     label="Matrícula"    value={perfil.matricula ?? '—'} />
+      <InfoRow icon={<Building2 size={12} strokeWidth={1.8} />} label="Departamento" value={perfil.departamento ?? '—'} />
     </div>
   )
 }
@@ -422,9 +421,9 @@ function BtnSalvar({ loading, success, label = 'Salvar alterações' }) {
       )}
     >
       {loading ? (
-        <><SpinIcon />Salvando...</>
+        <><Loader2 size={12} strokeWidth={1.8} className="animate-spin" />Salvando...</>
       ) : success ? (
-        <><CheckIcon />Salvo!</>
+        <><Check size={12} strokeWidth={1.8} />Salvo!</>
       ) : (
         label
       )}
@@ -432,9 +431,3 @@ function BtnSalvar({ loading, success, label = 'Salvar alterações' }) {
   )
 }
 
-/* ── Ícones ── */
-function MailIcon()     { return <svg width="12" height="12" viewBox="0 0 24 24" {...SV}><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg> }
-function HashIcon()     { return <svg width="12" height="12" viewBox="0 0 24 24" {...SV}><line x1="4" x2="20" y1="9" y2="9"/><line x1="4" x2="20" y1="15" y2="15"/><line x1="10" x2="8" y1="3" y2="21"/><line x1="16" x2="14" y1="3" y2="21"/></svg> }
-function BuildingIcon() { return <svg width="12" height="12" viewBox="0 0 24 24" {...SV}><rect width="16" height="20" x="4" y="2" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01M16 6h.01M12 6h.01M12 10h.01M8 10h.01M16 10h.01M12 14h.01M8 14h.01M16 14h.01"/></svg> }
-function SpinIcon()     { return <svg width="12" height="12" viewBox="0 0 24 24" {...SV} className="animate-spin"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> }
-function CheckIcon()    { return <svg width="12" height="12" viewBox="0 0 24 24" {...SV}><path d="M20 6 9 17l-5-5"/></svg> }

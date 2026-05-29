@@ -1,8 +1,7 @@
 import { useState, useMemo, useEffect } from 'react'
 import { publicacaoService } from '../services/api'
 import clsx from 'clsx'
-
-const SV = { fill: 'none', stroke: 'currentColor', strokeWidth: '1.8', strokeLinecap: 'round', strokeLinejoin: 'round' }
+import { Calendar, Image } from 'lucide-react'
 
 function formatarData(dataStr) {
   if (!dataStr) return ''
@@ -189,7 +188,7 @@ function GradeDesktop({ fotos, onFotoClick }) {
                   {foto.eventoTitulo}
                 </p>
                 <p className="text-[10px] text-white/50 flex items-center gap-1 mt-[2px]">
-                  <CalendarIcon />{formatarData(foto.eventoData)}
+                  <Calendar size={10} strokeWidth={1.8} />{formatarData(foto.eventoData)}
                 </p>
               </div>
             )}
@@ -220,7 +219,7 @@ function FilterPill({ label, active, onClick }) {
 function EmptyState() {
   return (
     <div className="flex flex-col items-center justify-center py-16 gap-3 text-t3">
-      <ImageIcon />
+      <Image size={32} strokeWidth={1.8} />
       <p className="text-[12px] font-semibold">Nenhuma foto encontrada</p>
     </div>
   )
@@ -237,23 +236,3 @@ function GradeSkeleton({ cols }) {
   )
 }
 
-/* ── Ícones ── */
-function CalendarIcon() {
-  return (
-    <svg width="10" height="10" viewBox="0 0 24 24" {...SV}>
-      <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/>
-      <line x1="16" x2="16" y1="2" y2="6"/>
-      <line x1="8" x2="8" y1="2" y2="6"/>
-      <line x1="3" x2="21" y1="10" y2="10"/>
-    </svg>
-  )
-}
-function ImageIcon() {
-  return (
-    <svg width="32" height="32" viewBox="0 0 24 24" {...SV}>
-      <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
-      <circle cx="9" cy="9" r="2"/>
-      <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
-    </svg>
-  )
-}

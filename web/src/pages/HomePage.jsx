@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import clsx from 'clsx'
+import { Bell, Calendar, Zap, Newspaper, Clock, Users, Search, TrendingUp } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { getIniciais } from '../utils/usuario'
 import logoImg from '../assets/adserra-logo.png'
@@ -47,11 +48,11 @@ function rotaPorId(id) {
 
 function iconePorTipo(tipo) {
   switch (tipo) {
-    case 'Evento':  return <IconeCalendario size={14} />
-    case 'Acao':    return <IconeRelampago size={14} />
-    case 'Noticia': return <IconeJornal size={14} />
-    case 'Aviso':   return <IconeSino size={14} />
-    default:        return <IconeJornal size={14} />
+    case 'Evento':  return <Calendar size={14} strokeWidth={1.8} />
+    case 'Acao':    return <Zap size={14} strokeWidth={1.8} />
+    case 'Noticia': return <Newspaper size={14} strokeWidth={1.8} />
+    case 'Aviso':   return <Bell size={14} strokeWidth={1.8} />
+    default:        return <Newspaper size={14} strokeWidth={1.8} />
   }
 }
 
@@ -165,9 +166,9 @@ export default function HomePage() {
 
           {/* Stats (3) */}
           <div className="flex gap-[6px] mb-[13px]">
-            <CardEstatistica icon={<IconeCalendario size={13} />} iconCls="bg-[var(--blue-sub)] text-blue-l" n={carregando ? '—' : qtdEventos}  label="Eventos" />
-            <CardEstatistica icon={<IconeRelampago />}            iconCls="bg-green/[0.12] text-green"       n={carregando ? '—' : qtdAcoes}     label="Ações" />
-            <CardEstatistica icon={<IconeJornal />}               iconCls="bg-amber/[0.12] text-amber"       n={carregando ? '—' : qtdNoticias}  label="Notícias" />
+            <CardEstatistica icon={<Calendar size={13} strokeWidth={1.8} />} iconCls="bg-[var(--blue-sub)] text-blue-l" n={carregando ? '—' : qtdEventos}  label="Eventos" />
+            <CardEstatistica icon={<Zap size={13} strokeWidth={1.8} />}      iconCls="bg-green/[0.12] text-green"       n={carregando ? '—' : qtdAcoes}     label="Ações" />
+            <CardEstatistica icon={<Newspaper size={13} strokeWidth={1.8} />} iconCls="bg-amber/[0.12] text-amber"       n={carregando ? '—' : qtdNoticias}  label="Notícias" />
           </div>
 
           {/* Próximos Eventos */}
@@ -185,7 +186,7 @@ export default function HomePage() {
                 <CardEventoMobile
                   key={ev.id}
                   id={ev.id}
-                  icon={<IconeCalendario size={22} />}
+                  icon={<Calendar size={22} strokeWidth={1.8} />}
                   title={ev.titulo}
                   date={formatarDataEventoCurta(ev.data)}
                 />
@@ -206,7 +207,7 @@ export default function HomePage() {
             noticiasList.map(n => (
               <CardNoticiaMobile
                 key={n.id}
-                icon={<IconeJornal />}
+                icon={<Newspaper size={13} strokeWidth={1.8} />}
                 tag="Notícia"
                 tagColor="amber"
                 title={n.titulo}
@@ -227,10 +228,10 @@ export default function HomePage() {
 
         {/* Stats (4) */}
         <div className="flex gap-[10px] mb-[18px]">
-          <CardEstatisticaWeb icon={<IconeCalendario size={16} />}  iconCls="bg-[var(--blue-sub)] text-blue-l" n={carregando ? '—' : qtdEventos}  label="Eventos próximos"    tendencia={tendEventos} />
-          <CardEstatisticaWeb icon={<IconeRelampago size={16} />}   iconCls="bg-green/[0.12] text-green"       n={carregando ? '—' : qtdAcoes}     label="Ações registradas"   tendencia={tendAcoes} />
-          <CardEstatisticaWeb icon={<IconeJornal size={16} />}      iconCls="bg-amber/[0.12] text-amber"       n={carregando ? '—' : qtdNoticias}  label="Notícias publicadas" tendencia={tendNoticias} />
-          {isAdmin && <CardEstatisticaWeb icon={<IconeUsuarios size={16} />} iconCls="bg-[var(--blue-sub)] text-blue-l" n={carregando ? '—' : qtdDocentes ?? '—'} label="Docentes ativos" tendencia={null} />}
+          <CardEstatisticaWeb icon={<Calendar size={16} strokeWidth={1.8} />}  iconCls="bg-[var(--blue-sub)] text-blue-l" n={carregando ? '—' : qtdEventos}  label="Eventos próximos"    tendencia={tendEventos} />
+          <CardEstatisticaWeb icon={<Zap size={16} strokeWidth={1.8} />}       iconCls="bg-green/[0.12] text-green"       n={carregando ? '—' : qtdAcoes}     label="Ações registradas"   tendencia={tendAcoes} />
+          <CardEstatisticaWeb icon={<Newspaper size={16} strokeWidth={1.8} />} iconCls="bg-amber/[0.12] text-amber"       n={carregando ? '—' : qtdNoticias}  label="Notícias publicadas" tendencia={tendNoticias} />
+          {isAdmin && <CardEstatisticaWeb icon={<Users size={16} strokeWidth={1.8} />} iconCls="bg-[var(--blue-sub)] text-blue-l" n={carregando ? '—' : qtdDocentes ?? '—'} label="Docentes ativos" tendencia={null} />}
         </div>
 
         {/* Grid 2 colunas */}
@@ -250,7 +251,7 @@ export default function HomePage() {
                 <ItemEventoWeb
                   key={ev.id}
                   id={ev.id}
-                  icon={<IconeCalendario size={16} />}
+                  icon={<Calendar size={16} strokeWidth={1.8} />}
                   nome={ev.titulo}
                   meta={formatarDataEvento(ev.data, ev.local)}
                   tag="Evento"
@@ -320,7 +321,7 @@ function CardEventoMobile({ icon, badge, title, date, id }) {
       </div>
       <div className="px-[9px] py-2 pb-[10px]">
         <p className="text-[10px] font-semibold text-blue-l mb-0.5 whitespace-nowrap overflow-hidden text-ellipsis">{title}</p>
-        <p className="text-[9px] text-t3 flex items-center gap-[3px]"><IconeCalendario size={12} />{date}</p>
+        <p className="text-[9px] text-t3 flex items-center gap-[3px]"><Calendar size={12} strokeWidth={1.8} />{date}</p>
       </div>
     </button>
   )
@@ -341,7 +342,7 @@ function CardNoticiaMobile({ icon, tag, tagColor, title, time }) {
           tagColor === 'amber' && 'text-amber',
         )}>{tag}</p>
         <p className="text-[10px] font-semibold text-t1 leading-[1.3] mb-px whitespace-nowrap overflow-hidden text-ellipsis">{title}</p>
-        <p className="text-[9px] text-t3 flex items-center gap-[3px]"><IconeRelogio />{time}</p>
+        <p className="text-[9px] text-t3 flex items-center gap-[3px]"><Clock size={12} strokeWidth={1.8} />{time}</p>
       </div>
     </div>
   )
@@ -354,7 +355,7 @@ function CardEstatisticaWeb({ icon, iconCls, n, label, tendencia }) {
     <div className="flex-1 bg-s1 border border-bdr rounded-[13px] px-[13px] py-[14px]">
       <div className="flex justify-between items-center mb-[9px]">
         <div className={clsx('w-8 h-8 rounded-[9px] flex items-center justify-center', iconCls)}>{icon}</div>
-        {tendencia && <span className="text-[10px] font-bold text-green flex items-center gap-[3px]"><IconeTendenciaAlta />{tendencia}</span>}
+        {tendencia && <span className="text-[10px] font-bold text-green flex items-center gap-[3px]"><TrendingUp size={12} strokeWidth={1.8} />{tendencia}</span>}
       </div>
       <p className="text-[24px] font-black text-t1">{n}</p>
       <p className="text-[10px] text-t3 mt-0.5">{label}</p>
@@ -373,7 +374,7 @@ function ItemEventoWeb({ icon, nome, meta, tag, corTag, id }) {
         <button onClick={() => navigate(`/eventos/${id}`)} className="text-[11px] font-semibold text-blue-l bg-transparent border-none p-0 cursor-pointer font-sans text-left whitespace-nowrap overflow-hidden text-ellipsis max-w-full block mb-0.5 hover:opacity-75 transition-opacity">
           {nome}
         </button>
-        <p className="text-[10px] text-t3 flex items-center gap-[3px]"><IconeCalendario size={12} />{meta}</p>
+        <p className="text-[10px] text-t3 flex items-center gap-[3px]"><Calendar size={12} strokeWidth={1.8} />{meta}</p>
       </div>
       <span className={clsx(
         'ml-auto flex-shrink-0 inline-flex items-center px-2 py-0.5 rounded-[20px] text-[8px] font-bold tracking-[0.3px] uppercase',
@@ -418,30 +419,3 @@ function LogoPequena() {
   )
 }
 
-/* ── Ícones (Lucide) ── */
-const IC = { fill: 'none', stroke: 'currentColor', strokeWidth: '1.8', strokeLinecap: 'round', strokeLinejoin: 'round' }
-
-function IconeSino({ size = 16 }) {
-  return <svg width={size} height={size} viewBox="0 0 24 24" {...IC}><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
-}
-function IconeCalendario({ size = 13 }) {
-  return <svg width={size} height={size} viewBox="0 0 24 24" {...IC}><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
-}
-function IconeRelampago({ size = 13 }) {
-  return <svg width={size} height={size} viewBox="0 0 24 24" {...IC}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-}
-function IconeJornal({ size = 13 }) {
-  return <svg width={size} height={size} viewBox="0 0 24 24" {...IC}><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6z"/></svg>
-}
-function IconeRelogio() {
-  return <svg width="12" height="12" viewBox="0 0 24 24" {...IC}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-}
-function IconeUsuarios({ size = 16 }) {
-  return <svg width={size} height={size} viewBox="0 0 24 24" {...IC}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-}
-function IconeBusca() {
-  return <svg width="13" height="13" viewBox="0 0 24 24" {...IC}><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-}
-function IconeTendenciaAlta() {
-  return <svg width="12" height="12" viewBox="0 0 24 24" {...IC}><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
-}

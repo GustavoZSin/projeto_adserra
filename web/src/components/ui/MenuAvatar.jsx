@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { User, LogOut } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import { getIniciais } from '../../utils/usuario'
 import { authService } from '../../services/api'
@@ -43,13 +44,13 @@ export default function MenuAvatar() {
             className="flex items-center gap-[8px] w-full px-3 py-[10px] text-[11px] font-semibold text-t2 hover:bg-s2 transition-colors border-none bg-transparent font-sans cursor-pointer text-left border-b border-bdr"
             onClick={() => { setAberto(false); navigate('/perfil') }}
           >
-            <IconeUsuario /> Meu Perfil
+            <User size={13} strokeWidth={1.8} /> Meu Perfil
           </button>
           <button
             className="flex items-center gap-[8px] w-full px-3 py-[10px] text-[11px] font-semibold text-red hover:bg-red/[0.08] transition-colors border-none bg-transparent font-sans cursor-pointer text-left"
             onClick={handleLogout}
           >
-            <IconeSair /> Sair
+            <LogOut size={13} strokeWidth={1.8} /> Sair
           </button>
         </div>
       )}
@@ -58,6 +59,3 @@ export default function MenuAvatar() {
   )
 }
 
-const IC = { fill: 'none', stroke: 'currentColor', strokeWidth: '1.8', strokeLinecap: 'round', strokeLinejoin: 'round' }
-function IconeUsuario() { return <svg width="13" height="13" viewBox="0 0 24 24" {...IC}><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> }
-function IconeSair()    { return <svg width="13" height="13" viewBox="0 0 24 24" {...IC}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg> }

@@ -4,6 +4,7 @@ import { getIniciais } from "../utils/usuario";
 import { usuariosService } from "../services/api";
 import MenuAvatar from "../components/ui/MenuAvatar";
 import clsx from "clsx";
+import { Users, Search, Trash2, Loader2 } from "lucide-react";
 
 const GRADIENTES_AVATAR = [
   "linear-gradient(135deg,var(--blue-d),var(--blue-l))",
@@ -114,7 +115,7 @@ export default function GerenciarUsuariosPage() {
                 if (mostrarBusca) setBusca("");
               }}
             >
-              <IconeBusca size={14} />
+              <Search size={14} strokeWidth={1.8} />
             </button>
             <MenuAvatar />
           </div>
@@ -124,7 +125,7 @@ export default function GerenciarUsuariosPage() {
           {/* Stat */}
           <div className="bg-s1 border border-bdr rounded-[12px] p-[10px] flex items-center gap-2 mb-3">
             <div className="w-[34px] h-[34px] rounded-[9px] bg-[var(--blue-sub)] text-blue-l flex items-center justify-center flex-shrink-0">
-              <IconeUsuarios size={16} />
+              <Users size={16} strokeWidth={1.8} />
             </div>
             <div>
               <p className="text-[17px] font-extrabold text-t1 leading-[1.1]">
@@ -140,7 +141,7 @@ export default function GerenciarUsuariosPage() {
           {mostrarBusca && (
             <div className="relative mb-3">
               <span className="absolute left-[10px] top-1/2 -translate-y-1/2 text-t3 pointer-events-none">
-                <IconeBusca size={13} />
+                <Search size={13} strokeWidth={1.8} />
               </span>
               <input
                 autoFocus
@@ -188,7 +189,7 @@ export default function GerenciarUsuariosPage() {
           <div className="flex items-center gap-[9px]">
             <div className="relative">
               <span className="absolute left-[10px] top-1/2 -translate-y-1/2 text-t3 pointer-events-none">
-                <IconeBusca size={13} />
+                <Search size={13} strokeWidth={1.8} />
               </span>
               <input
                 className="bg-s1 border-[1.5px] border-bdr rounded-[9px] pl-[32px] pr-3 py-[7px] text-[11px] text-t1 placeholder-t3 outline-none focus:border-blue-l transition-colors font-sans w-[220px]"
@@ -204,7 +205,7 @@ export default function GerenciarUsuariosPage() {
         <div className="mb-[18px]">
           <div className="inline-flex bg-s1 border border-bdr rounded-[13px] px-4 py-[14px] items-center gap-3">
             <div className="w-10 h-10 rounded-[11px] bg-[var(--blue-sub)] text-blue-l flex items-center justify-center flex-shrink-0">
-              <IconeUsuarios size={18} />
+              <Users size={18} strokeWidth={1.8} />
             </div>
             <div>
               <p className="text-[22px] font-extrabold text-t1 leading-[1.1]">
@@ -277,7 +278,7 @@ function CardUsuario({ u, removendo, onRemover }) {
             onClick={onRemover}
             disabled={removendo}
           >
-            {removendo ? <IconeCarregando /> : <IconeLixeira />}
+            {removendo ? <Loader2 size={13} strokeWidth={1.8} className="animate-spin-fast" /> : <Trash2 size={13} strokeWidth={1.8} />}
             <span className="hidden sm:inline">Remover</span>
           </button>
         </div>
@@ -317,7 +318,7 @@ function ModalConfirmarRemocao({ nome, onCancelar, onConfirmar }) {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="w-14 h-14 rounded-[14px] bg-red/[0.10] text-red flex items-center justify-center mb-4">
-          <IconeLixeira size={26} />
+          <Trash2 size={26} strokeWidth={1.8} />
         </div>
         <p className="text-[16px] font-extrabold text-t1 mb-2">
           Remover docente?
@@ -345,56 +346,3 @@ function ModalConfirmarRemocao({ nome, onCancelar, onConfirmar }) {
   );
 }
 
-/* ── Ícones ── */
-const IC = {
-  fill: "none",
-  stroke: "currentColor",
-  strokeWidth: "1.8",
-  strokeLinecap: "round",
-  strokeLinejoin: "round",
-};
-
-function IconeUsuarios({ size = 16 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" {...IC}>
-      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-      <circle cx="9" cy="7" r="4" />
-      <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-    </svg>
-  );
-}
-function IconeBusca({ size = 13 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" {...IC}>
-      <circle cx="11" cy="11" r="8" />
-      <path d="m21 21-4.3-4.3" />
-    </svg>
-  );
-}
-function IconeLixeira({ size = 13 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" {...IC}>
-      <path d="M3 6h18" />
-      <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-      <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-    </svg>
-  );
-}
-function IconeCarregando() {
-  return (
-    <svg
-      width="13"
-      height="13"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth="2"
-      className="animate-spin-fast"
-    >
-      <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
-    </svg>
-  );
-}
