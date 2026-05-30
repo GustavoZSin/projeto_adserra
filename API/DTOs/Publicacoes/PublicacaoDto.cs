@@ -1,6 +1,6 @@
 ﻿using API.Models.Enums;
 
-namespace API.DTOs
+namespace API.DTOs.Publicacoes
 {
     public class PublicacaoDto
     {
