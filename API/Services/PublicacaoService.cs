@@ -1,5 +1,6 @@
 using API.Data;
-using API.DTOs;
+using API.DTOs.ListagemPublicacoes;
+using API.DTOs.Publicacoes;
 using API.DTOs.Response;
 using API.Models;
 using API.Models.Enums;
@@ -24,8 +25,115 @@ namespace API.Services
             await _context.SaveChangesAsync();
             return true;
         }
+        internal async Task<List<PublicacaoResponse>> ListarPublicacoesAsync(FiltroPublicacaoUsuarioAutenticadoDto filtro)
+        {
+            var query = MontarQueryBaseListagemPublicacoes(filtro);
 
-        internal async Task<List<PublicacaoResponse>> ListarPublicacoesAsync(FiltroPublicacaoDto filtro)
+            if (filtro.Publicas.HasValue)
+                query = query.Where(p => p.Publica == filtro.Publicas.Value);
+
+            return await MontarRespostaPublicacoesAsync(query);
+        }
+        internal async Task<List<PublicacaoResponse>> ListarPublicacoesPublicasAsync(FiltroPublicacaoDto filtro)
+        {
+            var query = MontarQueryBaseListagemPublicacoes(filtro).Where(p => p.Publica);
+            return await MontarRespostaPublicacoesAsync(query);
+        }
+        internal async Task<PublicacaoResponse?> ObterPublicacaoPorIdAsync(int id)
+        {
+            var publicacao = await _context.Publicacoes
+                .AsNoTracking()
+                .Include(x => x.PublicadoPor)
+                .Include(x => x.ImagemCapa)
+                .Include(x => x.Imagens).ThenInclude(pi => pi.Imagem)
+                .FirstOrDefaultAsync(x => x.Id == id);
+
+            if (publicacao == null)
+                return null;
+
+            var urlMap = await GerarUrlsAssinadasAsync(ObterCaminhosImagens(publicacao));
+
+            return CriarResponse(publicacao, urlMap);
+        }
+        internal async Task<(bool Sucesso, Publicacao? PublicadaAgora)> EditarPublicacaoAsync(int id, EditarPublicacaoDto dto, Imagem? imagemCapa, List<PublicacaoImagem> imagensGaleria)
+        {
+            var publicacao = await _context.Publicacoes
+                .Include(p => p.ImagemCapa)
+                .Include(p => p.Imagens).ThenInclude(pi => pi.Imagem)
+                .Include(p => p.PublicadoPor)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (publicacao == null)
+                return (false, null);
+
+            var eraRascunho = !publicacao.Publica;
+
+            if (dto.Tipo.HasValue)
+                publicacao.Tipo = dto.Tipo.Value;
+
+            if (!string.IsNullOrWhiteSpace(dto.Titulo))
+                publicacao.Titulo = dto.Titulo;
+
+            if (!string.IsNullOrWhiteSpace(dto.Descricao))
+                publicacao.Descricao = dto.Descricao;
+
+            if (dto.Data != default)
+                publicacao.Data = DateTime.SpecifyKind(dto.Data.Value, DateTimeKind.Unspecified);
+
+            if (!string.IsNullOrWhiteSpace(dto.Local))
+                publicacao.Local = dto.Local;
+
+            if (imagemCapa != null)
+            {
+                await RemoverImagemCapaAsync(publicacao);
+
+                publicacao.ImagemCapa = imagemCapa;
+            }
+
+            if (dto.Publica.HasValue)
+                publicacao.Publica = dto.Publica.Value;
+
+            if (imagensGaleria != null && imagensGaleria.Count != 0)
+            {
+                await RemoverImagensGaleriaAsync(publicacao);
+
+                publicacao.Imagens.Clear();
+
+                foreach (var imagem in imagensGaleria)
+                    publicacao.Imagens.Add(imagem);
+            }
+
+            await _context.SaveChangesAsync();
+
+            var transitouParaPublico = eraRascunho && publicacao.Publica;
+            return (true, transitouParaPublico ? publicacao : null);
+        }
+        internal async Task<bool> DeletarPublicacaoAsync(int id)
+        {
+            var publicacao = await _context.Publicacoes
+                .Include(p => p.ImagemCapa)
+                .Include(x => x.Imagens).ThenInclude(pi => pi.Imagem)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (publicacao == null)
+                return false;
+
+            await RemoverImagensGaleriaAsync(publicacao);
+            await RemoverImagemCapaAsync(publicacao);
+
+            _context.Publicacoes.Remove(publicacao);
+
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+        internal async Task<string> UploadImagemAsync(IFormFile arquivo)
+        {
+            return await _storageService.UploadImagemAsync(arquivo);
+        }
+
+        #region Métodos Auxiliares
+        private IQueryable<Publicacao> MontarQueryBaseListagemPublicacoes(FiltroPublicacaoDto filtro)
         {
             var query = _context.Publicacoes
                 .AsNoTracking()
@@ -59,214 +167,103 @@ namespace API.Services
             if (filtro.DataFim.HasValue)
                 query = query.Where(p => p.Data <= DateTime.SpecifyKind(filtro.DataFim.Value, DateTimeKind.Unspecified));
 
-            if (filtro.Publicas.HasValue)
-                query = query.Where(p => p.Publica == filtro.Publicas.Value);
-
-            var entidades = await query.ToListAsync();
-
-            var todosCaminhos = entidades
-                .SelectMany(p =>
-                {
-                    var caminhos = new List<string?>();
-                    if (p.ImagemCapa != null)
-                        caminhos.Add(p.ImagemCapa.CaminhoArquivo);
-                    caminhos.AddRange(p.Imagens.Where(ip => ip.Imagem != null).Select(ip => ip.Imagem.CaminhoArquivo));
-                    return caminhos;
-                })
-                .Where(c => c != null)
-                .Distinct()
-                .Cast<string>()
-                .ToList();
-
-            Dictionary<string, string> urlMap = [];
-            if (todosCaminhos.Count > 0)
-            {
-                var signTasks = todosCaminhos
-                    .Select(c => (caminho: c, task: _storageService.GerarSignedUrlAsync(c)))
-                    .ToList();
-
-                await Task.WhenAll(signTasks.Select(x => x.task));
-                urlMap = signTasks.ToDictionary(x => x.caminho, x => x.task.Result);
-            }
-
-            return entidades.Select(p =>
-            {
-                var imagemUrl = p.ImagemCapa != null && urlMap.TryGetValue(p.ImagemCapa.CaminhoArquivo, out var u) ? u : null;
-                var imagensPublicacao = p.Imagens
-                    .Where(ip => ip.Imagem != null)
-                    .Select(ip => new ImagemPublicacaoResponse
-                    {
-                        URL = urlMap[ip.Imagem.CaminhoArquivo],
-                        Id = ip.Imagem.Id
-                    })
-                    .ToList();
-
-                return new PublicacaoResponse
-                {
-                    Id = p.Id,
-                    Tipo = p.Tipo.ToString(),
-                    Titulo = p.Titulo,
-                    Descricao = p.Descricao,
-                    Data = p.Data,
-                    Local = p.Local,
-                    PublicadoEm = p.PublicadoEm,
-                    NomePublicadoPor = p.PublicadoPor.UserName!,
-                    ImagemCapaUrl = imagemUrl,
-                    Publica = p.Publica,
-                    ImagensPublicacao = imagensPublicacao.Count > 0 ? imagensPublicacao : null
-                };
-            }).ToList();
+            return query;
         }
-
-        internal async Task<PublicacaoResponse?> ObterPublicacaoPorIdAsync(int id)
+        private async Task<List<PublicacaoResponse>> MontarRespostaPublicacoesAsync(IQueryable<Publicacao> query)
         {
-            var p = await _context.Publicacoes
-                .AsNoTracking()
-                .Include(x => x.PublicadoPor)
-                .Include(x => x.ImagemCapa)
-                .Include(x => x.Imagens).ThenInclude(pi => pi.Imagem)
-                .FirstOrDefaultAsync(x => x.Id == id);
+            var publicacoes = await query.ToListAsync();
 
-            if (p == null)
-                return null;
+            var urlMap = await GerarUrlsAssinadasAsync(ObterCaminhosImagens(publicacoes));
 
-            var caminhos = new List<string>();
-            if (p.ImagemCapa != null)
-                caminhos.Add(p.ImagemCapa.CaminhoArquivo);
-            caminhos.AddRange(p.Imagens.Where(ip => ip.Imagem != null).Select(ip => ip.Imagem.CaminhoArquivo));
-            caminhos = [.. caminhos.Distinct()];
+            return publicacoes.Select(p => CriarResponse(p, urlMap)).ToList();
+        }
+        private PublicacaoResponse CriarResponse(Publicacao publicacao, Dictionary<string, string> urlMap)
+        {
+            var imagemCapaUrl = publicacao.ImagemCapa != null && urlMap.TryGetValue(publicacao.ImagemCapa.CaminhoArquivo, out var url) ? url : null;
 
-            Dictionary<string, string> urlMap = [];
-            if (caminhos.Count > 0)
-            {
-                var signTasks = caminhos
-                    .Select(c => (caminho: c, task: _storageService.GerarSignedUrlAsync(c)))
-                    .ToList();
-
-                await Task.WhenAll(signTasks.Select(x => x.task));
-                urlMap = signTasks.ToDictionary(x => x.caminho, x => x.task.Result);
-            }
-
-            var imagemUrl = p.ImagemCapa != null && urlMap.TryGetValue(p.ImagemCapa.CaminhoArquivo, out var url) ? url : null;
-            var imagensPublicacao = p.Imagens
-                .Where(ip => ip.Imagem != null)
-                .Select(ip => new ImagemPublicacaoResponse
+            var imagensPublicacao = publicacao.Imagens
+                .Where(x => x.Imagem != null)
+                .Select(x => new ImagemPublicacaoResponse
                 {
-                    URL = urlMap[ip.Imagem.CaminhoArquivo],
-                    Id = ip.Imagem.Id
+                    Id = x.Imagem.Id,
+                    URL = urlMap[x.Imagem.CaminhoArquivo]
                 })
                 .ToList();
 
             return new PublicacaoResponse
             {
-                Id = p.Id,
-                Tipo = p.Tipo.ToString(),
-                Titulo = p.Titulo,
-                Descricao = p.Descricao,
-                Data = p.Data,
-                Local = p.Local,
-                PublicadoEm = p.PublicadoEm,
-                NomePublicadoPor = p.PublicadoPor.UserName!,
-                ImagemCapaUrl = imagemUrl,
-                Publica = p.Publica,
+                Id = publicacao.Id,
+                Tipo = publicacao.Tipo.ToString(),
+                Titulo = publicacao.Titulo,
+                Descricao = publicacao.Descricao,
+                Data = publicacao.Data,
+                Local = publicacao.Local,
+                PublicadoEm = publicacao.PublicadoEm,
+                NomePublicadoPor = publicacao.PublicadoPor.UserName!,
+                ImagemCapaUrl = imagemCapaUrl,
+                Publica = publicacao.Publica,
                 ImagensPublicacao = imagensPublicacao.Count > 0 ? imagensPublicacao : null
             };
         }
+        #endregion
 
-        internal async Task<bool> DeletarPublicacaoAsync(int id)
+        #region Imagens
+        private static List<string> ObterCaminhosImagens(IEnumerable<Publicacao> publicacoes)
         {
-            var publicacao = await _context.Publicacoes
-                .Include(p => p.ImagemCapa)
-                .Include(x => x.Imagens).ThenInclude(pi => pi.Imagem)
-                .FirstOrDefaultAsync(p => p.Id == id);
+            return publicacoes
+                .SelectMany(p =>
+                {
+                    var caminhos = new List<string?>();
 
-            if (publicacao == null)
-                return false;
+                    if (p.ImagemCapa != null)
+                        caminhos.Add(p.ImagemCapa.CaminhoArquivo);
 
+                    caminhos.AddRange(p.Imagens.Where(i => i.Imagem != null).Select(i => i.Imagem.CaminhoArquivo));
+
+                    return caminhos;
+                })
+                .Where(c => !string.IsNullOrWhiteSpace(c))
+                .Distinct()
+                .Cast<string>()
+                .ToList();
+        }
+        private static List<string> ObterCaminhosImagens(Publicacao publicacao)
+        {
+            return ObterCaminhosImagens([publicacao]);
+        }
+        private async Task<Dictionary<string, string>> GerarUrlsAssinadasAsync(IEnumerable<string> caminhos)
+        {
+            var lista = caminhos.Distinct().ToList();
+
+            if (lista.Count == 0) return new();
+
+            var tarefas = lista
+                .Select(async caminho => new
+                {
+                    Caminho = caminho,
+                    Url = await _storageService.GerarSignedUrlAsync(caminho)
+                });
+
+            var resultado = await Task.WhenAll(tarefas);
+            return resultado.ToDictionary(x => x.Caminho, x => x.Url);
+        }
+        private async Task RemoverImagemCapaAsync(Publicacao publicacao)
+        {
+            if (publicacao.ImagemCapa == null)
+                return;
+
+            await _storageService.DeletarImagemAsync(publicacao.ImagemCapa.CaminhoArquivo);
+
+            _context.Imagens.Remove(publicacao.ImagemCapa);
+        }
+        private async Task RemoverImagensGaleriaAsync(Publicacao publicacao)
+        {
             foreach (var item in publicacao.Imagens)
             {
                 await _storageService.DeletarImagemAsync(item.Imagem.CaminhoArquivo);
                 _context.Imagens.Remove(item.Imagem);
             }
-
-            if (publicacao.ImagemCapa != null)
-            {
-                await _storageService.DeletarImagemAsync(publicacao.ImagemCapa.CaminhoArquivo);
-                _context.Imagens.Remove(publicacao.ImagemCapa);
-            }
-
-            _context.Publicacoes.Remove(publicacao);
-
-            await _context.SaveChangesAsync();
-
-            return true;
         }
-
-        internal async Task<(bool Sucesso, Publicacao? PublicadaAgora)> EditarPublicacaoAsync(int id, EditarPublicacaoDto dto, Imagem? imagemCapa, List<PublicacaoImagem> imagensGaleria)
-        {
-            var publicacao = await _context.Publicacoes
-                .Include(p => p.ImagemCapa)
-                .Include(p => p.Imagens).ThenInclude(pi => pi.Imagem)
-                .Include(p => p.PublicadoPor)
-                .FirstOrDefaultAsync(p => p.Id == id);
-
-            if (publicacao == null)
-                return (false, null);
-
-            var eraRascunho = !publicacao.Publica;
-
-            if (dto.Tipo.HasValue)
-                publicacao.Tipo = dto.Tipo.Value;
-
-            if (!string.IsNullOrWhiteSpace(dto.Titulo))
-                publicacao.Titulo = dto.Titulo;
-
-            if (!string.IsNullOrWhiteSpace(dto.Descricao))
-                publicacao.Descricao = dto.Descricao;
-
-            if (dto.Data != default)
-                publicacao.Data = DateTime.SpecifyKind(dto.Data.Value, DateTimeKind.Unspecified);
-
-            if (!string.IsNullOrWhiteSpace(dto.Local))
-                publicacao.Local = dto.Local;
-
-            if (imagemCapa != null)
-            {
-                if (publicacao.ImagemCapa != null)
-                {
-                    await _storageService.DeletarImagemAsync(publicacao.ImagemCapa.CaminhoArquivo);
-                    _context.Imagens.Remove(publicacao.ImagemCapa);
-                }
-
-                publicacao.ImagemCapa = imagemCapa;
-            }
-
-            if (dto.Publica.HasValue)
-                publicacao.Publica = dto.Publica.Value;
-
-            if (imagensGaleria != null && imagensGaleria.Count != 0)
-            {
-                foreach (var item in publicacao.Imagens)
-                {
-                    await _storageService.DeletarImagemAsync(item.Imagem.CaminhoArquivo);
-                    _context.Imagens.Remove(item.Imagem);
-                }
-
-                publicacao.Imagens.Clear();
-
-                foreach (var imagem in imagensGaleria)
-                    publicacao.Imagens.Add(imagem);
-            }
-
-            await _context.SaveChangesAsync();
-
-            var transitouParaPublico = eraRascunho && publicacao.Publica;
-            return (true, transitouParaPublico ? publicacao : null);
-        }
-
-        internal async Task<string> UploadImagemAsync(IFormFile arquivo)
-        {
-            return await _storageService.UploadImagemAsync(arquivo);
-        }
+        #endregion
     }
 }

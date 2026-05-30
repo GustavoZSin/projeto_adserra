@@ -1,4 +1,5 @@
-using API.DTOs;
+using API.DTOs.ListagemPublicacoes;
+using API.DTOs.Publicacoes;
 using API.Models;
 using API.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -94,9 +95,17 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> ListarPublicacoes([FromQuery] FiltroPublicacaoDto filtro)
+        public async Task<IActionResult> ListarPublicacoes([FromQuery] FiltroPublicacaoUsuarioAutenticadoDto filtro)
         {
             var publicacoes = await publicacaoService.ListarPublicacoesAsync(filtro);
+            return Ok(publicacoes);
+        }
+
+        [AllowAnonymous]
+        [HttpGet("ListarPublicas")]
+        public async Task<IActionResult> ListarPublicacoesPublicas([FromQuery] FiltroPublicacaoDto filtro)
+        {
+            var publicacoes = await publicacaoService.ListarPublicacoesPublicasAsync(filtro);
             return Ok(publicacoes);
         }
 
