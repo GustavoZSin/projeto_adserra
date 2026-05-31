@@ -49,6 +49,7 @@ export default function PublicarPage() {
   const [galeriaPreviews, setGaleriaPreviews]   = useState([])  // blob URL[]
 
   const [visibilidade, setVisibilidade] = useState('publica')
+  const [rascunho, setRascunho]         = useState(false)
 
   const [loading, setLoading]   = useState(false)
   const [errors, setErrors]     = useState({})
@@ -71,7 +72,8 @@ export default function PublicarPage() {
         setData(pub.data.split('T')[0])
         setLocal(pub.local ?? '')
         setTipo(pub.tipo.toLowerCase())
-        setVisibilidade(pub.publica ? 'publica' : 'rascunho')
+        setVisibilidade(pub.publica ? 'publica' : 'interna')
+        setRascunho(pub.rascunho ?? false)
         if (pub.imagemCapaUrl) setCapaPreview(pub.imagemCapaUrl)
         if (pub.imagensPublicacao?.length)
           setGaleriaExistente(pub.imagensPublicacao.map(img => ({ id: img.id, url: img.uRL })))
@@ -88,7 +90,7 @@ export default function PublicarPage() {
     setTitulo(''); setDescricao(''); setData(''); setLocal('')
     setCapaPreview(null); setCapaFile(null)
     setGaleriaExistente([]); setGaleriaFiles([]); setGaleriaPreviews([])
-    setErrors({}); setApiError(null); setVisibilidade('publica')
+    setErrors({}); setApiError(null); setVisibilidade('publica'); setRascunho(false)
   }
 
   const handleCapaFile = (e) => {
@@ -129,7 +131,8 @@ export default function PublicarPage() {
     if (local) fd.append('Local', local)
     if (capaFile) fd.append('ImagemCapa', capaFile)
     galeriaFiles.forEach(f => fd.append('ImagensParaGaleria', f))
-    fd.append('Publica', String(visibilidade !== 'rascunho'))
+    fd.append('Publica', String(visibilidade === 'publica'))
+    fd.append('Rascunho', String(rascunho))
     return fd
   }
 
@@ -156,14 +159,14 @@ export default function PublicarPage() {
             <CheckCircle2 size={32} strokeWidth={1.8} />
           </div>
           <h1 className="text-[18px] font-extrabold text-t1 mb-2">
-            {isEditing ? 'Alterações salvas!' : visibilidade === 'rascunho' ? 'Rascunho salvo!' : 'Publicado com sucesso!'}
+            {isEditing ? 'Alterações salvas!' : rascunho ? 'Rascunho salvo!' : 'Publicado com sucesso!'}
           </h1>
           <p className="text-[12px] text-t3 leading-[1.6] mb-6">
-            {visibilidade === 'publica'
+            {rascunho
+              ? 'Visível apenas para administradores. Você pode publicá-la a qualquer momento.'
+              : visibilidade === 'publica'
               ? 'Sua publicação está visível publicamente.'
-              : visibilidade === 'interna'
-              ? 'Sua publicação está visível para todos os docentes.'
-              : 'Visível apenas para administradores. Você pode ativá-la a qualquer momento.'}
+              : 'Sua publicação está visível para todos os usuários logados.'}
           </p>
           <button className={clsx(btnP, 'mb-2')} onClick={() => { setSuccess(false); resetForm() }}>
             Nova publicação
@@ -246,11 +249,12 @@ export default function PublicarPage() {
           </div>
 
           <VisibilidadeToggle visibilidade={visibilidade} onChange={setVisibilidade} />
+          <RascunhoCheckbox rascunho={rascunho} onChange={setRascunho} />
 
           {apiError && <div className="bg-red/[0.1] border border-red/25 rounded-[9px] px-3 py-[9px] text-[11px] text-red mb-2">{apiError}</div>}
 
           <button className={clsx(btnP)} onClick={handleSalvar} disabled={loading}>
-            {loading ? <Loader2 size={16} strokeWidth={1.8} className="animate-spin-fast flex-shrink-0" /> : isEditing ? 'Salvar alterações' : visibilidade === 'rascunho' ? 'Salvar rascunho' : 'Publicar'}
+            {loading ? <Loader2 size={16} strokeWidth={1.8} className="animate-spin-fast flex-shrink-0" /> : isEditing ? 'Salvar alterações' : rascunho ? 'Salvar rascunho' : 'Publicar'}
           </button>
         </div>
       </div>
@@ -327,9 +331,10 @@ export default function PublicarPage() {
             <div className="bg-s1 border border-bdr rounded-[13px] p-[15px]">
               <p className="text-[12px] font-bold text-t1 mb-3">Publicação</p>
               <VisibilidadeToggle visibilidade={visibilidade} onChange={setVisibilidade} />
+              <RascunhoCheckbox rascunho={rascunho} onChange={setRascunho} />
               {apiError && <div className="bg-red/[0.1] border border-red/25 rounded-[9px] px-3 py-[9px] text-[11px] text-red mb-2">{apiError}</div>}
               <button className={clsx(btnP)} onClick={handleSalvar} disabled={loading}>
-                {loading ? <Loader2 size={16} strokeWidth={1.8} className="animate-spin-fast flex-shrink-0" /> : isEditing ? 'Salvar alterações' : visibilidade === 'rascunho' ? 'Salvar rascunho' : 'Publicar agora'}
+                {loading ? <Loader2 size={16} strokeWidth={1.8} className="animate-spin-fast flex-shrink-0" /> : isEditing ? 'Salvar alterações' : rascunho ? 'Salvar rascunho' : 'Publicar agora'}
               </button>
             </div>
           </div>
@@ -448,9 +453,8 @@ function GaleriaSection({ existentes, previews, onAdd, onRemoveNew }) {
 }
 
 const VISIBILIDADE_OPCOES = [
-  { key: 'publica',  label: 'Pública',  Icon: Globe,  desc: 'Visível para todos'     },
-  { key: 'interna',  label: 'Interna',  Icon: Users,  desc: 'Só docentes'            },
-  { key: 'rascunho', label: 'Rascunho', Icon: Lock,   desc: 'Só administradores'     },
+  { key: 'publica', label: 'Pública', Icon: Globe,  desc: 'Visível interna e externamente' },
+  { key: 'interna', label: 'Interna', Icon: Users,  desc: 'Só para usuários logados'       },
 ]
 
 function VisibilidadeToggle({ visibilidade, onChange }) {
@@ -482,6 +486,24 @@ function VisibilidadeToggle({ visibilidade, onChange }) {
         {VISIBILIDADE_OPCOES.find(o => o.key === visibilidade)?.desc}
       </p>
     </div>
+  )
+}
+
+function RascunhoCheckbox({ rascunho, onChange }) {
+  return (
+    <label className="flex items-center gap-[7px] cursor-pointer select-none mb-3">
+      <div
+        className={clsx(
+          'w-[15px] h-[15px] flex-shrink-0 rounded-[4px] border flex items-center justify-center transition-all duration-200',
+          rascunho ? 'bg-blue-grad border-blue' : 'bg-s2 border-bdr'
+        )}
+        onClick={() => onChange(!rascunho)}
+      >
+        {rascunho && <Lock size={9} strokeWidth={2.5} className="text-white" />}
+      </div>
+      <span className="text-[10px] font-semibold text-t2">Salvar como rascunho</span>
+      <span className="text-[9px] text-t3">— visível só para admins</span>
+    </label>
   )
 }
 

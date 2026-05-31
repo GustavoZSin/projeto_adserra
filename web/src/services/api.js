@@ -26,6 +26,9 @@ export const publicacaoService = {
   listar: (params = {}) =>
     axios.get('/publicacao', { params, withCredentials: true }),
 
+  listarPublicas: (params = {}) =>
+    axios.get('/publicacao/ListarPublicas', { params }),
+
   obter: (id) =>
     axios.get(`/publicacao/${id}`, { withCredentials: true }),
 
