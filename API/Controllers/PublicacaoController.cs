@@ -19,48 +19,6 @@ namespace API.Controllers
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> NovaPublicacao([FromForm] PublicacaoDto dto)
         {
-            Imagem? imagemCapa = null;
-
-            if (dto.ImagemCapa != null)
-            {
-                var caminhoArquivo = await publicacaoService.UploadImagemAsync(dto.ImagemCapa);
-
-                imagemCapa = new Imagem
-                {
-                    CaminhoArquivo = caminhoArquivo,
-                    ContentType = dto.ImagemCapa.ContentType,
-                    NomeArquivo = dto.ImagemCapa.FileName,
-                    CriadoEm = DateTime.UtcNow
-                };
-            }
-
-            List<PublicacaoImagem> imagensParaGaleria = [];
-            if (dto.ImagensParaGaleria != null && dto.ImagensParaGaleria.Count != 0)
-            {
-                var uploadTasks = dto.ImagensParaGaleria
-                    .Select(async (arquivo, idx) =>
-                    {
-                        var caminho = await publicacaoService.UploadImagemAsync(arquivo);
-                        return (caminho, arquivo, ordem: idx);
-                    });
-
-                var resultados = await Task.WhenAll(uploadTasks);
-
-                imagensParaGaleria = [.. resultados
-                    .OrderBy(r => r.ordem)
-                    .Select(r => new PublicacaoImagem
-                    {
-                        Imagem = new Imagem
-                        {
-                            CaminhoArquivo = r.caminho,
-                            ContentType = r.arquivo.ContentType,
-                            NomeArquivo = r.arquivo.FileName,
-                            CriadoEm = DateTime.UtcNow
-                        },
-                        Ordem = r.ordem
-                    })];
-            }
-
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrWhiteSpace(userId))
                 return Unauthorized();
@@ -69,27 +27,10 @@ namespace API.Controllers
             if (publicadoPor == null)
                 return Unauthorized();
 
-            var publicacao = new Publicacao
-            {
-                Tipo = dto.Tipo,
-                Titulo = dto.Titulo,
-                Descricao = dto.Descricao,
-                Data = DateTime.SpecifyKind(dto.Data, DateTimeKind.Unspecified),
-                Local = dto.Local,
-                ImagemCapa = imagemCapa,
-                Publica = dto.Publica,
-                PublicadoEm = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified),
-                PublicadoPor = publicadoPor,
-                Imagens = imagensParaGaleria,
-            };
-
-            var result = await publicacaoService.NovaPublicacao(publicacao);
+            var result = await publicacaoService.NovaPublicacao(dto, publicadoPor, userId);
 
             if (!result)
                 return BadRequest(new { message = "Falha ao criar a publicação. Tente novamente mais tarde." });
-
-            if (publicacao.Publica)
-                await notificacaoService.CriarNotificacoesParaPublicacaoAsync(publicacao, userId);
 
             return Ok(new { message = "Nova publicação criada com sucesso." });
         }

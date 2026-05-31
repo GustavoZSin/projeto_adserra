@@ -12,5 +12,6 @@ namespace API.DTOs.Publicacoes
         public IFormFile? ImagemCapa { get; set; }
         public List<IFormFile>? ImagensParaGaleria { get; set; }
         public bool Publica { get; set; }
+        public bool Rascunho { get; set; }
     }
 }

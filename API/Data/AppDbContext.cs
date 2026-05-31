@@ -123,6 +123,9 @@ public class AppDbContext : IdentityDbContext<User>
         builder.Entity<Publicacao>()
             .HasIndex(p => new { p.Tipo, p.Publica });
 
+        builder.Entity<Publicacao>()
+            .HasIndex(p => new { p.Tipo, p.Rascunho });
+
         builder.Entity<Professor>()
             .HasIndex(p => p.IdUsuario);
     }
