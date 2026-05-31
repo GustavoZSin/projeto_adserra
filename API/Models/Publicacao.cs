@@ -35,6 +35,8 @@ namespace API.Models
 
         public bool Publica { get; set; }
 
+        public bool Rascunho { get; set; }
+
         public ICollection<PublicacaoImagem> Imagens { get; set; } = [];
     }
 }

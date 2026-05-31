@@ -8,13 +8,16 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Services
 {
-    public class PublicacaoService(AppDbContext context, SupabaseStorageService storageService)
+    public class PublicacaoService(AppDbContext context, SupabaseStorageService storageService, NotificacaoService notificacaoService)
     {
         private readonly AppDbContext _context = context;
         private readonly SupabaseStorageService _storageService = storageService;
+        private readonly NotificacaoService _notificacaoService = notificacaoService;
 
-        internal async Task<bool> NovaPublicacao(Publicacao publicacao)
+        internal async Task<bool> NovaPublicacao(PublicacaoDto dto, User publicadoPor, string userId)
         {
+            Publicacao publicacao = await MontarNovaPublicacao(dto, publicadoPor);
+
             if (publicacao == null)
                 return false;
 
@@ -22,7 +25,14 @@ namespace API.Services
             publicacao.Data = DateTime.SpecifyKind(publicacao.Data, DateTimeKind.Unspecified);
 
             _context.Publicacoes.Add(publicacao);
-            await _context.SaveChangesAsync();
+            var publicacaoGerada = await _context.SaveChangesAsync();
+
+            if(publicacaoGerada <= 0)
+                return false;
+
+            if (publicacao.Publica)
+                await _notificacaoService.CriarNotificacoesParaPublicacaoAsync(publicacao, userId);
+
             return true;
         }
         internal async Task<List<PublicacaoResponse>> ListarPublicacoesAsync(FiltroPublicacaoUsuarioAutenticadoDto filtro)
@@ -66,8 +76,6 @@ namespace API.Services
             if (publicacao == null)
                 return (false, null);
 
-            var eraRascunho = !publicacao.Publica;
-
             if (dto.Tipo.HasValue)
                 publicacao.Tipo = dto.Tipo.Value;
 
@@ -93,6 +101,9 @@ namespace API.Services
             if (dto.Publica.HasValue)
                 publicacao.Publica = dto.Publica.Value;
 
+            if (dto.Rascunho.HasValue)
+                publicacao.Rascunho = dto.Rascunho.Value;
+
             if (imagensGaleria != null && imagensGaleria.Count != 0)
             {
                 await RemoverImagensGaleriaAsync(publicacao);
@@ -105,7 +116,9 @@ namespace API.Services
 
             await _context.SaveChangesAsync();
 
+            var eraRascunho = !publicacao.Rascunho;
             var transitouParaPublico = eraRascunho && publicacao.Publica;
+           
             return (true, transitouParaPublico ? publicacao : null);
         }
         internal async Task<bool> DeletarPublicacaoAsync(int id)
@@ -133,6 +146,65 @@ namespace API.Services
         }
 
         #region Métodos Auxiliares
+        private async Task<Publicacao> MontarNovaPublicacao(PublicacaoDto dto, User publicadoPor)
+        {
+            Imagem? imagemCapa = null;
+
+            if (dto.ImagemCapa != null)
+            {
+                var caminhoArquivo = await UploadImagemAsync(dto.ImagemCapa);
+
+                imagemCapa = new Imagem
+                {
+                    CaminhoArquivo = caminhoArquivo,
+                    ContentType = dto.ImagemCapa.ContentType,
+                    NomeArquivo = dto.ImagemCapa.FileName,
+                    CriadoEm = DateTime.UtcNow
+                };
+            }
+
+            List<PublicacaoImagem> imagensParaGaleria = [];
+            if (dto.ImagensParaGaleria != null && dto.ImagensParaGaleria.Count != 0)
+            {
+                var uploadTasks = dto.ImagensParaGaleria
+                    .Select(async (arquivo, idx) =>
+                    {
+                        var caminho = await UploadImagemAsync(arquivo);
+                        return (caminho, arquivo, ordem: idx);
+                    });
+
+                var resultados = await Task.WhenAll(uploadTasks);
+
+                imagensParaGaleria = [.. resultados
+                    .OrderBy(r => r.ordem)
+                    .Select(r => new PublicacaoImagem
+                    {
+                        Imagem = new Imagem
+                        {
+                            CaminhoArquivo = r.caminho,
+                            ContentType = r.arquivo.ContentType,
+                            NomeArquivo = r.arquivo.FileName,
+                            CriadoEm = DateTime.UtcNow
+                        },
+                        Ordem = r.ordem
+                    })];
+            }
+
+            return new Publicacao
+            {
+                Tipo = dto.Tipo,
+                Titulo = dto.Titulo,
+                Descricao = dto.Descricao,
+                Data = DateTime.SpecifyKind(dto.Data, DateTimeKind.Unspecified),
+                Local = dto.Local,
+                ImagemCapa = imagemCapa,
+                Publica = dto.Publica,
+                Rascunho = dto.Rascunho,
+                PublicadoEm = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Unspecified),
+                PublicadoPor = publicadoPor,
+                Imagens = imagensParaGaleria,
+            };
+        }
         private IQueryable<Publicacao> MontarQueryBaseListagemPublicacoes(FiltroPublicacaoDto filtro)
         {
             var query = _context.Publicacoes
@@ -202,6 +274,7 @@ namespace API.Services
                 NomePublicadoPor = publicacao.PublicadoPor.UserName!,
                 ImagemCapaUrl = imagemCapaUrl,
                 Publica = publicacao.Publica,
+                Rascunho = publicacao.Rascunho,
                 ImagensPublicacao = imagensPublicacao.Count > 0 ? imagensPublicacao : null
             };
         }

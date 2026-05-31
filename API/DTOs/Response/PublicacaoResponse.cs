@@ -12,6 +12,7 @@
         public DateTime PublicadoEm { get; set; }
         public string? ImagemCapaUrl { get; set; }
         public bool Publica { get; set; }
+        public bool Rascunho { get; set; }
         public List<ImagemPublicacaoResponse>? ImagensPublicacao { get; set; }
     }
 }
