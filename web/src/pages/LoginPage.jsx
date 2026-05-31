@@ -33,7 +33,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex-1 flex items-start justify-center px-5 pt-9 pb-12 relative min-h-screen
+    <div className="flex-1 flex items-start justify-center px-5 pt-9 pb-8 relative md:min-h-screen
                     md:items-center md:px-12 md:py-10">
 
       {/* Glow azul sutil — só no mobile */}
