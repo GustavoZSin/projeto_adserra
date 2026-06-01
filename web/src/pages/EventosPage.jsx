@@ -25,6 +25,7 @@ const normalizarPublicacao = (p) => {
     local: p.local ?? '',
     imagemCapaUrl: p.imagemCapaUrl ?? null,
     publica: p.publica,
+    rascunho: p.rascunho ?? false,
     temFotos: (p.imagensPublicacao?.length ?? 0) > 0,
     tag,
     tagColor,
@@ -159,13 +160,13 @@ export default function EventosPage() {
           {!carregando && visiveis.length === 0 && <p className="text-[11px] text-t3 text-center py-8">Nenhum evento encontrado.</p>}
 
           {visiveis.map(ev => (
-            <div key={ev.id} className={clsx('bg-s1 rounded-[13px] overflow-hidden mb-[9px] border', !ev.publica ? 'border-amber/40 opacity-75' : 'border-bdr')}>
+            <div key={ev.id} className={clsx('bg-s1 rounded-[13px] overflow-hidden mb-[9px] border', ev.rascunho ? 'border-amber/40 opacity-75' : 'border-bdr')}>
               <div className="w-full h-20 flex items-center justify-center text-icon relative overflow-hidden"
                    style={ev.imagemCapaUrl ? {} : { background: 'linear-gradient(135deg, var(--s2), var(--s3))' }}>
                 {ev.imagemCapaUrl
                   ? <img src={ev.imagemCapaUrl} alt={ev.titulo} className="absolute inset-0 w-full h-full object-cover" />
                   : <EventIcon tipo={ev.tipo} />}
-                {!ev.publica && <RascunhoBadge />}
+                {ev.rascunho && <RascunhoBadge />}
               </div>
               <div className="px-3 py-[10px] pb-3">
                 <div className="flex justify-between items-start mb-[5px] gap-[6px]">
@@ -229,13 +230,13 @@ export default function EventosPage() {
 
         <div className="grid grid-cols-3 gap-3">
           {visiveis.map(ev => (
-            <div key={ev.id} className={clsx('bg-s1 rounded-[13px] overflow-hidden border', !ev.publica ? 'border-amber/40 opacity-75' : 'border-bdr')}>
+            <div key={ev.id} className={clsx('bg-s1 rounded-[13px] overflow-hidden border', ev.rascunho ? 'border-amber/40 opacity-75' : 'border-bdr')}>
               <div className="w-full h-[100px] flex items-center justify-center text-icon relative overflow-hidden"
                    style={ev.imagemCapaUrl ? {} : { background: 'linear-gradient(135deg, var(--s2), var(--s3))' }}>
                 {ev.imagemCapaUrl
                   ? <img src={ev.imagemCapaUrl} alt={ev.titulo} className="absolute inset-0 w-full h-full object-cover" />
                   : <EventIcon tipo={ev.tipo} s={24} />}
-                {!ev.publica && <RascunhoBadge />}
+                {ev.rascunho && <RascunhoBadge />}
               </div>
               <div className="p-3">
                 <p className="text-[12px] font-bold text-t1 mb-1">{ev.titulo}</p>

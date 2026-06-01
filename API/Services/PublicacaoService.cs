@@ -108,12 +108,12 @@ namespace API.Services
 
             if (imagensGaleria != null && imagensGaleria.Count != 0)
             {
-                await RemoverImagensGaleriaAsync(publicacao);
-
-                publicacao.Imagens.Clear();
-
+                var ordemBase = publicacao.Imagens.Count;
                 foreach (var imagem in imagensGaleria)
+                {
+                    imagem.Ordem = ordemBase++;
                     publicacao.Imagens.Add(imagem);
+                }
             }
 
             await _context.SaveChangesAsync();
