@@ -76,6 +76,8 @@ namespace API.Services
             if (publicacao == null)
                 return (false, null);
 
+            var eraRascunho = publicacao.Rascunho;
+
             if (dto.Tipo.HasValue)
                 publicacao.Tipo = dto.Tipo.Value;
 
@@ -116,9 +118,8 @@ namespace API.Services
 
             await _context.SaveChangesAsync();
 
-            var eraRascunho = !publicacao.Rascunho;
-            var transitouParaPublico = eraRascunho && publicacao.Publica;
-           
+            var transitouParaPublico = eraRascunho && !publicacao.Rascunho && publicacao.Publica;
+
             return (true, transitouParaPublico ? publicacao : null);
         }
         internal async Task<bool> DeletarPublicacaoAsync(int id)

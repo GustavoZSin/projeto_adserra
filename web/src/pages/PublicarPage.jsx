@@ -131,7 +131,7 @@ export default function PublicarPage() {
     if (local) fd.append('Local', local)
     if (capaFile) fd.append('ImagemCapa', capaFile)
     galeriaFiles.forEach(f => fd.append('ImagensParaGaleria', f))
-    fd.append('Publica', String(visibilidade === 'publica'))
+    fd.append('Publica', String(!rascunho && visibilidade === 'publica'))
     fd.append('Rascunho', String(rascunho))
     return fd
   }
