@@ -96,7 +96,6 @@ namespace API.Services
             if (imagemCapa != null)
             {
                 await RemoverImagemCapaAsync(publicacao);
-
                 publicacao.ImagemCapa = imagemCapa;
             }
 
@@ -105,6 +104,23 @@ namespace API.Services
 
             if (dto.Rascunho.HasValue)
                 publicacao.Rascunho = dto.Rascunho.Value;
+
+            if (!string.IsNullOrWhiteSpace(dto.ImagensParaRemover))
+            {
+                var idsParaRemover = dto.ImagensParaRemover?
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(s => int.TryParse(s, out var id) ? id : (int?)null)
+                    .Where(id => id.HasValue)
+                    .ToList() ?? [];
+
+                var imagensARemover = publicacao.Imagens.Where(imagem => idsParaRemover.Contains(imagem.ImagemId)).ToList();
+                foreach (var item in imagensARemover)
+                {
+                    await _storageService.DeletarImagemAsync(item.Imagem.CaminhoArquivo);
+                    _context.Imagens.Remove(item.Imagem);
+                    publicacao.Imagens.Remove(item);
+                }
+            }
 
             if (imagensGaleria != null && imagensGaleria.Count != 0)
             {
