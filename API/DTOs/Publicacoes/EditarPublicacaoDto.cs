@@ -13,5 +13,6 @@ namespace API.DTOs.Publicacoes
         public bool? Publica { get; set; }
         public bool? Rascunho { get; set; }
         public List<IFormFile>? ImagensParaGaleria { get; set; }
+        public string? ImagensParaRemover { get; set; }
     }
 }
